@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>POS Mutiara Kasih - @yield('title', 'Beranda')</title>
+    <title>{{ $appStoreName ?? config('app.name', 'POS') }} - @yield('title', 'Dashboard')</title>
     <meta name="description" content="" />
     <meta name="author" content="Mariani Krismonika" />
     <link rel="icon" type="image/webp" href="{{ asset('assets/images/logo.webp') }}" />
@@ -17,10 +17,10 @@
     {{-- CSS Libraries --}}
     <link href="{{ asset('assets/vendor/bootstrap.min.css') }}" rel="stylesheet" />
     <link href="{{ asset('assets/vendor/datatables.min.css') }}" rel="stylesheet" />
-    
+
     {{-- Bootstrap Icons --}}
     <link href="{{ asset('assets/vendor/bootstrap-icons-1.13.1/bootstrap-icons.min.css') }}" rel="stylesheet" />
-    
+
     {{-- Custom CSS --}}
     <link href="{{ asset('assets/css/custom-css.css') }}" rel="stylesheet" />
 
@@ -30,9 +30,9 @@
 <body>
     @include('layouts.header')
     @include('layouts.sidebar')
-        <main>
-            @yield('content')
-        </main>
+    <main>
+        @yield('content')
+    </main>
     @include('layouts.footer')
 
     {{-- JS Libraries --}}
