@@ -19,8 +19,8 @@ return new class extends Migration
             $table->string('password');
             $table->enum('role', [
                 RoleStatus::ADMIN->value,
-                RoleStatus::USER->value
-            ])->default(RoleStatus::USER->value);
+                RoleStatus::CASHIER->value
+            ])->default(RoleStatus::CASHIER->value);
             $table->rememberToken();
             $table->timestamps();
         });
