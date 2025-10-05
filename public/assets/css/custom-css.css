@@ -1,5 +1,6 @@
 :root {
     --sidebar-width: 260px;
+    --sidebar-width-collapsed: 72px;
     --navbar-height: 56px;
     --bg-soft: #f6f8fb;
     --card-radius: 12px;
@@ -43,6 +44,21 @@ body {
     .site-footer {
         margin-left: var(--sidebar-width);
     }
+
+    body.sidebar-collapsed #appSidebar.offcanvas-lg {
+        width: var(--sidebar-width-collapsed);
+    }
+    body.sidebar-collapsed > main,
+    body.sidebar-collapsed .site-footer {
+        margin-left: var(--sidebar-width-collapsed);
+    }
+    body.sidebar-collapsed #appSidebar .nav-link span {
+        display: none;
+    }
+    body.sidebar-collapsed #appSidebar .nav-item.small,
+    body.sidebar-collapsed #appSidebar .nav-item.small ~ .nav-item.small {
+        display: none;
+    }
 }
 
 #appSidebar .nav-link {
@@ -57,6 +73,11 @@ body {
     box-shadow: 0 2px 6px rgba(13, 110, 253, 0.2);
 }
 
+#appSidebar .nav-link.active:hover {
+    background: #0b5ed7;
+    color: #fff;
+}
+
 #appSidebar .nav-link .bi {
     width: 1.25rem;
     text-align: center;
@@ -68,6 +89,13 @@ body {
 
 #appSidebar .nav-link:hover {
     background: rgba(13, 110, 253, 0.08);
+}
+
+#appSidebar .nav-link:hover { color: #0b2e66; }
+
+#appSidebar .nav-link.active:hover {
+    background: #0b5ed7;
+    color: #fff;
 }
 
 @media (max-width: 991.98px) {
