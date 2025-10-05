@@ -9,13 +9,11 @@
             @if (!empty($appStoreAddress))
                 <span><i class="bi bi-geo-alt me-1"></i>{{ $appStoreAddress }}</span>
             @endif
+        </div>
+        <div class="d-flex flex-column flex-sm-row gap-2">
             @if (!empty($appStorePhone))
                 <span><i class="bi bi-telephone me-1"></i>{{ $appStorePhone }}</span>
             @endif
         </div>
-        <nav aria-label="Footer">
-            <a href="#" class="link-secondary text-decoration-none me-3">Kebijakan Privasi</a>
-            <a href="#" class="link-secondary text-decoration-none">Syarat & Ketentuan</a>
-        </nav>
     </div>
 </footer>

@@ -26,10 +26,8 @@
                     </button>
                     <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userMenu">
                         <li>
-                            <h6 class="dropdown-header">Akun</h6>
+                            <h6 class="dropdown-header">Sistem</h6>
                         </li>
-                        <li><a class="dropdown-item" href="{{ route('pengaturan.index') }}"><i
-                                    class="bi bi-gear me-2"></i>Pengaturan</a></li>
                         <li>
                             <hr class="dropdown-divider" />
                         </li>
