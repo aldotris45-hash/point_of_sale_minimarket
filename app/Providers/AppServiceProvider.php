@@ -6,6 +6,8 @@ use App\Services\Auth\AuthService;
 use App\Services\Auth\AuthServiceInterface;
 use App\Services\Settings\SettingsService;
 use App\Services\Settings\SettingsServiceInterface;
+use App\Services\Category\CategoryServiceInterface;
+use App\Services\Category\CategoryService;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -18,6 +20,7 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->bind(AuthServiceInterface::class, AuthService::class);
         $this->app->singleton(SettingsServiceInterface::class, SettingsService::class);
+        $this->app->singleton(CategoryServiceInterface::class, CategoryService::class);
     }
 
     /**
@@ -25,7 +28,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Share basic settings with all views
         $settings = $this->app->make(SettingsServiceInterface::class);
         View::share('appStoreName', $settings->storeName());
         View::share('appCurrency', $settings->currency());

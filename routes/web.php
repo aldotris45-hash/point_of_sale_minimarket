@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\CategoryController;
 
 Route::middleware('auth')->group(function () {
     Route::view('/', 'home')->name('dashboard');
@@ -10,7 +11,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/transaksi', fn() => view('pages.placeholder', ['title' => 'Transaksi']))->name('transaksi');
     Route::get('/pembayaran', fn() => view('pages.placeholder', ['title' => 'Pembayaran']))->name('pembayaran');
     Route::get('/laporan', fn() => view('pages.placeholder', ['title' => 'Laporan']))->name('laporan');
-    Route::get('/kategori', fn() => view('pages.placeholder', ['title' => 'Manajemen Kategori']))->name('kategori');
+
+    Route::resource('kategori', CategoryController::class)
+        ->parameters(['kategori' => 'category'])
+        ->names('kategori')
+        ->except(['show']);
+    Route::get('/kategori-data', [CategoryController::class, 'data'])->name('kategori.data');
+
     Route::get('/produk', fn() => view('pages.placeholder', ['title' => 'Manajemen Produk']))->name('produk');
     Route::get('/pengguna', fn() => view('pages.placeholder', ['title' => 'Manajemen Pengguna']))->name('pengguna');
     Route::get('/pengaturan', fn() => view('pages.placeholder', ['title' => 'Pengaturan']))->name('pengaturan');
