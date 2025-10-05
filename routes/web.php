@@ -25,10 +25,13 @@ Route::middleware('auth')->group(function () {
     Route::get('/pembayaran/{transaction}/status', [PaymentController::class, 'status'])->name('pembayaran.status');
     Route::get('/pembayaran/{transaction}/complete', [PaymentController::class, 'complete'])->name('pembayaran.complete');
 
-    // Struk/Receipt
+    // Transaksi
     Route::get('/transaksi/{transaction}/struk', [TransactionController::class, 'receipt'])->name('transaksi.struk');
-
-    Route::get('/transaksi', fn() => view('pages.placeholder', ['title' => 'Transaksi']))->name('transaksi');
+    Route::get('/transaksi', [\App\Http\Controllers\TransactionController::class, 'index'])->name('transaksi');
+    Route::get('/transaksi-data', [TransactionController::class, 'data'])->name('transaksi.data');
+    Route::get('/transaksi/{transaction}', [\App\Http\Controllers\TransactionController::class, 'show'])->name('transaksi.show');
+    
+    
     Route::get('/pembayaran', fn() => view('pages.placeholder', ['title' => 'Pembayaran']))->name('pembayaran');
 
     // Kategori
