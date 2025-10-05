@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ProductController;
 
 Route::middleware('auth')->group(function () {
     Route::view('/', 'home')->name('dashboard');
@@ -18,7 +19,12 @@ Route::middleware('auth')->group(function () {
         ->except(['show']);
     Route::get('/kategori-data', [CategoryController::class, 'data'])->name('kategori.data');
 
-    Route::get('/produk', fn() => view('pages.placeholder', ['title' => 'Manajemen Produk']))->name('produk');
+    Route::resource('produk', ProductController::class)
+        ->parameters(['produk' => 'product'])
+        ->names('produk')
+        ->except(['show']);
+    Route::get('/produk-data', [ProductController::class, 'data'])->name('produk.data');
+
     Route::get('/pengguna', fn() => view('pages.placeholder', ['title' => 'Manajemen Pengguna']))->name('pengguna');
     Route::get('/pengaturan', fn() => view('pages.placeholder', ['title' => 'Pengaturan']))->name('pengaturan');
     Route::get('/log-aktivitas', fn() => view('pages.placeholder', ['title' => 'Log Aktivitas']))->name('log-aktivitas');

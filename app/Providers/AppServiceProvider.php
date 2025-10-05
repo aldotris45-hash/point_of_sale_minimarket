@@ -8,6 +8,8 @@ use App\Services\Settings\SettingsService;
 use App\Services\Settings\SettingsServiceInterface;
 use App\Services\Category\CategoryServiceInterface;
 use App\Services\Category\CategoryService;
+use App\Services\Product\ProductServiceInterface;
+use App\Services\Product\ProductService;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -21,6 +23,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(AuthServiceInterface::class, AuthService::class);
         $this->app->singleton(SettingsServiceInterface::class, SettingsService::class);
         $this->app->singleton(CategoryServiceInterface::class, CategoryService::class);
+        $this->app->singleton(ProductServiceInterface::class, ProductService::class);
     }
 
     /**

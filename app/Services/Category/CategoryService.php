@@ -7,20 +7,6 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class CategoryService implements CategoryServiceInterface
 {
-    public function paginate(?string $search = null, int $perPage = 10): LengthAwarePaginator
-    {
-        return Category::query()
-            ->when($search, function ($q) use ($search) {
-                $q->where(function ($qq) use ($search) {
-                    $qq->where('name', 'like', "%{$search}%")
-                        ->orWhere('description', 'like', "%{$search}%");
-                });
-            })
-            ->orderBy('name')
-            ->paginate($perPage)
-            ->withQueryString();
-    }
-
     public function create(array $data): Category
     {
         return Category::create([

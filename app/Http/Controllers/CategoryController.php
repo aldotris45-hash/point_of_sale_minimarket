@@ -29,6 +29,35 @@ class CategoryController extends Controller
         return view('categories.index');
     }
 
+    public function data()
+    {
+        $query = Category::query()->select(['id', 'name', 'description', 'created_at']);
+
+        return DataTables::of($query)
+            ->addIndexColumn()
+            ->addColumn('action', function (Category $c) {
+                $editUrl = route('kategori.edit', $c);
+                $deleteUrl = route('kategori.destroy', $c);
+                $csrf = csrf_token();
+                return <<<HTML
+                    <div class="d-flex justify-content-end gap-1">
+                        <a href="{$editUrl}" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-pencil-square"></i> Edit
+                        </a>
+                        <form action="{$deleteUrl}" method="POST" class="d-inline" onsubmit="return confirm('Hapus kategori ini? Tindakan tidak dapat dibatalkan.');">
+                            <input type="hidden" name="_token" value="{$csrf}">
+                            <input type="hidden" name="_method" value="DELETE">
+                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                <i class="bi bi-trash"></i> Hapus
+                            </button>
+                        </form>
+                    </div>
+                HTML;
+            })
+            ->rawColumns(['action'])
+            ->toJson();
+    }
+
     public function create(): View
     {
         return view('categories.create');
@@ -64,34 +93,5 @@ class CategoryController extends Controller
         return redirect()
             ->route('kategori.index')
             ->with('success', 'Kategori berhasil dihapus.');
-    }
-
-    public function data()
-    {
-        $query = Category::query()->select(['id', 'name', 'description', 'created_at']);
-
-        return DataTables::of($query)
-            ->addIndexColumn()
-            ->addColumn('action', function (Category $c) {
-                $editUrl = route('kategori.edit', $c);
-                $deleteUrl = route('kategori.destroy', $c);
-                $csrf = csrf_token();
-                return <<<HTML
-                    <div class="d-flex justify-content-end gap-1">
-                        <a href="{$editUrl}" class="btn btn-sm btn-outline-primary">
-                            <i class="bi bi-pencil-square"></i> Edit
-                        </a>
-                        <form action="{$deleteUrl}" method="POST" class="d-inline" onsubmit="return confirm('Hapus kategori ini? Tindakan tidak dapat dibatalkan.');">
-                            <input type="hidden" name="_token" value="{$csrf}">
-                            <input type="hidden" name="_method" value="DELETE">
-                            <button type="submit" class="btn btn-sm btn-outline-danger">
-                                <i class="bi bi-trash"></i> Hapus
-                            </button>
-                        </form>
-                    </div>
-                HTML;
-            })
-            ->rawColumns(['action'])
-            ->toJson();
     }
 }
