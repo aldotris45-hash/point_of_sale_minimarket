@@ -9,6 +9,7 @@ use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\CashierController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\MidtransController;
+use App\Http\Controllers\TransactionController;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 
 Route::middleware('auth')->group(function () {
@@ -22,6 +23,10 @@ Route::middleware('auth')->group(function () {
     // Pembayaran
     Route::get('/pembayaran/{transaction}', [PaymentController::class, 'show'])->name('pembayaran.show');
     Route::get('/pembayaran/{transaction}/status', [PaymentController::class, 'status'])->name('pembayaran.status');
+    Route::get('/pembayaran/{transaction}/complete', [PaymentController::class, 'complete'])->name('pembayaran.complete');
+
+    // Struk/Receipt
+    Route::get('/transaksi/{transaction}/struk', [TransactionController::class, 'receipt'])->name('transaksi.struk');
 
     Route::get('/transaksi', fn() => view('pages.placeholder', ['title' => 'Transaksi']))->name('transaksi');
     Route::get('/pembayaran', fn() => view('pages.placeholder', ['title' => 'Pembayaran']))->name('pembayaran');

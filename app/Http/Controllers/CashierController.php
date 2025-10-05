@@ -91,6 +91,8 @@ class CashierController extends Controller
         }
 
         return redirect()->route('kasir')
-            ->with('success', 'Transaksi berhasil. Nomor: ' . $order->invoice_number);
+            ->with('success', 'Transaksi berhasil. Nomor: ' . $order->invoice_number)
+            ->with('printed_transaction_id', $order->id)
+            ->with('printed_invoice', $order->invoice_number);
     }
 }

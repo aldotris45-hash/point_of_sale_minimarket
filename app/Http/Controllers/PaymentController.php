@@ -36,4 +36,15 @@ class PaymentController extends Controller
             ], true),
         ]);
     }
+
+    public function complete(Transaction $transaction)
+    {
+        // Flash data untuk modal cetak di halaman kasir
+        $method = strtolower((string) ($transaction->payment_method?->value ?? $transaction->payment_method ?? ''));
+        return redirect()->route('kasir')
+            ->with('success', 'Transaksi berhasil. Nomor: ' . $transaction->invoice_number)
+            ->with('printed_transaction_id', $transaction->id)
+            ->with('printed_invoice', $transaction->invoice_number)
+            ->with('printed_payment_method', $method);
+    }
 }

@@ -24,6 +24,31 @@
             <div class="alert alert-danger" role="alert">{{ session('error') }}</div>
         @endif
 
+        {{-- Modal sukses pembayaran (tunai/QRIS) --}}
+        <div class="modal fade" id="cashSuccessModal" tabindex="-1" aria-labelledby="cashSuccessLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="cashSuccessLabel"><i class="bi bi-receipt-cutoff"></i> Pembayaran Berhasil</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="mb-1">Transaksi <span class="text-uppercase">{{ session('printed_payment_method', 'cash') }}</span> telah berhasil diproses.</p>
+                        @if (session('printed_transaction_id'))
+                            <p class="text-muted small mb-0">No. Transaksi: <span class="fw-semibold">{{ session('printed_invoice') }}</span></p>
+                        @endif
+                        <p class="text-muted small">Anda dapat mencetak struk untuk pelanggan.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Tutup</button>
+                        @if (session('printed_transaction_id'))
+                            <a id="btnPrintReceipt" class="btn btn-primary" target="_blank" href="{{ route('transaksi.struk', ['transaction' => session('printed_transaction_id'), 'print' => 1]) }}"><i class="bi bi-printer"></i> Cetak Struk</a>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <section class="row g-3">
             <div class="col-12 col-lg-8">
                 <section class="card shadow-sm h-100">
@@ -361,7 +386,7 @@
                     clearInterval(pollTimer);
                     pollTimer = null;
                 }
-                const toShowUrl = (id) => @json(route('pembayaran.show', ['transaction' => '__ID__'])).replace('__ID__', id);
+                const toShowUrl = (id) => @json(route('pembayaran.complete', ['transaction' => '__ID__'])).replace('__ID__', id);
                 const statusUrlTmpl = @json(route('pembayaran.status', ['transaction' => '__ID__']));
                 const url = statusUrlTmpl.replace('__ID__', trxId);
 
@@ -594,7 +619,7 @@
                     // Mulai polling status setelah embed dimulai
                     startStatusPolling(trxId);
 
-                    const toShowUrl = (id) => @json(route('pembayaran.show', ['transaction' => '__ID__'])).replace('__ID__', id);
+                    const toShowUrl = (id) => @json(route('pembayaran.complete', ['transaction' => '__ID__'])).replace('__ID__', id);
                     try {
                         window.snap.embed(token, {
                             embedId: 'snapContainer',
@@ -610,7 +635,7 @@
                                     clearInterval(pollTimer);
                                     pollTimer = null;
                                 }
-                                window.location = toShowUrl(trxId);
+                                // Pending: tetap menunggu polling/webhook; biarkan tetap di kasir
                             },
                             onError: function() {
                                 alert('Pembayaran gagal. Coba lagi.');
@@ -628,6 +653,25 @@
             });
 
             renderCart();
+
+            // Tampilkan modal sukses tunai jika ada transaksi yang baru saja dibuat
+            @if (session('printed_transaction_id'))
+                try {
+                    const el = document.getElementById('cashSuccessModal');
+                    if (el) {
+                        const m = new bootstrap.Modal(el);
+                        m.show();
+                        const btn = document.getElementById('btnPrintReceipt');
+                        if (btn) {
+                            btn.addEventListener('click', function(){
+                                // setelah klik cetak, bersihkan keranjang
+                                cart = [];
+                                renderCart();
+                            });
+                        }
+                    }
+                } catch (e) {}
+            @endif
         })();
     </script>
 @endpush
