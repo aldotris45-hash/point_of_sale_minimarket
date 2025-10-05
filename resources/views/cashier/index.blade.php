@@ -29,20 +29,26 @@
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="cashSuccessLabel"><i class="bi bi-receipt-cutoff"></i> Pembayaran Berhasil</h5>
+                        <h5 class="modal-title" id="cashSuccessLabel"><i class="bi bi-receipt-cutoff"></i> Pembayaran
+                            Berhasil</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
                     </div>
                     <div class="modal-body">
-                        <p class="mb-1">Transaksi <span class="text-uppercase">{{ session('printed_payment_method', 'cash') }}</span> telah berhasil diproses.</p>
+                        <p class="mb-1">Transaksi <span
+                                class="text-uppercase">{{ session('printed_payment_method', 'cash') }}</span> telah berhasil
+                            diproses.</p>
                         @if (session('printed_transaction_id'))
-                            <p class="text-muted small mb-0">No. Transaksi: <span class="fw-semibold">{{ session('printed_invoice') }}</span></p>
+                            <p class="text-muted small mb-0">No. Transaksi: <span
+                                    class="fw-semibold">{{ session('printed_invoice') }}</span></p>
                         @endif
                         <p class="text-muted small">Anda dapat mencetak struk untuk pelanggan.</p>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Tutup</button>
                         @if (session('printed_transaction_id'))
-                            <a id="btnPrintReceipt" class="btn btn-primary" target="_blank" href="{{ route('transaksi.struk', ['transaction' => session('printed_transaction_id'), 'print' => 1]) }}"><i class="bi bi-printer"></i> Cetak Struk</a>
+                            <a id="btnPrintReceipt" class="btn btn-primary" target="_blank"
+                                href="{{ route('transaksi.struk', ['transaction' => session('printed_transaction_id'), 'print' => 1]) }}"><i
+                                    class="bi bi-printer"></i> Cetak Struk</a>
                         @endif
                     </div>
                 </div>
@@ -138,8 +144,6 @@
                                     <button type="button" class="btn btn-outline-secondary" data-method="qris"><i
                                             class="bi bi-qr-code"></i> QRIS</button>
                                 </div>
-                                <small class="text-muted d-block mt-1">Pilih QRIS untuk menampilkan kode QR
-                                    pembayaran.</small>
                             </fieldset>
 
                             <fieldset class="mb-3" id="cashSection">
@@ -663,7 +667,7 @@
                         m.show();
                         const btn = document.getElementById('btnPrintReceipt');
                         if (btn) {
-                            btn.addEventListener('click', function(){
+                            btn.addEventListener('click', function() {
                                 // setelah klik cetak, bersihkan keranjang
                                 cart = [];
                                 renderCart();
