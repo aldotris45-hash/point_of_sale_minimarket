@@ -17,6 +17,8 @@ return new class extends Migration {
             $table->string('type')->default('json');
             $table->string('group')->nullable();
             $table->string('description')->nullable();
+            $table->boolean('autoload')->default(true);
+            $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
         });
     }

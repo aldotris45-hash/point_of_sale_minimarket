@@ -75,7 +75,7 @@
                     </li>
                     <li class="nav-item mt-1">
                         <a class="nav-link d-flex align-items-center gap-2 {{ request()->is('pengaturan*') ? 'active' : '' }}"
-                            href="{{ url('/pengaturan') }}">
+                            href="{{ route('pengaturan.index') }}">
                             <i class="bi bi-gear"></i><span>Pengaturan</span>
                         </a>
                     </li>

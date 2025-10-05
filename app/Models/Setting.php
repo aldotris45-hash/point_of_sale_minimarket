@@ -15,9 +15,12 @@ class Setting extends Model
         'type',
         'group',
         'description',
+        'autoload',
+        'updated_by',
     ];
 
     protected $casts = [
         'value' => 'json',
+        'autoload' => 'boolean',
     ];
 }

@@ -14,4 +14,8 @@ interface SettingsServiceInterface
     public function taxPercent(): float;
     public function currency(): string;
     public function storeName(): string;
+    public function storeAddress(): string;
+    public function storePhone(): string;
+    public function storeLogoPath(): ?string;
+    public function receiptNumberFormat(): string;
 }

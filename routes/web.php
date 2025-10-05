@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\SettingsController;
 
 Route::middleware('auth')->group(function () {
     Route::view('/', 'home')->name('dashboard');
@@ -35,7 +36,11 @@ Route::middleware('auth')->group(function () {
         ->except(['show']);
     Route::get('/pengguna-data', [UserController::class, 'data'])->name('pengguna.data');
 
-    Route::get('/pengaturan', fn() => view('pages.placeholder', ['title' => 'Pengaturan']))->name('pengaturan');
+    // Pengaturan
+    Route::get('/pengaturan', [SettingsController::class, 'index'])->name('pengaturan.index');
+    Route::put('/pengaturan', [SettingsController::class, 'update'])->name('pengaturan.update');
+    Route::get('/pengaturan/preview-receipt', [SettingsController::class, 'previewReceipt'])->name('pengaturan.preview');
+
     Route::get('/log-aktivitas', fn() => view('pages.placeholder', ['title' => 'Log Aktivitas']))->name('log-aktivitas');
     Route::get('/bantuan', fn() => view('pages.placeholder', ['title' => 'Panduan']))->name('bantuan');
 });

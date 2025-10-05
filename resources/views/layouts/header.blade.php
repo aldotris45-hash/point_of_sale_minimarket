@@ -5,12 +5,14 @@
             <i class="bi bi-list"></i>
         </button>
 
-        <button id="desktopSidebarToggle" class="btn btn-outline-secondary d-none d-lg-inline-flex me-2" type="button" aria-pressed="false" aria-label="Sembunyikan/Tampilkan sidebar">
+        <button id="desktopSidebarToggle" class="btn btn-outline-secondary d-none d-lg-inline-flex me-2" type="button"
+            aria-pressed="false" aria-label="Sembunyikan/Tampilkan sidebar">
             <i class="bi bi-layout-sidebar-inset"></i>
         </button>
 
         <a class="navbar-brand d-flex align-items-center gap-2" href="{{ url('/') }}">
-            <img src="{{ asset('assets/images/logo.webp') }}" alt="Logo" width="32" height="32" />
+            <img src="{{ $appStoreLogoPath ? asset($appStoreLogoPath) : asset('assets/images/logo.webp') }}"
+                alt="Logo" width="32" height="32" />
             <span class="fw-semibold">{{ $appStoreName ?? config('app.name', 'POS') }}</span>
         </a>
 
@@ -26,7 +28,8 @@
                         <li>
                             <h6 class="dropdown-header">Akun</h6>
                         </li>
-                        <li><a class="dropdown-item" href="{{ url('/pengaturan') }}"><i class="bi bi-gear me-2"></i>Pengaturan</a></li>
+                        <li><a class="dropdown-item" href="{{ route('pengaturan.index') }}"><i
+                                    class="bi bi-gear me-2"></i>Pengaturan</a></li>
                         <li>
                             <hr class="dropdown-divider" />
                         </li>

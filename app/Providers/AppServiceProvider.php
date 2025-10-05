@@ -39,5 +39,9 @@ class AppServiceProvider extends ServiceProvider
         View::share('appCurrency', $settings->currency());
         View::share('appDiscountPercent', $settings->discountPercent());
         View::share('appTaxPercent', $settings->taxPercent());
+        View::share('appStoreAddress', $settings->storeAddress());
+        View::share('appStorePhone', $settings->storePhone());
+        View::share('appStoreLogoPath', $settings->storeLogoPath());
+        View::share('appReceiptFormat', $settings->receiptNumberFormat());
     }
 }
