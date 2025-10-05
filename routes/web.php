@@ -59,14 +59,16 @@ Route::middleware('auth')->group(function () {
     Route::get('/pengaturan', [SettingsController::class, 'index'])->name('pengaturan.index');
     Route::put('/pengaturan', [SettingsController::class, 'update'])->name('pengaturan.update');
     Route::get('/pengaturan/preview-receipt', [SettingsController::class, 'previewReceipt'])->name('pengaturan.preview');
-
+        // Pembayaran listing
+        Route::get('/pembayaran', [PaymentController::class, 'index'])->name('pembayaran');
+        Route::get('/pembayaran-data', [PaymentController::class, 'data'])->name('pembayaran.data');
     Route::get('/log-aktivitas', fn() => view('pages.placeholder', ['title' => 'Log Aktivitas']))->name('log-aktivitas');
     Route::get('/bantuan', fn() => view('pages.placeholder', ['title' => 'Panduan']))->name('bantuan');
 });
 
 // Midtrans webhook
 Route::post('/midtrans/notification', [MidtransController::class, 'notification'])
-    ->name('midtrans.notification')
+        // Route::get('/pembayaran', fn() => view('pages.placeholder', ['title' => 'Pembayaran']))->name('pembayaran');
     ->withoutMiddleware([VerifyCsrfToken::class]);
 
 Route::middleware('guest')->group(function () {
