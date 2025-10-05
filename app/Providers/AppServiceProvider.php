@@ -14,6 +14,8 @@ use App\Services\User\UserServiceInterface;
 use App\Services\User\UserService;
 use App\Services\Cashier\CashierServiceInterface;
 use App\Services\Cashier\CashierService;
+use App\Services\Payments\MidtransServiceInterface;
+use App\Services\Payments\MidtransService;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -30,6 +32,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(ProductServiceInterface::class, ProductService::class);
         $this->app->singleton(UserServiceInterface::class, UserService::class);
         $this->app->singleton(CashierServiceInterface::class, CashierService::class);
+        $this->app->singleton(MidtransServiceInterface::class, MidtransService::class);
     }
 
     /**

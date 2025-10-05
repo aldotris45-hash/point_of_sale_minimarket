@@ -9,13 +9,17 @@ use App\Models\Product;
 use App\Models\Transaction;
 use App\Models\TransactionDetail;
 use App\Services\Settings\SettingsServiceInterface;
+use App\Services\Payments\MidtransServiceInterface;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 
 class CashierService implements CashierServiceInterface
 {
-    public function __construct(private readonly SettingsServiceInterface $settings) {}
+    public function __construct(
+        private readonly SettingsServiceInterface $settings,
+        private readonly MidtransServiceInterface $midtrans,
+    ) {}
 
     public function checkout(array $items, string $paymentMethod, float $paidAmount = 0, ?string $note = null): Transaction
     {
@@ -51,8 +55,9 @@ class CashierService implements CashierServiceInterface
                 ];
             }
 
-            $discountPercent = (float) $this->settings->discountPercent();
-            $taxPercent = (float) $this->settings->taxPercent();
+            $discountPercent = $this->settings->discountPercent();
+            $taxPercent = $this->settings->taxPercent();
+
             $discountAmount = $subtotal * ($discountPercent / 100);
             $afterDiscount = $subtotal - $discountAmount;
             $taxAmount = $afterDiscount * ($taxPercent / 100);
@@ -72,10 +77,9 @@ class CashierService implements CashierServiceInterface
                 'amount_paid' => $method === PaymentMethod::CASH ? $paidAmount : 0,
                 'change' => $method === PaymentMethod::CASH ? max(0, $paidAmount - $total) : 0,
                 'payment_method' => $method,
-                'status' => TransactionStatus::PAID,
+                'status' => $method === PaymentMethod::CASH ? TransactionStatus::PAID : TransactionStatus::PENDING,
             ]);
 
-            // Nomor invoice berdasarkan format pengaturan
             $format = $this->settings->receiptNumberFormat();
             $invoice = $this->generateInvoiceNumber($trx->id, $format);
             $trx->update(['invoice_number' => $invoice]);
@@ -95,6 +99,10 @@ class CashierService implements CashierServiceInterface
                 'ip_address' => request()->ip(),
                 'user_agent' => request()->userAgent(),
             ]);
+
+            if ($method === PaymentMethod::QRIS) {
+                $this->midtrans->createSnapTransaction($trx);
+            }
 
             return $trx;
         });

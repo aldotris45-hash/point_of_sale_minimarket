@@ -57,7 +57,7 @@ class CashierController extends Controller
         return response()->json($products);
     }
 
-    public function checkout(CheckoutRequest $request): RedirectResponse
+    public function checkout(CheckoutRequest $request): RedirectResponse|JsonResponse
     {
         $data = $request->validated();
 
@@ -68,6 +68,22 @@ class CashierController extends Controller
                 (float) ($data['paid_amount'] ?? 0),
                 $data['note'] ?? null
             );
+            // Jika QRIS dan permintaan JSON/AJAX -> kembalikan snap token untuk Snap Embedded
+            if (
+                ($data['payment_method'] === 'qris') &&
+                ($request->ajax() || $request->wantsJson() || $request->expectsJson())
+            ) {
+                $order->loadMissing('latestPayment');
+                $payment = $order->latestPayment;
+                $token = $payment->metadata['snap_token'] ?? null;
+                $redir = $payment->metadata['redirect_url'] ?? null;
+                return response()->json([
+                    'transaction_id' => $order->id,
+                    'invoice' => $order->invoice_number,
+                    'snap_token' => $token,
+                    'redirect_url' => $redir,
+                ]);
+            }
         } catch (\Throwable $e) {
             return back()
                 ->withInput()

@@ -12,7 +12,7 @@
                 <p class="text-muted mb-0">Scan SKU atau cari produk, tambahkan ke keranjang, lalu proses pembayaran.</p>
             </div>
             <div class="text-muted small">
-                Diskon: {{ number_format($discount_percent, 2, ',', '.') }}% • Pajak:
+                • Diskon: {{ number_format($discount_percent, 2, ',', '.') }}% • Pajak:
                 {{ number_format($tax_percent, 2, ',', '.') }}% • Mata Uang: {{ $currency }}
             </div>
         </header>
@@ -32,15 +32,16 @@
                             onsubmit="return false;">
                             <div class="col-12 col-md-8">
                                 <label for="q" class="visually-hidden">Cari produk</label>
-                                <div class="dropdown w-100 position-relative" id="searchDropdown">
+                                <div class="w-100 position-relative" id="searchDropdown">
                                     <div class="input-group">
                                         <span class="input-group-text"><i class="bi bi-upc-scan"></i></span>
                                         <input id="q" type="search" class="form-control"
                                             placeholder="Scan SKU atau ketik nama produk..." autocomplete="off"
                                             aria-expanded="false" aria-haspopup="listbox">
                                     </div>
-                                    <div class="dropdown-menu p-3 w-100" id="inlineDropMenu"
-                                        style="max-height: 420px; overflow: auto;">
+                                    <div class="p-3 w-100 position-absolute bg-white border rounded shadow"
+                                        id="inlineDropMenu"
+                                        style="max-height: 420px; overflow: auto; z-index: 1000; top: 100%; left: 0; margin-top: .25rem; display: none;">
                                         <div id="inlineDropResults" aria-live="polite"></div>
                                     </div>
                                 </div>
@@ -109,18 +110,17 @@
                                 <div class="d-flex gap-2">
                                     <button type="button" class="btn btn-outline-primary active" data-method="cash"><i
                                             class="bi bi-cash"></i> Tunai</button>
-                                    <button type="button" class="btn btn-outline-secondary" data-method="qris" disabled><i
+                                    <button type="button" class="btn btn-outline-secondary" data-method="qris"><i
                                             class="bi bi-qr-code"></i> QRIS</button>
                                 </div>
-                                <small class="text-muted d-block mt-1">QRIS dapat diaktifkan saat integrasi pembayaran
-                                    siap.</small>
+                                <small class="text-muted d-block mt-1">Pilih QRIS untuk menampilkan kode QR
+                                    pembayaran.</small>
                             </fieldset>
 
                             <fieldset class="mb-3" id="cashSection">
                                 <label for="paid_amount" class="form-label">Jumlah Bayar ({{ $currency }})</label>
                                 <input type="text" inputmode="numeric" id="paid_amount" name="paid_amount"
                                     class="form-control" placeholder="Rp 0">
-                                <div class="form-text">Format uang otomatis. Kembalian dihitung saat pembayaran.</div>
                                 <div id="changeDisplay" class="mt-2 fw-semibold"></div>
                             </fieldset>
 
@@ -135,6 +135,16 @@
                                     <i class="bi bi-check2-circle"></i> Proses Pembayaran
                                 </button>
                             </div>
+                            <div id="snapSection" class="mt-3" style="display:none;">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <i class="bi bi-qr-code"></i> Pembayaran QRIS
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="snapContainer"></div>
+                                    </div>
+                                </div>
+                            </div>
                         </form>
                     </div>
                 </aside>
@@ -144,7 +154,11 @@
 @endsection
 
 @push('script')
+    <script
+        src="{{ config('midtrans.is_production') ? 'https://app.midtrans.com/snap/snap.js' : 'https://app.sandbox.midtrans.com/snap/snap.js' }}"
+        data-client-key="{{ config('midtrans.client_key') }}"></script>
     <script src="{{ asset('assets/vendor/jquery-3.7.0.min.js') }}"></script>
+
     <script>
         (function() {
             const fmt = (n) => Number(n || 0).toLocaleString('id-ID');
@@ -172,6 +186,7 @@
             let lastTotal = 0;
             let dropdownReq = null;
             let dropDebounce = null;
+            let pollTimer = null;
 
             function renderInlineResults(list) {
                 if (!Array.isArray(list) || !list.length) {
@@ -277,14 +292,16 @@
             }
 
             function showInlineMenu() {
-                if (!$inlineDropMenu.hasClass('show')) {
-                    $inlineDropMenu.addClass('show');
+                if ($inlineDropMenu.css('display') === 'none') {
+                    $inlineDropMenu.css('display', 'block');
+                    $q.attr('aria-expanded', 'true');
                 }
             }
 
             function hideInlineMenu() {
-                if ($inlineDropMenu.hasClass('show')) {
-                    $inlineDropMenu.removeClass('show');
+                if ($inlineDropMenu.css('display') !== 'none') {
+                    $inlineDropMenu.css('display', 'none');
+                    $q.attr('aria-expanded', 'false');
                 }
             }
 
@@ -296,16 +313,17 @@
                 } : {
                     limit: 20
                 };
-                // cancel previous request if any
+
                 if (dropdownReq && typeof dropdownReq.abort === 'function') {
                     try {
                         dropdownReq.abort();
                     } catch (e) {}
                 }
+
                 dropdownReq = $.get(@json(route('kasir.products')), params)
                     .done(renderInlineResults)
                     .fail((xhr, status) => {
-                        if (status === 'abort') return; // ignore manual aborts
+                        if (status === 'abort') return;
                         $inlineDropResults.html('<div class="text-danger small">Gagal memuat data.</div>');
                     })
                     .always(() => {
@@ -315,7 +333,7 @@
 
             function parseMoneyToInt(str) {
                 if (typeof str !== 'string') str = String(str || '');
-                // remove non-digits
+
                 const digits = str.replace(/[^0-9]/g, '');
                 return Number(digits || 0);
             }
@@ -338,12 +356,47 @@
                 }
             }
 
+            function startStatusPolling(trxId) {
+                if (pollTimer) {
+                    clearInterval(pollTimer);
+                    pollTimer = null;
+                }
+                const toShowUrl = (id) => @json(route('pembayaran.show', ['transaction' => '__ID__'])).replace('__ID__', id);
+                const statusUrlTmpl = @json(route('pembayaran.status', ['transaction' => '__ID__']));
+                const url = statusUrlTmpl.replace('__ID__', trxId);
+
+                pollTimer = setInterval(() => {
+                    $.ajax({
+                        url: url,
+                        method: 'GET',
+                        headers: {
+                            'Accept': 'application/json'
+                        }
+                    }).done((res) => {
+                        const s = String(res?.status || '').toLowerCase();
+                        if (s === 'settlement' || s === 'paid') {
+                            clearInterval(pollTimer);
+                            pollTimer = null;
+                            window.location = toShowUrl(trxId);
+                            return;
+                        }
+                        if (['expire', 'cancel', 'deny', 'failure', 'refunded', 'canceled'].includes(
+                                s)) {
+                            clearInterval(pollTimer);
+                            pollTimer = null;
+                            alert('Pembayaran tidak berhasil (' + s + ').');
+                        }
+                    }).fail(() => {});
+                }, 3000);
+            }
+
             $('#btnSearch').on('click', function() {
                 const q = ($q.val() || '').trim();
                 showInlineMenu();
                 searchInline(q);
                 $q.trigger('focus');
             });
+
             $q.on('keypress', function(e) {
                 if (e.which === 13) {
                     e.preventDefault();
@@ -376,7 +429,6 @@
                 }
             });
 
-            // Inline dropdown: add to cart
             $inlineDropResults.on('click', '[data-add]', function() {
                 const id = Number($(this).data('add'));
                 const qty = Number($('#qty_' + id).val() || 1);
@@ -389,17 +441,30 @@
                 });
             });
 
-            // Show dropdown when focusing the search input
             $q.on('focus', function() {
                 showInlineMenu();
                 if (!$inlineDropResults.children().length) {
                     searchInline('');
                 }
             });
+
             // ESC to hide
             $q.on('keydown', function(e) {
-                if (e.key === 'Escape') hideInlineMenu();
+                if (e.key === 'Escape') {
+                    e.stopPropagation();
+                    hideInlineMenu();
+                }
             });
+
+            // ESC to hide
+            $inlineDropMenu.on('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    e.stopPropagation();
+                    hideInlineMenu();
+                    $q.trigger('focus');
+                }
+            });
+
             // Hide when clicking outside
             $(document).on('click', function(e) {
                 const el = $searchDropdown[0];
@@ -413,6 +478,7 @@
                     }
                 }
             });
+
             // Live filtering with debounce on the main input
             $q.on('input', function() {
                 const q = ($q.val() || '').trim();
@@ -420,21 +486,25 @@
                 if (dropDebounce) clearTimeout(dropDebounce);
                 dropDebounce = setTimeout(() => searchInline(q), 250);
             });
+
             $('#cartTable').on('click', '[data-del]', function() {
                 const i = Number($(this).data('del'));
                 cart.splice(i, 1);
                 renderCart();
             });
+
             $('#cartTable').on('click', '[data-inc]', function() {
                 const i = Number($(this).data('inc'));
                 cart[i].qty = Math.min(cart[i].qty + 1, cart[i].stock);
                 renderCart();
             });
+
             $('#cartTable').on('click', '[data-dec]', function() {
                 const i = Number($(this).data('dec'));
                 cart[i].qty = Math.max(cart[i].qty - 1, 1);
                 renderCart();
             });
+
             $('#cartTable').on('input', '[data-qty]', function() {
                 const i = Number($(this).data('qty'));
                 let v = Number($(this).val() || 1);
@@ -469,7 +539,8 @@
                 updatePaidState();
             });
 
-            $('#checkoutForm').on('submit', function() {
+            $('#checkoutForm').on('submit', function(e) {
+                e.preventDefault();
                 if (!cart.length) {
                     alert('Keranjang kosong.');
                     return false;
@@ -484,9 +555,76 @@
                     alert('Keranjang tidak valid.');
                     return false;
                 }
+                const method = $('#payment_method').val();
                 const paidInt = parseMoneyToInt($paidAmount.val());
                 $paidAmount.val(String(paidInt));
-                return true;
+
+                // Cash: submit normal
+                if (method === 'cash') {
+                    HTMLFormElement.prototype.submit.call(this);
+                    return false;
+                }
+
+                // QRIS: AJAX -> Snap Embedded
+                const $form = $(this);
+                $.ajax({
+                    url: $form.attr('action'),
+                    method: 'POST',
+                    data: $form.serialize(),
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    beforeSend: function() {
+                        $btnCheckout.prop('disabled', true).text('Memproses…');
+                    },
+                    complete: function() {
+                        $btnCheckout.prop('disabled', false).html(
+                            '<i class="bi bi-check2-circle"></i> Proses Pembayaran');
+                    }
+                }).done((res) => {
+                    const token = res?.snap_token;
+                    const trxId = res?.transaction_id;
+                    if (!token || !trxId) {
+                        alert('Gagal memulai pembayaran.');
+                        return;
+                    }
+                    $('#snapSection').show();
+
+                    // Mulai polling status setelah embed dimulai
+                    startStatusPolling(trxId);
+
+                    const toShowUrl = (id) => @json(route('pembayaran.show', ['transaction' => '__ID__'])).replace('__ID__', id);
+                    try {
+                        window.snap.embed(token, {
+                            embedId: 'snapContainer',
+                            onSuccess: function() {
+                                if (pollTimer) {
+                                    clearInterval(pollTimer);
+                                    pollTimer = null;
+                                }
+                                window.location = toShowUrl(trxId);
+                            },
+                            onPending: function() {
+                                if (pollTimer) {
+                                    clearInterval(pollTimer);
+                                    pollTimer = null;
+                                }
+                                window.location = toShowUrl(trxId);
+                            },
+                            onError: function() {
+                                alert('Pembayaran gagal. Coba lagi.');
+                            },
+                            onClose: function() {}
+                        });
+                    } catch (err) {
+                        alert('Gagal memuat Snap. ' + (err?.message || ''));
+                    }
+                }).fail((xhr) => {
+                    const msg = xhr?.responseJSON?.message || 'Gagal membuat transaksi QRIS.';
+                    alert(msg);
+                });
+                return false;
             });
 
             renderCart();
