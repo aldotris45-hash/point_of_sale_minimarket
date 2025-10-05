@@ -6,12 +6,17 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\CashierController;
 
 Route::middleware('auth')->group(function () {
     Route::view('/', 'home')->name('dashboard');
 
-    Route::get('/kasir', fn() => view('pages.placeholder', ['title' => 'Kasir']))->name('kasir');
+    // Kasir
+    Route::get('/kasir', [CashierController::class, 'index'])->name('kasir');
+    Route::get('/kasir/products', [CashierController::class, 'products'])->name('kasir.products');
+    Route::post('/kasir/checkout', [CashierController::class, 'checkout'])->name('kasir.checkout');
     Route::get('/transaksi', fn() => view('pages.placeholder', ['title' => 'Transaksi']))->name('transaksi');
+    
     Route::get('/pembayaran', fn() => view('pages.placeholder', ['title' => 'Pembayaran']))->name('pembayaran');
     Route::get('/laporan', fn() => view('pages.placeholder', ['title' => 'Laporan']))->name('laporan');
 
