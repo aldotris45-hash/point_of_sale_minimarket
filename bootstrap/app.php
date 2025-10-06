@@ -14,6 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // Global middsleware
         $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
         $middleware->append(\App\Http\Middleware\ForceHttps::class);
+        $middleware->append(\App\Http\Middleware\ActivityLogger::class);
 
         // Route middleware aliases
         $middleware->alias([

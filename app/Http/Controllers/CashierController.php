@@ -7,6 +7,7 @@ use App\Http\Requests\Cashier\CheckoutRequest;
 use App\Models\Product;
 use App\Services\Cashier\CashierServiceInterface;
 use App\Services\Settings\SettingsServiceInterface;
+use App\Services\ActivityLog\ActivityLoggerInterface;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
@@ -16,7 +17,8 @@ class CashierController extends Controller
 {
     public function __construct(
         private readonly CashierServiceInterface $cashier,
-        private readonly SettingsServiceInterface $settings
+        private readonly SettingsServiceInterface $settings,
+        private readonly ActivityLoggerInterface $logger
     ) {
         $this->middleware(function ($request, $next) {
             if (!Auth::check() || !in_array(Auth::user()->role, [RoleStatus::ADMIN->value, RoleStatus::CASHIER->value], true)) {
@@ -69,7 +71,15 @@ class CashierController extends Controller
                 (float) ($data['paid_amount'] ?? 0),
                 $data['note'] ?? null
             );
-            // Jika QRIS dan permintaan JSON/AJAX -> kembalikan snap token untuk Snap Embedded
+
+            $this->logger->log('Buat Transaksi', 'Transaksi baru dibuat', [
+                'transaction_id' => $order->id,
+                'invoice' => $order->invoice_number,
+                'payment_method' => $data['payment_method'],
+                'items_count' => count($data['items'] ?? []),
+                'note' => $data['note'] ?? null,
+            ]);
+
             if (
                 ($data['payment_method'] === 'qris') &&
                 ($request->ajax() || $request->wantsJson() || $request->expectsJson())

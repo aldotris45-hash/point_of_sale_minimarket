@@ -2,8 +2,11 @@
 
 namespace App\Providers;
 
+use App\Services\ActivityLog\ActivityLogger;
+use App\Services\ActivityLog\ActivityLoggerInterface;
 use App\Services\Auth\AuthService;
 use App\Services\Auth\AuthServiceInterface;
+use App\Services\Report\ReportServiceInterface;
 use App\Services\Settings\SettingsService;
 use App\Services\Settings\SettingsServiceInterface;
 use App\Services\Category\CategoryServiceInterface;
@@ -16,6 +19,7 @@ use App\Services\Cashier\CashierServiceInterface;
 use App\Services\Cashier\CashierService;
 use App\Services\Payments\MidtransServiceInterface;
 use App\Services\Payments\MidtransService;
+use App\Services\Report\ReportService;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Blade;
@@ -34,7 +38,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(UserServiceInterface::class, UserService::class);
         $this->app->singleton(CashierServiceInterface::class, CashierService::class);
         $this->app->singleton(MidtransServiceInterface::class, MidtransService::class);
-        $this->app->bind(\App\Services\Report\ReportServiceInterface::class, \App\Services\Report\ReportService::class);
+        $this->app->bind(ReportServiceInterface::class, ReportService::class);
+        $this->app->singleton(ActivityLoggerInterface::class, ActivityLogger::class);
     }
 
     /**

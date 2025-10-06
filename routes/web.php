@@ -71,7 +71,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/laporan-data', [\App\Http\Controllers\ReportController::class, 'data'])->name('laporan.data');
     Route::get('/laporan/unduh', [\App\Http\Controllers\ReportController::class, 'download'])->name('laporan.unduh');
 
-    Route::get('/log-aktivitas', fn() => view('pages.placeholder', ['title' => 'Log Aktivitas']))->name('log-aktivitas');
+    // Log Aktivitas
+    Route::get('/log-aktivitas', [\App\Http\Controllers\ActivityLogController::class, 'index'])->name('log-aktivitas');
+    Route::get('/log-aktivitas-data', [\App\Http\Controllers\ActivityLogController::class, 'data'])->name('log-aktivitas.data');
+
+    // Bantuan
     Route::get('/bantuan', fn() => view('pages.placeholder', ['title' => 'Panduan']))->name('bantuan');
 });
 

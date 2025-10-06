@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Enums\RoleStatus;
 use App\Http\Requests\Settings\UpdateSettingsRequest;
 use App\Services\Settings\SettingsServiceInterface;
+use App\Services\ActivityLog\ActivityLoggerInterface;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -13,7 +14,7 @@ use Carbon\Carbon;
 
 class SettingsController extends Controller
 {
-    public function __construct(private readonly SettingsServiceInterface $settings)
+    public function __construct(private readonly SettingsServiceInterface $settings, private readonly ActivityLoggerInterface $logger)
     {
         $this->middleware(function ($request, $next) {
             if (!Auth::check() || Auth::user()->role !== RoleStatus::ADMIN->value) {
@@ -41,15 +42,26 @@ class SettingsController extends Controller
     public function update(UpdateSettingsRequest $request): RedirectResponse
     {
         $validated = $request->validated();
+        $before = [
+            'store_name' => $this->settings->storeName(),
+            'currency' => $this->settings->currency(),
+            'discount_percent' => $this->settings->discountPercent(),
+            'tax_percent' => $this->settings->taxPercent(),
+            'store_address' => $this->settings->storeAddress(),
+            'store_phone' => $this->settings->storePhone(),
+            'receipt_format' => $this->settings->receiptNumberFormat(),
+        ];
 
         $this->settings->set('store.name', $validated['store_name'], 'store', 'Nama Toko');
         $this->settings->set('store.address', $validated['store_address'] ?? '', 'store', 'Alamat Toko');
+        
         $phone = $validated['store_phone'] ?? '';
         if ($phone !== '') {
             $phone = preg_replace('/[^0-9+]/', '', $phone);
             $phone = ltrim($phone, '+');
             $phone = ($validated['store_phone'][0] === '+') ? ('+' . $phone) : $phone;
         }
+
         $this->settings->set('store.phone', $phone, 'store', 'No. Telepon Toko');
         $this->settings->set('pos.currency', strtoupper($validated['currency']), 'pos', 'Mata Uang');
         $this->settings->set('pos.discount_percent', (float) $validated['discount_percent'], 'pos', 'Diskon Global (%)');
@@ -61,6 +73,17 @@ class SettingsController extends Controller
             $path = $file->store('assets/images', 'public');
             $this->settings->set('store.logo_path', 'storage/' . $path, 'store', 'Path Logo Toko');
         }
+
+        $after = [
+            'store_name' => $this->settings->storeName(),
+            'currency' => $this->settings->currency(),
+            'discount_percent' => $this->settings->discountPercent(),
+            'tax_percent' => $this->settings->taxPercent(),
+            'store_address' => $this->settings->storeAddress(),
+            'store_phone' => $this->settings->storePhone(),
+            'receipt_format' => $this->settings->receiptNumberFormat(),
+        ];
+        $this->logger->log('Ubah Pengaturan', 'Mengubah pengaturan aplikasi', ['before' => $before, 'after' => $after]);
 
         return redirect()->route('pengaturan.index')->with('success', 'Pengaturan berhasil disimpan.');
     }
@@ -99,9 +122,11 @@ class SettingsController extends Controller
             '{MM}' => $now->format('m'),
             '{DD}' => $now->format('d'),
         ];
+
         $result = strtr($format, $map);
         $seqPad = str_pad((string) $seq, $seqWidth, '0', STR_PAD_LEFT);
         $result = preg_replace('/\{SEQ:\d{1,9}\}/', $seqPad, $result);
+        
         return $result;
     }
 }

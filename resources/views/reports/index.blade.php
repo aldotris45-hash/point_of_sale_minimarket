@@ -7,7 +7,7 @@
         <div class="d-flex align-items-center justify-content-between mb-3">
             <h1 class="h3 mb-0"><i class="bi bi-graph-up-arrow"></i> Laporan Penjualan</h1>
             <div class="d-flex gap-2">
-                <a class="btn btn-outline-secondary" href="{{ route('laporan.unduh', request()->query()) }}">
+                <a class="btn btn-outline-success" href="{{ route('laporan.unduh', request()->query()) }}">
                     <i class="bi bi-download"></i> Unduh CSV
                 </a>
             </div>

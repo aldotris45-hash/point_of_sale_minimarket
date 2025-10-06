@@ -8,6 +8,7 @@ use App\Http\Requests\Product\UpdateProductRequest;
 use App\Models\Category;
 use App\Models\Product;
 use App\Services\Product\ProductServiceInterface;
+use App\Services\ActivityLog\ActivityLoggerInterface;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\View\View;
@@ -15,7 +16,7 @@ use Yajra\DataTables\Facades\DataTables;
 
 class ProductController extends Controller
 {
-    public function __construct(private readonly ProductServiceInterface $service)
+    public function __construct(private readonly ProductServiceInterface $service, private readonly ActivityLoggerInterface $logger)
     {
         $this->middleware(function ($request, $next) {
             if (!Auth::check() || Auth::user()->role !== RoleStatus::ADMIN->value) {
@@ -69,7 +70,8 @@ class ProductController extends Controller
 
     public function store(StoreProductRequest $request): RedirectResponse
     {
-        $this->service->create($request->validated());
+        $p = $this->service->create($request->validated());
+        $this->logger->log('Tambah Produk', "Menambahkan produk '{$p->name}'", ['product_id' => $p->id, 'sku' => $p->sku]);
         return redirect()->route('produk.index')->with('success', 'Produk berhasil ditambahkan.');
     }
 
@@ -81,13 +83,20 @@ class ProductController extends Controller
 
     public function update(UpdateProductRequest $request, Product $product): RedirectResponse
     {
+        $before = $product->only(['name', 'sku', 'price', 'stock', 'category_id']);
         $this->service->update($product, $request->validated());
+        $after = $product->only(['name', 'sku', 'price', 'stock', 'category_id']);
+        $this->logger->log('Ubah Produk', "Mengubah produk '{$before['name']}'", ['before' => $before, 'after' => $after, 'product_id' => $product->id]);
         return redirect()->route('produk.index')->with('success', 'Produk berhasil diperbarui.');
     }
 
     public function destroy(Product $product): RedirectResponse
     {
+        $name = $product->name;
+        $id = $product->id;
+        $sku = $product->sku;
         $this->service->delete($product);
+        $this->logger->log('Hapus Produk', "Menghapus produk '{$name}'", ['product_id' => $id, 'sku' => $sku]);
         return redirect()->route('produk.index')->with('success', 'Produk berhasil dihapus.');
     }
 }
