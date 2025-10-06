@@ -65,7 +65,7 @@
                         </a>
                     </li>
 
-                    <!-- Administrasi (Admin saja) -->
+                    <!-- Administrasi -->
                     <li class="nav-item px-3 pt-3 pb-2 text-muted text-uppercase small">Administrasi</li>
                     <li class="nav-item">
                         <a class="nav-link d-flex align-items-center gap-2 {{ request()->is('pengguna*') ? 'active' : '' }}"
@@ -83,15 +83,6 @@
                         <a class="nav-link d-flex align-items-center gap-2 {{ request()->is('log-aktivitas*') ? 'active' : '' }}"
                             href="{{ url('/log-aktivitas') }}">
                             <i class="bi bi-clipboard-data"></i><span>Log Aktivitas</span>
-                        </a>
-                    </li>
-
-                    <!-- Bantuan -->
-                    <li class="nav-item px-3 pt-3 pb-2 text-muted text-uppercase small">Bantuan</li>
-                    <li class="nav-item mb-3">
-                        <a class="nav-link d-flex align-items-center gap-2 {{ request()->is('bantuan*') ? 'active' : '' }}"
-                            href="{{ url('/bantuan') }}">
-                            <i class="bi bi-life-preserver"></i><span>Panduan</span>
                         </a>
                     </li>
                 @endif

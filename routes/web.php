@@ -13,7 +13,7 @@ use App\Http\Controllers\TransactionController;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 
 Route::middleware('auth')->group(function () {
-    Route::view('/', 'home')->name('dashboard');
+    Route::get('/', [\App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
 
     // Kasir
     Route::middleware('role:admin,cashier')->group(function () {
@@ -74,9 +74,6 @@ Route::middleware('auth')->group(function () {
     // Log Aktivitas
     Route::get('/log-aktivitas', [\App\Http\Controllers\ActivityLogController::class, 'index'])->name('log-aktivitas');
     Route::get('/log-aktivitas-data', [\App\Http\Controllers\ActivityLogController::class, 'data'])->name('log-aktivitas.data');
-
-    // Bantuan
-    Route::get('/bantuan', fn() => view('pages.placeholder', ['title' => 'Panduan']))->name('bantuan');
 });
 
 // Midtrans webhook
