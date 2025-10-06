@@ -43,12 +43,13 @@ class CashierController extends Controller
 
         $query = Product::query()->select(['id', 'sku', 'name', 'price', 'stock']);
         if ($q !== '') {
-            if (ctype_digit($q)) {
+            if (ctype_digit($q) && (int) $q > 0) {
                 $query->where('id', (int) $q);
             } else {
                 $query->where(function ($w) use ($q) {
-                    $w->where('sku', 'like', "%{$q}%")
-                        ->orWhere('name', 'like', "%{$q}%");
+                    $escaped = addcslashes($q, "%_\\");
+                    $w->where('sku', 'like', "%{$escaped}%")
+                        ->orWhere('name', 'like', "%{$escaped}%");
                 });
             }
         }

@@ -81,7 +81,7 @@ class UserController extends Controller
     public function destroy(User $user): RedirectResponse
     {
         if (Auth::id() === $user->id) {
-            return back()->with('success', 'Tidak dapat menghapus akun sendiri.');
+            return back()->with('error', 'Tidak dapat menghapus akun sendiri.');
         }
         $this->service->delete($user);
         return redirect()->route('pengguna.index')->with('success', 'Pengguna berhasil dihapus.');

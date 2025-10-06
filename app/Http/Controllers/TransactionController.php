@@ -100,7 +100,7 @@ class TransactionController extends Controller
                 $receiptUrl = route('transaksi.struk', $t);
                 return '<div class="d-flex justify-content-end gap-1">'
                     . '<a class="btn btn-sm btn-outline-primary" href="' . e($showUrl) . '"><i class="bi bi-eye"></i></a>'
-                    . '<a class="btn btn-sm btn-outline-secondary" href="' . e($receiptUrl) . '" target="_blank"><i class="bi bi-receipt-cutoff"></i></a>'
+                    . '<a class="btn btn-sm btn-outline-secondary" href="' . e($receiptUrl) . '" target="_blank" rel="noopener noreferrer"><i class="bi bi-receipt-cutoff"></i></a>'
                     . '</div>';
             })
             ->rawColumns(['invoice', 'status_badge', 'action'])

@@ -115,7 +115,7 @@ class PaymentController extends Controller
                 if ($qrisUrl) {
                     $btns .= '<a class="btn btn-sm btn-outline-success" href="' . e($qrisUrl) . '"><i class="bi bi-qr-code"></i></a>';
                 }
-                $btns .= '<a class="btn btn-sm btn-outline-secondary" target="_blank" href="' . e($receiptUrl) . '"><i class="bi bi-receipt-cutoff"></i></a>';
+                $btns .= '<a class="btn btn-sm btn-outline-secondary" target="_blank" rel="noopener noreferrer" href="' . e($receiptUrl) . '"><i class="bi bi-receipt-cutoff"></i></a>';
                 $btns .= '</div>';
                 return $btns;
             })

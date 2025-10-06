@@ -18,6 +18,7 @@ use App\Services\Payments\MidtransServiceInterface;
 use App\Services\Payments\MidtransService;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Blade;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -49,5 +50,14 @@ class AppServiceProvider extends ServiceProvider
         View::share('appStorePhone', $settings->storePhone());
         View::share('appStoreLogoPath', $settings->storeLogoPath());
         View::share('appReceiptFormat', $settings->receiptNumberFormat());
+
+        Blade::directive('money', function ($expression) {
+            return "<?php
+                \$__cur = app(\\App\\Services\\Settings\\SettingsServiceInterface::class)->currency();
+                \$__code = is_string(\$__cur) ? strtoupper(\$__cur) : 'IDR';
+                \$__prefix = \$__code === 'IDR' ? 'Rp ' : (\$__code . ' ');
+                echo \$__prefix . number_format($expression, 0, ',', '.');
+            ?>";
+        });
     }
 }

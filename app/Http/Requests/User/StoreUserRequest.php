@@ -4,6 +4,8 @@ namespace App\Http\Requests\User;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Password;
+use App\Enums\RoleStatus;
 
 class StoreUserRequest extends FormRequest
 {
@@ -14,11 +16,13 @@ class StoreUserRequest extends FormRequest
 
     public function rules(): array
     {
+        $roles = array_map(fn($e) => $e->value, RoleStatus::cases());
+
         return [
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'role' => ['required', Rule::in(['admin', 'cashier'])],
+            'email' => ['required', 'string', 'email:rfc,dns', 'max:255', 'unique:users,email'],
+            'password' => ['required', Password::min(8), 'confirmed'],
+            'role' => ['required', Rule::in($roles)],
         ];
     }
 

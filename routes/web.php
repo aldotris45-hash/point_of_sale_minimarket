@@ -16,9 +16,11 @@ Route::middleware('auth')->group(function () {
     Route::view('/', 'home')->name('dashboard');
 
     // Kasir
-    Route::get('/kasir', [CashierController::class, 'index'])->name('kasir');
-    Route::get('/kasir/products', [CashierController::class, 'products'])->name('kasir.products');
-    Route::post('/kasir/checkout', [CashierController::class, 'checkout'])->name('kasir.checkout');
+    Route::middleware('role:admin,cashier')->group(function () {
+        Route::get('/kasir', [CashierController::class, 'index'])->name('kasir');
+        Route::get('/kasir/products', [CashierController::class, 'products'])->name('kasir.products');
+        Route::post('/kasir/checkout', [CashierController::class, 'checkout'])->name('kasir.checkout');
+    });
 
     // Pembayaran
     Route::get('/pembayaran/{transaction}', [PaymentController::class, 'show'])->name('pembayaran.show');
@@ -27,48 +29,49 @@ Route::middleware('auth')->group(function () {
 
     // Transaksi
     Route::get('/transaksi/{transaction}/struk', [TransactionController::class, 'receipt'])->name('transaksi.struk');
-    Route::get('/transaksi', [\App\Http\Controllers\TransactionController::class, 'index'])->name('transaksi');
+    Route::get('/transaksi', [TransactionController::class, 'index'])->name('transaksi');
     Route::get('/transaksi-data', [TransactionController::class, 'data'])->name('transaksi.data');
-    Route::get('/transaksi/{transaction}', [\App\Http\Controllers\TransactionController::class, 'show'])->name('transaksi.show');
-    
-    
-    Route::get('/pembayaran', fn() => view('pages.placeholder', ['title' => 'Pembayaran']))->name('pembayaran');
+    Route::get('/transaksi/{transaction}', [TransactionController::class, 'show'])->name('transaksi.show');
+
 
     // Kategori
-    Route::resource('kategori', CategoryController::class)
-        ->parameters(['kategori' => 'category'])
-        ->names('kategori')
-        ->except(['show']);
-    Route::get('/kategori-data', [CategoryController::class, 'data'])->name('kategori.data');
+    Route::middleware('role:admin')->group(function () {
+        Route::resource('kategori', CategoryController::class)
+            ->parameters(['kategori' => 'category'])
+            ->names('kategori')
+            ->except(['show']);
+        Route::get('/kategori-data', [CategoryController::class, 'data'])->name('kategori.data');
 
-    // Produk
-    Route::resource('produk', ProductController::class)
-        ->parameters(['produk' => 'product'])
-        ->names('produk')
-        ->except(['show']);
-    Route::get('/produk-data', [ProductController::class, 'data'])->name('produk.data');
+        // Produk
+        Route::resource('produk', ProductController::class)
+            ->parameters(['produk' => 'product'])
+            ->names('produk')
+            ->except(['show']);
+        Route::get('/produk-data', [ProductController::class, 'data'])->name('produk.data');
 
-    // Pengguna
-    Route::resource('pengguna', UserController::class)
-        ->parameters(['pengguna' => 'user'])
-        ->names('pengguna')
-        ->except(['show']);
-    Route::get('/pengguna-data', [UserController::class, 'data'])->name('pengguna.data');
+        // Pengguna
+        Route::resource('pengguna', UserController::class)
+            ->parameters(['pengguna' => 'user'])
+            ->names('pengguna')
+            ->except(['show']);
+        Route::get('/pengguna-data', [UserController::class, 'data'])->name('pengguna.data');
 
-    // Pengaturan
-    Route::get('/pengaturan', [SettingsController::class, 'index'])->name('pengaturan.index');
-    Route::put('/pengaturan', [SettingsController::class, 'update'])->name('pengaturan.update');
-    Route::get('/pengaturan/preview-receipt', [SettingsController::class, 'previewReceipt'])->name('pengaturan.preview');
-        // Pembayaran listing
+        // Pengaturan
+        Route::get('/pengaturan', [SettingsController::class, 'index'])->name('pengaturan.index');
+        Route::put('/pengaturan', [SettingsController::class, 'update'])->name('pengaturan.update');
+        Route::get('/pengaturan/preview-receipt', [SettingsController::class, 'previewReceipt'])->name('pengaturan.preview');
+
+        // Pembayaran
         Route::get('/pembayaran', [PaymentController::class, 'index'])->name('pembayaran');
         Route::get('/pembayaran-data', [PaymentController::class, 'data'])->name('pembayaran.data');
+    });
     Route::get('/log-aktivitas', fn() => view('pages.placeholder', ['title' => 'Log Aktivitas']))->name('log-aktivitas');
     Route::get('/bantuan', fn() => view('pages.placeholder', ['title' => 'Panduan']))->name('bantuan');
 });
 
 // Midtrans webhook
 Route::post('/midtrans/notification', [MidtransController::class, 'notification'])
-        // Route::get('/pembayaran', fn() => view('pages.placeholder', ['title' => 'Pembayaran']))->name('pembayaran');
+    ->middleware(['throttle:30,1'])
     ->withoutMiddleware([VerifyCsrfToken::class]);
 
 Route::middleware('guest')->group(function () {

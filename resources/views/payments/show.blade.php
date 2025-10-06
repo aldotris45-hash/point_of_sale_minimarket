@@ -14,8 +14,8 @@
                     Pembayaran</a>
                 <a class="btn btn-outline-primary" href="{{ route('transaksi.show', $transaction) }}"><i
                         class="bi bi-eye"></i> Detail Transaksi</a>
-                <a class="btn btn-primary" target="_blank" href="{{ route('transaksi.struk', $transaction) }}"><i
-                        class="bi bi-receipt-cutoff"></i> Cetak Struk</a>
+                <a class="btn btn-primary" target="_blank" rel="noopener noreferrer"
+                    href="{{ route('transaksi.struk', $transaction) }}"><i class="bi bi-printer"></i> Cetak Struk</a>
             </div>
         </div>
 
@@ -23,7 +23,7 @@
             <div class="col-12 col-lg-6">
                 <div class="card shadow-sm h-100">
                     <div class="card-body text-center">
-                        <p class="mb-2">Total: <strong>Rp {{ number_format($transaction->total, 0, ',', '.') }}</strong>
+                        <p class="mb-2">Total: <strong>@money($transaction->total)</strong>
                         </p>
                         @php
                             $pm = strtolower((string) ($payment->method->value ?? ($payment->method ?? '')));
@@ -88,7 +88,7 @@
                             </div>
                             <div class="col-6">
                                 <div class="text-muted">Jumlah</div>
-                                <div class="fw-semibold">Rp {{ number_format($payment->amount, 0, ',', '.') }}</div>
+                                <div class="fw-semibold">@money($payment->amount)</div>
                             </div>
                         </div>
                         <div class="alert alert-info d-flex align-items-start gap-2 mt-3" id="statusAlert" role="status"
