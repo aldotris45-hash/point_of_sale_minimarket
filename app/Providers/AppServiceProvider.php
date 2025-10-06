@@ -34,6 +34,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(UserServiceInterface::class, UserService::class);
         $this->app->singleton(CashierServiceInterface::class, CashierService::class);
         $this->app->singleton(MidtransServiceInterface::class, MidtransService::class);
+        $this->app->bind(\App\Services\Report\ReportServiceInterface::class, \App\Services\Report\ReportService::class);
     }
 
     /**

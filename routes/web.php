@@ -65,6 +65,12 @@ Route::middleware('auth')->group(function () {
         Route::get('/pembayaran', [PaymentController::class, 'index'])->name('pembayaran');
         Route::get('/pembayaran-data', [PaymentController::class, 'data'])->name('pembayaran.data');
     });
+
+    // Laporan
+    Route::get('/laporan', [\App\Http\Controllers\ReportController::class, 'index'])->name('laporan');
+    Route::get('/laporan-data', [\App\Http\Controllers\ReportController::class, 'data'])->name('laporan.data');
+    Route::get('/laporan/unduh', [\App\Http\Controllers\ReportController::class, 'download'])->name('laporan.unduh');
+
     Route::get('/log-aktivitas', fn() => view('pages.placeholder', ['title' => 'Log Aktivitas']))->name('log-aktivitas');
     Route::get('/bantuan', fn() => view('pages.placeholder', ['title' => 'Panduan']))->name('bantuan');
 });
