@@ -27,16 +27,17 @@
                         <i class="bi bi-cash-stack"></i><span>Kasir</span>
                     </a>
                 </li>
+                <!-- Penjualan -->
+                <li class="nav-item px-3 pt-3 pb-2 text-muted text-uppercase small">Penjualan</li>
+                <li class="nav-item">
+                    <a class="nav-link d-flex align-items-center gap-2 {{ request()->is('transaksi*') ? 'active' : '' }}"
+                        href="{{ url('/transaksi') }}">
+                        <i class="bi bi-receipt"></i><span>Transaksi</span>
+                    </a>
+                </li>
 
                 @if ($isAdmin)
                     <!-- Penjualan -->
-                    <li class="nav-item px-3 pt-3 pb-2 text-muted text-uppercase small">Penjualan</li>
-                    <li class="nav-item">
-                        <a class="nav-link d-flex align-items-center gap-2 {{ request()->is('transaksi*') ? 'active' : '' }}"
-                            href="{{ url('/transaksi') }}">
-                            <i class="bi bi-receipt"></i><span>Transaksi</span>
-                        </a>
-                    </li>
                     <li class="nav-item mt-1">
                         <a class="nav-link d-flex align-items-center gap-2 {{ request()->is('pembayaran*') ? 'active' : '' }}"
                             href="{{ url('/pembayaran') }}">

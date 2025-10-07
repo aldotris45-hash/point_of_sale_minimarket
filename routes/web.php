@@ -15,24 +15,23 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 Route::middleware('auth')->group(function () {
     Route::get('/', [\App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
 
-    // Kasir
     Route::middleware('role:admin,cashier')->group(function () {
+        // Kasir
         Route::get('/kasir', [CashierController::class, 'index'])->name('kasir');
         Route::get('/kasir/products', [CashierController::class, 'products'])->name('kasir.products');
         Route::post('/kasir/checkout', [CashierController::class, 'checkout'])->name('kasir.checkout');
+
+        // Pembayaran
+        Route::get('/pembayaran/{transaction}', [PaymentController::class, 'show'])->name('pembayaran.show');
+        Route::get('/pembayaran/{transaction}/status', [PaymentController::class, 'status'])->name('pembayaran.status');
+        Route::get('/pembayaran/{transaction}/complete', [PaymentController::class, 'complete'])->name('pembayaran.complete');
+
+        // Transaksi
+        Route::get('/transaksi/{transaction}/struk', [TransactionController::class, 'receipt'])->name('transaksi.struk');
+        Route::get('/transaksi', [TransactionController::class, 'index'])->name('transaksi');
+        Route::get('/transaksi-data', [TransactionController::class, 'data'])->name('transaksi.data');
+        Route::get('/transaksi/{transaction}', [TransactionController::class, 'show'])->name('transaksi.show');
     });
-
-    // Pembayaran
-    Route::get('/pembayaran/{transaction}', [PaymentController::class, 'show'])->name('pembayaran.show');
-    Route::get('/pembayaran/{transaction}/status', [PaymentController::class, 'status'])->name('pembayaran.status');
-    Route::get('/pembayaran/{transaction}/complete', [PaymentController::class, 'complete'])->name('pembayaran.complete');
-
-    // Transaksi
-    Route::get('/transaksi/{transaction}/struk', [TransactionController::class, 'receipt'])->name('transaksi.struk');
-    Route::get('/transaksi', [TransactionController::class, 'index'])->name('transaksi');
-    Route::get('/transaksi-data', [TransactionController::class, 'data'])->name('transaksi.data');
-    Route::get('/transaksi/{transaction}', [TransactionController::class, 'show'])->name('transaksi.show');
-
 
     // Kategori
     Route::middleware('role:admin')->group(function () {
@@ -64,16 +63,16 @@ Route::middleware('auth')->group(function () {
         // Pembayaran
         Route::get('/pembayaran', [PaymentController::class, 'index'])->name('pembayaran');
         Route::get('/pembayaran-data', [PaymentController::class, 'data'])->name('pembayaran.data');
+
+        // Laporan
+        Route::get('/laporan', [\App\Http\Controllers\ReportController::class, 'index'])->name('laporan');
+        Route::get('/laporan-data', [\App\Http\Controllers\ReportController::class, 'data'])->name('laporan.data');
+        Route::get('/laporan/unduh', [\App\Http\Controllers\ReportController::class, 'download'])->name('laporan.unduh');
+
+        // Log Aktivitas
+        Route::get('/log-aktivitas', [\App\Http\Controllers\ActivityLogController::class, 'index'])->name('log-aktivitas');
+        Route::get('/log-aktivitas-data', [\App\Http\Controllers\ActivityLogController::class, 'data'])->name('log-aktivitas.data');
     });
-
-    // Laporan
-    Route::get('/laporan', [\App\Http\Controllers\ReportController::class, 'index'])->name('laporan');
-    Route::get('/laporan-data', [\App\Http\Controllers\ReportController::class, 'data'])->name('laporan.data');
-    Route::get('/laporan/unduh', [\App\Http\Controllers\ReportController::class, 'download'])->name('laporan.unduh');
-
-    // Log Aktivitas
-    Route::get('/log-aktivitas', [\App\Http\Controllers\ActivityLogController::class, 'index'])->name('log-aktivitas');
-    Route::get('/log-aktivitas-data', [\App\Http\Controllers\ActivityLogController::class, 'data'])->name('log-aktivitas.data');
 });
 
 // Midtrans webhook

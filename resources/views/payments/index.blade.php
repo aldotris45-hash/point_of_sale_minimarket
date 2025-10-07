@@ -40,16 +40,16 @@
                         @endforeach
                     </select>
                 </div>
-                <div class="col-6 col-md-2">
+                <div class="col-6 col-md-1">
                     <label class="form-label">Provider</label>
                     <input type="text" class="form-control" name="provider" value="{{ $provider }}"
                         placeholder="midtrans">
                 </div>
-                <div class="col-6 col-md-1">
+                <div class="col-6 col-md-2">
                     <label class="form-label">Dari</label>
                     <input type="date" class="form-control" name="from" value="{{ $from }}">
                 </div>
-                <div class="col-6 col-md-1">
+                <div class="col-6 col-md-2">
                     <label class="form-label">Sampai</label>
                     <input type="date" class="form-control" name="to" value="{{ $to }}">
                 </div>
