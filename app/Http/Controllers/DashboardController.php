@@ -22,7 +22,6 @@ class DashboardController extends Controller
         $today = Carbon::today();
         $from7 = (clone $today)->subDays(6);
 
-        // KPI cards
         $salesToday = (float) Transaction::query()
             ->whereDate('created_at', $today)
             ->where('status', 'paid')
@@ -35,7 +34,6 @@ class DashboardController extends Controller
         $outOfStock = (int) Product::query()->where('stock', '<=', 0)->count('id');
         $lowStock = (int) Product::query()->where('stock', '>', 0)->where('stock', '<=', 5)->count('id');
 
-        // 7-day sales chart (paid only)
         $rows = $this->report->dailySalesQuery([
             'from' => $from7->toDateString(),
             'to' => $today->toDateString(),
@@ -44,12 +42,24 @@ class DashboardController extends Controller
         $byDate = collect($rows)->keyBy(fn($r) => Carbon::parse($r->date)->toDateString());
         $dates = [];
         $values = [];
+        $trxCounts = [];
+        $itemsCounts = [];
         for ($d = (clone $from7); $d->lte($today); $d->addDay()) {
             $key = $d->toDateString();
             $dates[] = $d->format('d M');
             $values[] = (float) ($byDate[$key]->total ?? 0.0);
+            $trxCounts[] = (int) ($byDate[$key]->trx_count ?? 0);
+            $itemsCounts[] = (int) ($byDate[$key]->items_qty ?? 0);
         }
         $max = max(1.0, max($values));
+        $sales7days = array_sum($values);
+        $trx7days = array_sum($trxCounts);
+        $items7days = array_sum($itemsCounts);
+        $aov7days = $trx7days > 0 ? ($sales7days / $trx7days) : 0.0;
+
+        // best day
+        $bestIndex = $values ? array_keys($values, max($values))[0] : null;
+        $bestDay = $bestIndex !== null ? ['label' => $dates[$bestIndex], 'value' => $values[$bestIndex]] : null;
 
         // Top products today (by qty)
         $topToday = DB::table('transaction_details as d')
@@ -72,6 +82,11 @@ class DashboardController extends Controller
             'chartValues' => $values,
             'chartMax' => $max,
             'topToday' => $topToday,
+            'sales7days' => $sales7days,
+            'trx7days' => $trx7days,
+            'items7days' => $items7days,
+            'aov7days' => $aov7days,
+            'bestDay' => $bestDay,
         ]);
     }
 }
