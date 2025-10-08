@@ -22,6 +22,8 @@ class UpdateProductRequest extends FormRequest
             'sku' => ['required', 'string', 'max:100', Rule::unique('products', 'sku')->ignore($product?->id)],
             'price' => ['required', 'numeric', 'min:0'],
             'stock' => ['nullable', 'integer', 'min:0'],
+            'min_stock' => ['nullable', 'integer', 'min:0'],
+            'expiry_date' => ['nullable', 'date'],
         ];
     }
 
@@ -39,6 +41,9 @@ class UpdateProductRequest extends FormRequest
             'price.min' => 'Harga minimal :min.',
             'stock.integer' => 'Stok harus berupa angka bulat.',
             'stock.min' => 'Stok minimal :min.',
+            'min_stock.integer' => 'Stok minimal harus berupa angka bulat.',
+            'min_stock.min' => 'Stok minimal :min.',
+            'expiry_date.date' => 'Tanggal kadaluarsa tidak valid.',
         ];
     }
 }

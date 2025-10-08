@@ -16,10 +16,13 @@ class Product extends Model
         'sku',
         'price',
         'stock',
+        'min_stock',
+        'expiry_date',
     ];
 
     protected $casts = [
         'price' => 'decimal:2',
+        'expiry_date' => 'date',
     ];
 
     public function category(): BelongsTo

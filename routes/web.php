@@ -77,6 +77,12 @@ Route::middleware('auth')->group(function () {
         Route::get('/log-aktivitas', [\App\Http\Controllers\ActivityLogController::class, 'index'])->name('log-aktivitas');
         Route::get('/log-aktivitas-data', [\App\Http\Controllers\ActivityLogController::class, 'data'])->name('log-aktivitas.data');
     });
+
+    // Notifications
+    Route::put('/notifications/{id}/read', [\App\Http\Controllers\NotificationController::class, 'read'])
+        ->name('notifications.read');
+    Route::put('/notifications/read-all', [\App\Http\Controllers\NotificationController::class, 'readAll'])
+        ->name('notifications.read_all');
 });
 
 // Midtrans webhook

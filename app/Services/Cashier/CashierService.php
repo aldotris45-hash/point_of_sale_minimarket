@@ -10,6 +10,7 @@ use App\Models\Transaction;
 use App\Models\TransactionDetail;
 use App\Services\Settings\SettingsServiceInterface;
 use App\Services\Payments\MidtransServiceInterface;
+use App\Services\Product\ProductAlertService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
@@ -92,6 +93,11 @@ class CashierService implements CashierServiceInterface
                     ...$b,
                 ]);
                 Product::whereKey($b['product_id'])->decrement('stock', (int) $b['quantity']);
+
+                $p = Product::find($b['product_id']);
+                if ($p) {
+                    app(ProductAlertService::class)->checkAndNotifyForProduct($p, 7);
+                }
             }
 
             ActivityLog::create([

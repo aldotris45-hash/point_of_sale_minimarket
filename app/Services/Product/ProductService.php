@@ -14,6 +14,8 @@ class ProductService implements ProductServiceInterface
             'sku' => $data['sku'],
             'price' => $data['price'],
             'stock' => $data['stock'] ?? 0,
+            'min_stock' => $data['min_stock'] ?? 0,
+            'expiry_date' => $data['expiry_date'] ?? null,
         ]);
     }
 
@@ -25,6 +27,8 @@ class ProductService implements ProductServiceInterface
             'sku' => $data['sku'],
             'price' => $data['price'],
             'stock' => $data['stock'] ?? 0,
+            'min_stock' => $data['min_stock'] ?? 0,
+            'expiry_date' => $data['expiry_date'] ?? null,
         ]);
 
         return $product;

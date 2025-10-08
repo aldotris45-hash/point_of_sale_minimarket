@@ -23,6 +23,7 @@ use App\Services\Report\ReportService;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Blade;
+use Illuminate\Support\Facades\Auth;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -64,6 +65,16 @@ class AppServiceProvider extends ServiceProvider
                 \$__prefix = \$__code === 'IDR' ? 'Rp ' : (\$__code . ' ');
                 echo \$__prefix . number_format($expression, 0, ',', '.');
             ?>";
+        });
+
+        View::composer('layouts.header', function () {
+            if (Auth::check()) {
+                try {
+                    app(\App\Services\Product\ProductAlertService::class)->scanAndNotify(7);
+                } catch (\Throwable $e) {
+                    // swallow to avoid blocking request
+                }
+            }
         });
     }
 }

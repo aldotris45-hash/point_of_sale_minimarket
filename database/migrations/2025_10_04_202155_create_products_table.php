@@ -18,6 +18,8 @@ return new class extends Migration
             $table->string('name');
             $table->decimal('price', 12, 2)->default(0);
             $table->unsignedInteger('stock')->default(0);
+            $table->unsignedInteger('min_stock')->default(0);
+            $table->date('expiry_date')->nullable();
             $table->timestamps();
             $table->index('name');
         });

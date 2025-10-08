@@ -404,7 +404,7 @@
             function updatePaidState() {
                 const method = $paymentMethod.val();
                 const paid = parseMoneyToInt($paidAmount.val());
-                const allow = method !== 'cash' || paid >= Math.ceil(lastSubtotal);
+                const allow = method !== 'cash' || paid >= Math.ceil(lastTotal);
                 const canPay = allow && cart.length > 0;
                 $btnCheckout.prop('disabled', !canPay);
                 if (method === 'cash') {
