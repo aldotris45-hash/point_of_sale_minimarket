@@ -103,7 +103,6 @@ class ReportService implements ReportServiceInterface
 
     public function slowProducts(array $filters, int $limit = 5): Collection
     {
-        // Produk dengan total qty terjual paling sedikit dalam periode, tapi pernah terjual (>0)
         $sold = DB::table('transaction_details as d')
             ->join('transactions as t', 't.id', '=', 'd.transaction_id')
             ->when($filters['from'] ?? null, fn($q, $v) => $q->whereDate('t.created_at', '>=', $v))
@@ -115,7 +114,6 @@ class ReportService implements ReportServiceInterface
 
         return DB::table('products as p')
             ->leftJoinSub($sold, 's', 's.product_id', '=', 'p.id')
-            // sertakan juga produk dengan penjualan 0 untuk benar-benar menyoroti perputaran lambat
             ->orderByRaw('COALESCE(s.qty, 0) ASC, p.stock DESC, p.name ASC')
             ->limit($limit)
             ->selectRaw('p.id as product_id, p.name, COALESCE(s.qty, 0) as qty, COALESCE(s.total, 0) as total, p.stock')

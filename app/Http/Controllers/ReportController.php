@@ -32,7 +32,7 @@ class ReportController extends Controller
             'to'     => $request->query('to'),
             'status' => $request->query('status', 'paid'),
             'method' => $request->query('method'),
-            'period' => $request->query('period', 'daily'), // daily|monthly
+            'period' => $request->query('period', 'daily'),
         ];
 
         $summary = $this->report->summary($filters);
@@ -53,7 +53,7 @@ class ReportController extends Controller
             'filters'     => $filters,
             'summary'     => $summary,
             'topProducts' => $topProducts,
-            'slowProducts'=> $slowProducts,
+            'slowProducts' => $slowProducts,
             'methods'     => $methods,
             'statuses'    => $statuses,
             'currency'    => $this->settings->currency(),
@@ -78,7 +78,7 @@ class ReportController extends Controller
             ->addIndexColumn()
             ->editColumn('date', function ($row) use ($filters) {
                 if (($filters['period'] ?? 'daily') === 'monthly') {
-                    return $row->date; // already YYYY-MM
+                    return $row->date;
                 }
                 return date('d/m/Y', strtotime($row->date));
             })
@@ -115,6 +115,7 @@ class ReportController extends Controller
 
         $callback = function () use ($periodRows, $summary, $top, $slow, $products, $isMonthly, $filters) {
             $out = fopen('php://output', 'w');
+            
             // Bagian 1: Ringkasan
             fputcsv($out, ['Laporan Penjualan']);
             fputcsv($out, ['Periode', $filters['period'] ?? 'daily']);

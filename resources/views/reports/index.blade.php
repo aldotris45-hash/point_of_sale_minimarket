@@ -7,7 +7,8 @@
         <div class="d-flex align-items-center justify-content-between mb-3">
             <h1 class="h3 mb-0"><i class="bi bi-graph-up-arrow"></i> Laporan Penjualan</h1>
             <div class="d-flex gap-2">
-                <a id="downloadCsv" class="btn btn-outline-success" href="{{ route('laporan.unduh', request()->query()) }}" data-url="{{ route('laporan.unduh') }}">
+                <a id="downloadCsv" class="btn btn-outline-success" href="{{ route('laporan.unduh', request()->query()) }}"
+                    data-url="{{ route('laporan.unduh') }}">
                     <i class="bi bi-download"></i> Unduh CSV
                 </a>
             </div>
@@ -48,15 +49,19 @@
                 <div class="col-6 col-md-2">
                     <label class="form-label">Periode</label>
                     <select class="form-select" name="period">
-                        <option value="daily" {{ ($filters['period'] ?? 'daily') === 'daily' ? 'selected' : '' }}>Harian</option>
-                        <option value="monthly" {{ ($filters['period'] ?? 'daily') === 'monthly' ? 'selected' : '' }}>Bulanan</option>
+                        <option value="daily" {{ ($filters['period'] ?? 'daily') === 'daily' ? 'selected' : '' }}>Harian
+                        </option>
+                        <option value="monthly" {{ ($filters['period'] ?? 'daily') === 'monthly' ? 'selected' : '' }}>
+                            Bulanan</option>
                     </select>
                 </div>
                 <div class="col-12 col-md-4">
                     <div class="d-grid d-md-flex gap-2 justify-content-md-end">
-                        <a href="{{ route('laporan') }}" class="btn btn-outline-secondary w-100 w-md-auto"><i class="bi bi-x-circle"></i>
+                        <a href="{{ route('laporan') }}" class="btn btn-outline-secondary w-100 w-md-auto"><i
+                                class="bi bi-x-circle"></i>
                             Reset</a>
-                        <button type="submit" class="btn btn-primary w-100 w-md-auto"><i class="bi bi-search"></i> Terapkan</button>
+                        <button type="submit" class="btn btn-primary w-100 w-md-auto"><i class="bi bi-search"></i>
+                            Terapkan</button>
                     </div>
                 </div>
             </div>
@@ -260,13 +265,11 @@
                 table.ajax.reload();
             });
 
-            // Build CSV download URL with current filters
             $('#downloadCsv').on('click', function(e) {
                 const base = $(this).data('url');
                 const fd = new FormData($form[0]);
                 const params = new URLSearchParams(fd).toString();
                 $(this).attr('href', base + '?' + params);
-                // allow navigation
             });
         })();
     </script>
