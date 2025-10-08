@@ -7,7 +7,7 @@
         <div class="d-flex align-items-center justify-content-between mb-3">
             <h1 class="h3 mb-0"><i class="bi bi-graph-up-arrow"></i> Laporan Penjualan</h1>
             <div class="d-flex gap-2">
-                <a class="btn btn-outline-success" href="{{ route('laporan.unduh', request()->query()) }}">
+                <a id="downloadCsv" class="btn btn-outline-success" href="{{ route('laporan.unduh', request()->query()) }}" data-url="{{ route('laporan.unduh') }}">
                     <i class="bi bi-download"></i> Unduh CSV
                 </a>
             </div>
@@ -45,10 +45,19 @@
                         @endforeach
                     </select>
                 </div>
-                <div class="col-12 col-md-4 d-flex gap-2 justify-content-end">
-                    <a href="{{ route('laporan') }}" class="btn btn-outline-secondary"><i class="bi bi-x-circle"></i>
-                        Reset</a>
-                    <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i> Terapkan</button>
+                <div class="col-6 col-md-2">
+                    <label class="form-label">Periode</label>
+                    <select class="form-select" name="period">
+                        <option value="daily" {{ ($filters['period'] ?? 'daily') === 'daily' ? 'selected' : '' }}>Harian</option>
+                        <option value="monthly" {{ ($filters['period'] ?? 'daily') === 'monthly' ? 'selected' : '' }}>Bulanan</option>
+                    </select>
+                </div>
+                <div class="col-12 col-md-4">
+                    <div class="d-grid d-md-flex gap-2 justify-content-md-end">
+                        <a href="{{ route('laporan') }}" class="btn btn-outline-secondary w-100 w-md-auto"><i class="bi bi-x-circle"></i>
+                            Reset</a>
+                        <button type="submit" class="btn btn-primary w-100 w-md-auto"><i class="bi bi-search"></i> Terapkan</button>
+                    </div>
                 </div>
             </div>
         </form>
@@ -126,6 +135,40 @@
                                                 <td>{{ $p->name }}</td>
                                                 <td class="text-end">{{ number_format($p->qty, 0, ',', '.') }}</td>
                                                 <td class="text-end">@money($p->total)</td>
+                                            </tr>
+                                        @endforeach
+                                    </tbody>
+                                </table>
+                            </div>
+                        @endif
+                    </div>
+                </section>
+
+                <section class="card shadow-sm mt-3">
+                    <div class="card-header d-flex align-items-center gap-2">
+                        <i class="bi bi-hourglass-split"></i> <strong>Produk Perputaran Lambat</strong>
+                    </div>
+                    <div class="card-body">
+                        @if (($slowProducts ?? collect())->isEmpty())
+                            <div class="text-muted">Tidak ada data.</div>
+                        @else
+                            <div class="table-responsive">
+                                <table class="table table-sm align-middle mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Produk</th>
+                                            <th class="text-end">Qty</th>
+                                            <th class="text-end">Total</th>
+                                            <th class="text-end">Stok Saat Ini</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach ($slowProducts as $p)
+                                            <tr>
+                                                <td>{{ $p->name }}</td>
+                                                <td class="text-end">{{ number_format($p->qty, 0, ',', '.') }}</td>
+                                                <td class="text-end">@money($p->total)</td>
+                                                <td class="text-end">{{ number_format($p->stock, 0, ',', '.') }}</td>
                                             </tr>
                                         @endforeach
                                     </tbody>
@@ -215,6 +258,15 @@
             $form.on('submit', function(e) {
                 e.preventDefault();
                 table.ajax.reload();
+            });
+
+            // Build CSV download URL with current filters
+            $('#downloadCsv').on('click', function(e) {
+                const base = $(this).data('url');
+                const fd = new FormData($form[0]);
+                const params = new URLSearchParams(fd).toString();
+                $(this).attr('href', base + '?' + params);
+                // allow navigation
             });
         })();
     </script>

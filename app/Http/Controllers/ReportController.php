@@ -32,10 +32,12 @@ class ReportController extends Controller
             'to'     => $request->query('to'),
             'status' => $request->query('status', 'paid'),
             'method' => $request->query('method'),
+            'period' => $request->query('period', 'daily'), // daily|monthly
         ];
 
         $summary = $this->report->summary($filters);
         $topProducts = $this->report->topProducts($filters, 5);
+        $slowProducts = $this->report->slowProducts($filters, 5);
 
         $methods = collect([
             (object) ['value' => 'cash'],
@@ -51,6 +53,7 @@ class ReportController extends Controller
             'filters'     => $filters,
             'summary'     => $summary,
             'topProducts' => $topProducts,
+            'slowProducts'=> $slowProducts,
             'methods'     => $methods,
             'statuses'    => $statuses,
             'currency'    => $this->settings->currency(),
@@ -64,13 +67,21 @@ class ReportController extends Controller
             'to'     => $request->query('to'),
             'status' => $request->query('status', 'paid'),
             'method' => $request->query('method'),
+            'period' => $request->query('period', 'daily'),
         ];
 
-        $query = $this->report->dailySalesQuery($filters);
+        $query = ($filters['period'] ?? 'daily') === 'monthly'
+            ? $this->report->monthlySalesQuery($filters)
+            : $this->report->dailySalesQuery($filters);
 
         return DataTables::of($query)
             ->addIndexColumn()
-            ->editColumn('date', fn($row) => date('d/m/Y', strtotime($row->date)))
+            ->editColumn('date', function ($row) use ($filters) {
+                if (($filters['period'] ?? 'daily') === 'monthly') {
+                    return $row->date; // already YYYY-MM
+                }
+                return date('d/m/Y', strtotime($row->date));
+            })
             ->editColumn('total', fn($row) => 'Rp ' . number_format((float) $row->total, 0, ',', '.'))
             ->toJson();
     }
@@ -82,27 +93,77 @@ class ReportController extends Controller
             'to'     => $request->query('to'),
             'status' => $request->query('status', 'paid'),
             'method' => $request->query('method'),
+            'period' => $request->query('period', 'daily'),
         ];
 
-        $rows = $this->report->dailySalesQuery($filters)->get();
+        $periodRows = ($filters['period'] ?? 'daily') === 'monthly'
+            ? $this->report->monthlySalesQuery($filters)->get()
+            : $this->report->dailySalesQuery($filters)->get();
+        $summary = $this->report->summary($filters);
+        $top = $this->report->topProducts($filters, 10);
+        $slow = $this->report->slowProducts($filters, 10);
+        $products = $this->report->productSales($filters);
 
-        $filename = 'laporan-penjualan-' . Str::slug(($filters['from'] ?? 'all') . '_to_' . ($filters['to'] ?? 'all')) . '.csv';
+        $filename = 'laporan-penjualan-' . ($filters['period'] ?? 'daily') . '-' . Str::slug(($filters['from'] ?? 'all') . '_to_' . ($filters['to'] ?? 'all')) . '.csv';
 
         $headers = [
             'Content-Type' => 'text/csv',
             'Content-Disposition' => "attachment; filename=\"$filename\"",
         ];
 
-        $callback = function () use ($rows) {
+        $isMonthly = ($filters['period'] ?? 'daily') === 'monthly';
+
+        $callback = function () use ($periodRows, $summary, $top, $slow, $products, $isMonthly, $filters) {
             $out = fopen('php://output', 'w');
+            // Bagian 1: Ringkasan
+            fputcsv($out, ['Laporan Penjualan']);
+            fputcsv($out, ['Periode', $filters['period'] ?? 'daily']);
+            fputcsv($out, ['Dari', $filters['from'] ?? '-']);
+            fputcsv($out, ['Sampai', $filters['to'] ?? '-']);
+            fputcsv($out, ['Status', $filters['status'] ?? '-']);
+            fputcsv($out, ['Metode', $filters['method'] ?? '-']);
+            fputcsv($out, []);
+            fputcsv($out, ['Ringkasan']);
+            fputcsv($out, ['Total Penjualan', (int) $summary['total_sales']]);
+            fputcsv($out, ['Total Transaksi', (int) $summary['total_transactions']]);
+            fputcsv($out, ['Rata-rata per Transaksi', (int) $summary['average_order_value']]);
+            fputcsv($out, ['Total Item Terjual', (int) $summary['total_items_sold']]);
+            fputcsv($out, []);
+
+            // Bagian 2: Penjualan per Periode (Harian/Bulanan)
+            fputcsv($out, ['Penjualan per ' . (($isMonthly) ? 'Bulan' : 'Hari')]);
             fputcsv($out, ['Tanggal', 'Jumlah Transaksi', 'Total Item', 'Total Nominal']);
-            foreach ($rows as $r) {
+            foreach ($periodRows as $r) {
                 fputcsv($out, [
-                    date('Y-m-d', strtotime($r->date)),
+                    $isMonthly ? $r->date : date('Y-m-d', strtotime($r->date)),
                     (int) $r->trx_count,
                     (int) $r->items_qty,
                     (int) $r->total,
                 ]);
+            }
+            fputcsv($out, []);
+
+            // Bagian 3: Produk Terlaris
+            fputcsv($out, ['Top Produk (Terlaris)']);
+            fputcsv($out, ['Produk', 'SKU', 'Qty', 'Total']);
+            foreach ($products->take(10) as $p) {
+                fputcsv($out, [$p->name, $p->sku, (int) $p->qty, (int) $p->total]);
+            }
+            fputcsv($out, []);
+
+            // Bagian 4: Produk Perputaran Lambat
+            fputcsv($out, ['Produk Perputaran Lambat']);
+            fputcsv($out, ['Produk', 'Qty', 'Total']);
+            foreach ($slow as $p) {
+                fputcsv($out, [$p->name, (int) $p->qty, (int) $p->total]);
+            }
+            fputcsv($out, []);
+
+            // Bagian 5: Detail Penjualan per Produk (lengkap)
+            fputcsv($out, ['Detail Penjualan per Produk']);
+            fputcsv($out, ['Produk', 'SKU', 'Qty', 'Total']);
+            foreach ($products as $p) {
+                fputcsv($out, [$p->name, $p->sku, (int) $p->qty, (int) $p->total]);
             }
             fclose($out);
         };

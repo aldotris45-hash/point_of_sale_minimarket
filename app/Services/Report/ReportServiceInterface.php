@@ -12,4 +12,10 @@ interface ReportServiceInterface
     public function dailySalesQuery(array $filters): Builder;
 
     public function topProducts(array $filters, int $limit = 5): Collection;
+
+    public function monthlySalesQuery(array $filters): Builder;
+
+    public function slowProducts(array $filters, int $limit = 5): Collection;
+
+    public function productSales(array $filters): Collection;
 }

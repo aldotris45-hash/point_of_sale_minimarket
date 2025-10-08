@@ -36,17 +36,53 @@ class ReportService implements ReportServiceInterface
 
     public function dailySalesQuery(array $filters): Builder
     {
-        $q = DB::table('transactions as t')
-            ->leftJoin('transaction_details as d', 'd.transaction_id', '=', 't.id')
+        $dateExpr = DB::raw('DATE(t.created_at)');
+
+        $trx = $this->baseTransactionQuery($filters)
+            ->selectRaw('DATE(t.created_at) as grp_date, COUNT(*) as trx_count, COALESCE(SUM(t.total),0) as total')
+            ->groupBy($dateExpr);
+
+        $items = DB::table('transaction_details as d')
+            ->join('transactions as t', 't.id', '=', 'd.transaction_id')
             ->when($filters['from'] ?? null, fn($q, $v) => $q->whereDate('t.created_at', '>=', $v))
             ->when($filters['to'] ?? null, fn($q, $v) => $q->whereDate('t.created_at', '<=', $v))
             ->when(!empty($filters['status']), fn($q) => $q->where('t.status', $filters['status']))
             ->when(!empty($filters['method']), fn($q) => $q->where('t.payment_method', $filters['method']))
-            ->groupBy(DB::raw('DATE(t.created_at)'))
-            ->orderBy(DB::raw('DATE(t.created_at)'))
-            ->selectRaw('DATE(t.created_at) as date, COUNT(DISTINCT t.id) as trx_count, COALESCE(SUM(d.quantity),0) as items_qty, COALESCE(SUM(t.total),0) as total');
+            ->selectRaw('DATE(t.created_at) as grp_date, COALESCE(SUM(d.quantity),0) as items_qty')
+            ->groupBy($dateExpr);
 
-        return $q;
+        return DB::query()
+            ->fromSub($trx, 'x')
+            ->leftJoinSub($items, 'i', 'i.grp_date', '=', 'x.grp_date')
+            ->selectRaw('x.grp_date as date, x.trx_count, COALESCE(i.items_qty,0) as items_qty, x.total')
+            ->orderBy('x.grp_date');
+    }
+
+    public function monthlySalesQuery(array $filters): Builder
+    {
+        $driver = DB::connection()->getDriverName();
+        $expr = $driver === 'sqlite'
+            ? "strftime('%Y-%m', t.created_at)"
+            : "DATE_FORMAT(t.created_at, '%Y-%m')";
+
+        $trx = $this->baseTransactionQuery($filters)
+            ->selectRaw("$expr as grp_date, COUNT(*) as trx_count, COALESCE(SUM(t.total),0) as total")
+            ->groupBy(DB::raw($expr));
+
+        $items = DB::table('transaction_details as d')
+            ->join('transactions as t', 't.id', '=', 'd.transaction_id')
+            ->when($filters['from'] ?? null, fn($q, $v) => $q->whereDate('t.created_at', '>=', $v))
+            ->when($filters['to'] ?? null, fn($q, $v) => $q->whereDate('t.created_at', '<=', $v))
+            ->when(!empty($filters['status']), fn($q) => $q->where('t.status', $filters['status']))
+            ->when(!empty($filters['method']), fn($q) => $q->where('t.payment_method', $filters['method']))
+            ->selectRaw("$expr as grp_date, COALESCE(SUM(d.quantity),0) as items_qty")
+            ->groupBy(DB::raw($expr));
+
+        return DB::query()
+            ->fromSub($trx, 'x')
+            ->leftJoinSub($items, 'i', 'i.grp_date', '=', 'x.grp_date')
+            ->selectRaw('x.grp_date as date, x.trx_count, COALESCE(i.items_qty,0) as items_qty, x.total')
+            ->orderBy('x.grp_date');
     }
 
     public function topProducts(array $filters, int $limit = 5): Collection
@@ -62,6 +98,42 @@ class ReportService implements ReportServiceInterface
             ->orderByDesc(DB::raw('SUM(d.quantity)'))
             ->limit($limit)
             ->selectRaw('d.product_id, COALESCE(p.name, CONCAT("#", d.product_id)) as name, SUM(d.quantity) as qty, SUM(d.total) as total')
+            ->get();
+    }
+
+    public function slowProducts(array $filters, int $limit = 5): Collection
+    {
+        // Produk dengan total qty terjual paling sedikit dalam periode, tapi pernah terjual (>0)
+        $sold = DB::table('transaction_details as d')
+            ->join('transactions as t', 't.id', '=', 'd.transaction_id')
+            ->when($filters['from'] ?? null, fn($q, $v) => $q->whereDate('t.created_at', '>=', $v))
+            ->when($filters['to'] ?? null, fn($q, $v) => $q->whereDate('t.created_at', '<=', $v))
+            ->when(!empty($filters['status']), fn($q) => $q->where('t.status', $filters['status']))
+            ->when(!empty($filters['method']), fn($q) => $q->where('t.payment_method', $filters['method']))
+            ->groupBy('d.product_id')
+            ->selectRaw('d.product_id, SUM(d.quantity) as qty, SUM(d.total) as total');
+
+        return DB::table('products as p')
+            ->leftJoinSub($sold, 's', 's.product_id', '=', 'p.id')
+            // sertakan juga produk dengan penjualan 0 untuk benar-benar menyoroti perputaran lambat
+            ->orderByRaw('COALESCE(s.qty, 0) ASC, p.stock DESC, p.name ASC')
+            ->limit($limit)
+            ->selectRaw('p.id as product_id, p.name, COALESCE(s.qty, 0) as qty, COALESCE(s.total, 0) as total, p.stock')
+            ->get();
+    }
+
+    public function productSales(array $filters): Collection
+    {
+        return DB::table('transaction_details as d')
+            ->join('transactions as t', 't.id', '=', 'd.transaction_id')
+            ->leftJoin('products as p', 'p.id', '=', 'd.product_id')
+            ->when($filters['from'] ?? null, fn($q, $v) => $q->whereDate('t.created_at', '>=', $v))
+            ->when($filters['to'] ?? null, fn($q, $v) => $q->whereDate('t.created_at', '<=', $v))
+            ->when(!empty($filters['status']), fn($q) => $q->where('t.status', $filters['status']))
+            ->when(!empty($filters['method']), fn($q) => $q->where('t.payment_method', $filters['method']))
+            ->groupBy('d.product_id', 'p.name', 'p.sku')
+            ->orderByDesc(DB::raw('SUM(d.quantity)'))
+            ->selectRaw('d.product_id, COALESCE(p.name, CONCAT("#", d.product_id)) as name, p.sku, SUM(d.quantity) as qty, SUM(d.total) as total')
             ->get();
     }
 
