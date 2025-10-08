@@ -20,6 +20,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/kasir', [CashierController::class, 'index'])->name('kasir');
         Route::get('/kasir/products', [CashierController::class, 'products'])->name('kasir.products');
         Route::post('/kasir/checkout', [CashierController::class, 'checkout'])->name('kasir.checkout');
+        Route::post('/kasir/hold', [CashierController::class, 'hold'])->name('kasir.hold');
+        Route::get('/kasir/holds', [CashierController::class, 'holds'])->name('kasir.holds');
+        Route::post('/kasir/holds/{transaction}/resume', [CashierController::class, 'resume'])->name('kasir.holds.resume');
+        Route::delete('/kasir/holds/{transaction}', [CashierController::class, 'destroyHold'])->name('kasir.holds.destroy');
 
         // Pembayaran
         Route::get('/pembayaran/{transaction}', [PaymentController::class, 'show'])->name('pembayaran.show');

@@ -160,6 +160,15 @@ class PaymentController extends Controller
 
     public function complete(Transaction $transaction)
     {
+        if ($transaction->suspended_from_id) {
+            $orig = Transaction::where('id', $transaction->suspended_from_id)
+                ->where('status', TransactionStatus::SUSPENDED)
+                ->first();
+            if ($orig) {
+                $orig->delete();
+            }
+        }
+
         $method = strtolower((string) ($transaction->payment_method?->value ?? $transaction->payment_method ?? ''));
         return redirect()->route('kasir')
             ->with('success', 'Transaksi berhasil. Nomor: ' . $transaction->invoice_number)

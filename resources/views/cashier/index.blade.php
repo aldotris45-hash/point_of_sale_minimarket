@@ -86,11 +86,19 @@
 
 
 
-                        <div class="d-flex justify-content-between align-items-center mt-3">
+                        <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center mt-3">
                             <div class="fw-semibold">Keranjang</div>
-                            <button type="button" class="btn btn-sm btn-outline-danger" id="btnClearCart" disabled>
-                                <i class="bi bi-trash"></i> Hapus Semua
-                            </button>
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-sm btn-outline-secondary" id="btnShowHolds">
+                                    <i class="bi bi-inboxes"></i> Tertunda
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-warning" id="btnHold" disabled>
+                                    <i class="bi bi-pause-circle"></i> Tunda Transaksi
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-danger" id="btnClearCart" disabled>
+                                    <i class="bi bi-trash"></i> Hapus Semua
+                                </button>
+                            </div>
                         </div>
 
                         <div class="table-responsive mt-2">
@@ -154,10 +162,11 @@
                             </fieldset>
 
                             <fieldset class="mb-3">
-                                <label for="note" class="form-label">Catatan</label>
+                                <label for="note" class="form-label">Catatan/Pelanggan</label>
                                 <input type="text" name="note" id="note" class="form-control"
-                                    maxlength="255" placeholder="Opsional">
+                                    maxlength="255" placeholder="Misal: Nama pelanggan / no. telp / catatan">
                             </fieldset>
+                            <input type="hidden" name="suspended_from_id" id="suspended_from_id" />
 
                             <div class="d-grid">
                                 <button type="submit" class="btn btn-success btn-lg" id="btnCheckout" disabled>
@@ -180,6 +189,23 @@
             </div>
         </section>
     </section>
+    <!-- Modal Holds -->
+    <div class="modal fade" id="holdsModal" tabindex="-1" aria-labelledby="holdsLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="holdsLabel"><i class="bi bi-inboxes"></i> Transaksi Tertunda</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="holdsList" class="list-group small"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Tutup</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @push('script')
@@ -204,6 +230,8 @@
             const $paymentMethod = $('#payment_method');
             const $paidAmount = $('#paid_amount');
             const $btnClearCart = $('#btnClearCart');
+            const $btnHold = $('#btnHold');
+            const $btnShowHolds = $('#btnShowHolds');
 
             const $searchDropdown = $('#searchDropdown');
             const $inlineDropMenu = $('#inlineDropMenu');
@@ -263,6 +291,7 @@
                     $cartBody.html('<tr><td colspan="5" class="text-center text-muted">Keranjang kosong.</td></tr>');
                     calcSummary();
                     $btnClearCart.prop('disabled', true);
+                    $btnHold.prop('disabled', true);
                     return;
                 }
                 const rows = cart.map((it, i) => {
@@ -292,6 +321,7 @@
                 $cartBody.html(rows);
                 calcSummary();
                 $btnClearCart.prop('disabled', cart.length === 0);
+                $btnHold.prop('disabled', cart.length === 0);
             }
 
             function calcSummary() {
@@ -545,6 +575,126 @@
             $btnClearCart.on('click', function() {
                 cart = [];
                 renderCart();
+                $('#suspended_from_id').val('');
+                // If modal open, refresh list to remove badge
+                if ($('#holdsModal').hasClass('show')) loadHolds();
+            });
+
+            // Create Hold
+            $btnHold.on('click', function() {
+                if (!cart.length) return;
+                const payload = {
+                    _token: @json(csrf_token()),
+                    items: JSON.parse($itemsJson.val() || '[]'),
+                    note: ($('#note').val() || '').trim(),
+                    suspended_from_id: ($('#suspended_from_id').val() || '').trim()
+                };
+                $.ajax({
+                    url: @json(route('kasir.hold')),
+                    method: 'POST',
+                    data: payload,
+                    headers: {
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                }).done((res) => {
+                    alert('Transaksi ditunda: ' + (res?.invoice || ''));
+                    cart = [];
+                    renderCart();
+                    $('#suspended_from_id').val('');
+                    $('#note').val('');
+                    if ($('#holdsModal').hasClass('show')) loadHolds();
+                }).fail((xhr) => {
+                    alert(xhr?.responseJSON?.message || 'Gagal menunda transaksi');
+                });
+            });
+
+            function loadHolds() {
+                $('#holdsList').html('<div class="text-muted">Memuat…</div>');
+                $.get(@json(route('kasir.holds'))).done((list) => {
+                    if (!Array.isArray(list) || !list.length) {
+                        $('#holdsList').html('<div class="text-muted">Tidak ada transaksi tertunda.</div>');
+                        return;
+                    }
+                    const currentIdNum = Number(($('#suspended_from_id').val() || '').toString().trim());
+                    const rows = list.map(h => {
+                        const isCurrent = Number.isFinite(currentIdNum) && currentIdNum > 0 && Number(h
+                            .id) === currentIdNum;
+                        const badge = isCurrent ?
+                            '<span class="badge bg-info ms-2">Sedang dimuat</span>' : '';
+                        return `
+                        <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="fw-semibold">${h.invoice_number} ${badge}</div>
+                                <div class="text-muted">Pelanggan/Catatan: <span class="fw-semibold">${(h.note||'-')}</span></div>
+                                <div class="small text-muted">${new Date(h.created_at).toLocaleString('id-ID')} • Total Rp ${fmt(h.total)}</div>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-sm btn-primary" data-resume="${h.id}"><i class="bi bi-download"></i> Muat</button>
+                                <button class="btn btn-sm btn-outline-danger" data-delete="${h.id}"><i class="bi bi-trash"></i></button>
+                            </div>
+                        </div>`;
+                    }).join('');
+                    $('#holdsList').html(rows);
+                }).fail(() => {
+                    $('#holdsList').html('<div class="text-danger">Gagal memuat data.</div>');
+                });
+            }
+
+            $btnShowHolds.on('click', function() {
+                const el = document.getElementById('holdsModal');
+                if (!el) return;
+                const m = new bootstrap.Modal(el);
+                m.show();
+                loadHolds();
+                $('#holdsList').off('click').on('click', '[data-resume]', function() {
+                    const id = $(this).data('resume');
+                    $.post(@json(route('kasir.holds.resume', ['transaction' => '__ID__'])).replace('__ID__', id), {
+                        _token: @json(csrf_token())
+                    }).done((res) => {
+                        if (Array.isArray(res?.items)) {
+                            const items = res.items;
+                            $('#suspended_from_id').val(id);
+                            $('#note').val(res.note || '');
+                            const ids = items.map(i => i.product_id);
+                            $.get(@json(route('kasir.products')), {
+                                q: '',
+                                limit: 100
+                            }).done((all) => {
+                                cart = items.map(it => {
+                                    const p = Array.isArray(all) ? all.find(x =>
+                                        Number(x.id) === Number(it
+                                            .product_id)) : null;
+                                    const stock = p ? Number(p.stock) : it
+                                        .qty; // fallback
+                                    return {
+                                        product_id: it.product_id,
+                                        name: p ? p.name : ('Produk #' + it
+                                            .product_id),
+                                        price: Number(it.price || 0),
+                                        qty: Math.min(Number(it.qty), stock),
+                                        stock: stock
+                                    };
+                                });
+                                renderCart();
+                                loadHolds(); // refresh badge state
+                                m.hide();
+                            });
+                        }
+                    }).fail(() => alert('Gagal memuat transaksi.'));
+                }).on('click', '[data-delete]', function() {
+                    const id = $(this).data('delete');
+                    if (!confirm('Hapus transaksi tertunda ini?')) return;
+                    $.ajax({
+                            url: @json(route('kasir.holds.destroy', ['transaction' => '__ID__'])).replace('__ID__', id),
+                            method: 'DELETE',
+                            data: {
+                                _token: @json(csrf_token())
+                            }
+                        })
+                        .done(() => loadHolds())
+                        .fail(() => alert('Gagal menghapus.'));
+                });
             });
 
             $('#checkoutForm [data-method]').on('click', function() {
@@ -620,7 +770,7 @@
                     }
                     $('#snapSection').show();
 
-                    // Mulai polling status setelah embed dimulai
+                    // Start polling status after embed started
                     startStatusPolling(trxId);
 
                     const toShowUrl = (id) => @json(route('pembayaran.complete', ['transaction' => '__ID__'])).replace('__ID__', id);
@@ -639,7 +789,6 @@
                                     clearInterval(pollTimer);
                                     pollTimer = null;
                                 }
-                                // Pending: tetap menunggu polling/webhook; biarkan tetap di kasir
                             },
                             onError: function() {
                                 alert('Pembayaran gagal. Coba lagi.');
@@ -658,7 +807,6 @@
 
             renderCart();
 
-            // Tampilkan modal sukses tunai jika ada transaksi yang baru saja dibuat
             @if (session('printed_transaction_id'))
                 try {
                     const el = document.getElementById('cashSuccessModal');
@@ -668,9 +816,9 @@
                         const btn = document.getElementById('btnPrintReceipt');
                         if (btn) {
                             btn.addEventListener('click', function() {
-                                // setelah klik cetak, bersihkan keranjang
                                 cart = [];
                                 renderCart();
+                                $('#suspended_from_id').val('');
                             });
                         }
                     }

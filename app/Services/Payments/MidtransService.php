@@ -152,6 +152,15 @@ class MidtransService implements MidtransServiceInterface
                     'amount_paid' => $transaction->total,
                     'change' => 0,
                 ]);
+
+                if ($transaction->suspended_from_id) {
+                    $orig = Transaction::where('id', $transaction->suspended_from_id)
+                        ->where('status', TransactionStatus::SUSPENDED)
+                        ->first();
+                    if ($orig) {
+                        $orig->delete();
+                    }
+                }
                 break;
 
             case 'pending':

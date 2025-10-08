@@ -17,6 +17,8 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->restrictOnDelete();
             $table->string('invoice_number')->unique();
+            $table->string('note', 255)->nullable();
+            $table->foreignId('suspended_from_id')->nullable()->constrained('transactions')->nullOnDelete();
             $table->decimal('subtotal', 12, 2)->default(0);
             $table->decimal('discount', 12, 2)->default(0);
             $table->decimal('tax', 12, 2)->default(0);
@@ -29,11 +31,12 @@ return new class extends Migration
             ])->default(PaymentMethod::CASH->value);
             $table->enum('status', [
                 TransactionStatus::PENDING->value,
+                TransactionStatus::SUSPENDED->value,
                 TransactionStatus::PAID->value,
                 TransactionStatus::CANCELED->value,
                 TransactionStatus::REFUNDED->value
             ])->default(TransactionStatus::PENDING->value)
-              ->index();
+                ->index();
             $table->timestamps();
         });
     }

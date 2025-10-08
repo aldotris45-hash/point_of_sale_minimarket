@@ -23,6 +23,8 @@ class TransactionController extends Controller
         $from = $request->query('from');
         $to = $request->query('to');
 
+        $statuses = array_values(array_filter(TransactionStatus::cases(), fn($s) => $s->value !== 'suspended'));
+
         return view('transactions.index', [
             'q' => $q,
             'status' => $status,
@@ -31,7 +33,7 @@ class TransactionController extends Controller
             'from' => $from,
             'to' => $to,
             'currency' => $this->settings->currency(),
-            'statuses' => TransactionStatus::cases(),
+            'statuses' => $statuses,
             'methods' => PaymentMethod::cases(),
         ]);
     }
@@ -47,6 +49,7 @@ class TransactionController extends Controller
 
         $query = Transaction::query()
             ->with(['user'])
+            ->where('status', '!=', TransactionStatus::SUSPENDED->value)
             ->when($q !== '', function ($w) use ($q) {
                 $w->where(function ($qq) use ($q) {
                     $qq->where('invoice_number', 'like', "%{$q}%")

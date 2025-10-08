@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Enums\RoleStatus;
 use App\Http\Requests\Cashier\CheckoutRequest;
+use App\Http\Requests\Cashier\HoldRequest;
+use App\Models\Transaction;
+use App\Enums\TransactionStatus;
 use App\Models\Product;
 use App\Services\Cashier\CashierServiceInterface;
 use App\Services\Settings\SettingsServiceInterface;
@@ -69,7 +72,8 @@ class CashierController extends Controller
                 $data['items'],
                 $data['payment_method'],
                 (float) ($data['paid_amount'] ?? 0),
-                $data['note'] ?? null
+                $data['note'] ?? null,
+                isset($data['suspended_from_id']) ? (int) $data['suspended_from_id'] : null
             );
 
             $this->logger->log('Buat Transaksi', 'Transaksi baru dibuat', [
@@ -105,5 +109,70 @@ class CashierController extends Controller
             ->with('success', 'Transaksi berhasil. Nomor: ' . $order->invoice_number)
             ->with('printed_transaction_id', $order->id)
             ->with('printed_invoice', $order->invoice_number);
+    }
+
+    public function hold(HoldRequest $request): JsonResponse|RedirectResponse
+    {
+        $data = $request->validated();
+        try {
+            $trx = $this->cashier->hold($data['items'], $data['note'] ?? null, isset($data['suspended_from_id']) ? (int)$data['suspended_from_id'] : null);
+            $this->logger->log('Tunda Transaksi', 'Transaksi ditunda', [
+                'transaction_id' => $trx->id,
+                'invoice' => $trx->invoice_number,
+                'items_count' => count($data['items'] ?? []),
+                'note' => $data['note'] ?? null,
+            ]);
+        } catch (\Throwable $e) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => $e->getMessage()], 422);
+            }
+            return back()->with('error', $e->getMessage())->withInput();
+        }
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'transaction_id' => $trx->id,
+                'invoice' => $trx->invoice_number,
+                'status' => $trx->status?->value ?? 'suspended',
+            ]);
+        }
+        return redirect()->route('kasir')->with('success', 'Transaksi ditunda. Nomor: ' . $trx->invoice_number);
+    }
+
+    public function holds(): JsonResponse
+    {
+        $list = Transaction::query()
+            ->withCount('details')
+            ->where('status', TransactionStatus::SUSPENDED->value)
+            ->where('user_id', Auth::id())
+            ->orderByDesc('created_at')
+            ->limit(50)
+            ->get(['id', 'invoice_number', 'total', 'created_at', 'note']);
+
+        return response()->json($list);
+    }
+
+    public function resume(Transaction $transaction): JsonResponse
+    {
+        abort_unless($transaction->status === TransactionStatus::SUSPENDED, 400, 'Transaksi bukan status ditunda.');
+        $transaction->loadMissing('details');
+        return response()->json([
+            'id' => $transaction->id,
+            'invoice' => $transaction->invoice_number,
+            'note' => $transaction->note,
+            'suspended_from_id' => $transaction->id,
+            'items' => $transaction->details->map(fn($d) => [
+                'product_id' => $d->product_id,
+                'qty' => $d->quantity,
+                'price' => (float) $d->price,
+            ])->values(),
+        ]);
+    }
+
+    public function destroyHold(Transaction $transaction): JsonResponse
+    {
+        abort_unless($transaction->status === TransactionStatus::SUSPENDED, 400, 'Transaksi bukan status ditunda.');
+        $transaction->delete();
+        return response()->json(['deleted' => true]);
     }
 }
