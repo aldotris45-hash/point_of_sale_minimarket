@@ -50,7 +50,7 @@
                     <div class="card-body d-flex align-items-center">
                         <i class="bi bi-people text-info fs-2 me-3"></i>
                         <div>
-                            <p class="text-muted mb-0">Produk Stok Rendah (&le; 5)</p>
+                            <p class="text-muted mb-0">Produk Stok Rendah (&le; stok minimum)</p>
                             <h2 class="h4 mb-0">{{ number_format($lowStock, 0, ',', '.') }}</h2>
                         </div>
                     </div>

@@ -116,8 +116,6 @@
                                 role="status" aria-hidden="true"></span>
                             <i class="bi bi-box-arrow-in-right me-1"></i> Masuk
                         </button>
-                        <small class="text-muted text-center">Dengan masuk, Anda menyetujui kebijakan penggunaan sistem
-                            ini.</small>
                     </div>
                 </form>
 

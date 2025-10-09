@@ -42,11 +42,6 @@ class AuthController extends Controller
         return redirect()->intended('/');
     }
 
-    public function showRegister(): View
-    {
-        return view('auth.register');
-    }
-
     public function logout(Request $request): RedirectResponse
     {
         $this->auth->logout();

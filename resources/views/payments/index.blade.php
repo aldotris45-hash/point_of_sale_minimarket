@@ -9,7 +9,7 @@
                 <h1 class="h3 d-flex align-items-center gap-2 mb-1">
                     <i class="bi bi-credit-card-2-front"></i> Pembayaran
                 </h1>
-                <p class="text-muted mb-0">Daftar pembayaran (QRIS/Tunai) dari transaksi.</p>
+                <p class="text-muted mb-0">Daftar pembayaran QRIS dari transaksi.</p>
             </div>
         </header>
 
