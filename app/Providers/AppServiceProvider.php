@@ -48,15 +48,28 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        $settings = $this->app->make(SettingsServiceInterface::class);
-        View::share('appStoreName', $settings->storeName());
-        View::share('appCurrency', $settings->currency());
-        View::share('appDiscountPercent', $settings->discountPercent());
-        View::share('appTaxPercent', $settings->taxPercent());
-        View::share('appStoreAddress', $settings->storeAddress());
-        View::share('appStorePhone', $settings->storePhone());
-        View::share('appStoreLogoPath', $settings->storeLogoPath());
-        View::share('appReceiptFormat', $settings->receiptNumberFormat());
+        // Share common settings with views, but don't allow failures (e.g., DB not ready) to break bootstrapping
+        try {
+            $settings = $this->app->make(SettingsServiceInterface::class);
+            View::share('appStoreName', $settings->storeName());
+            View::share('appCurrency', $settings->currency());
+            View::share('appDiscountPercent', $settings->discountPercent());
+            View::share('appTaxPercent', $settings->taxPercent());
+            View::share('appStoreAddress', $settings->storeAddress());
+            View::share('appStorePhone', $settings->storePhone());
+            View::share('appStoreLogoPath', $settings->storeLogoPath());
+            View::share('appReceiptFormat', $settings->receiptNumberFormat());
+        } catch (\Throwable $e) {
+            // Fallback safe defaults so composer install / package discovery won't fail
+            View::share('appStoreName', config('app.name', 'POS'));
+            View::share('appCurrency', 'IDR');
+            View::share('appDiscountPercent', 0.0);
+            View::share('appTaxPercent', 0.0);
+            View::share('appStoreAddress', '');
+            View::share('appStorePhone', '');
+            View::share('appStoreLogoPath', null);
+            View::share('appReceiptFormat', 'INV-{YYYY}{MM}{DD}-{SEQ:6}');
+        }
 
         Blade::directive('money', function ($expression) {
             return "<?php

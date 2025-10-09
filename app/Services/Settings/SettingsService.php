@@ -5,6 +5,7 @@ namespace App\Services\Settings;
 use App\Models\Setting;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 class SettingsService implements SettingsServiceInterface
@@ -13,13 +14,24 @@ class SettingsService implements SettingsServiceInterface
 
     public function get(string $key, mixed $default = null): mixed
     {
+        // If database is not ready (e.g., fresh clone, during package:discover),
+        // avoid hitting DB or a DB-backed cache store.
+        if (!$this->isDatabaseReady()) {
+            return $default;
+        }
+
         $cacheKey = "settings:" . $key;
         return $this->cache->rememberForever($cacheKey, function () use ($key, $default) {
-            if (!Schema::hasTable('settings')) {
+            try {
+                if (!Schema::hasTable('settings')) {
+                    return $default;
+                }
+                $setting = Setting::query()->where('key', $key)->first();
+                return $setting?->value ?? $default;
+            } catch (\Throwable $e) {
+                // Swallow any DB errors and return default to keep bootstrapping safe
                 return $default;
             }
-            $setting = Setting::query()->where('key', $key)->first();
-            return $setting?->value ?? $default;
         });
     }
 
@@ -90,5 +102,31 @@ class SettingsService implements SettingsServiceInterface
         // Example format: INV-{YYYY}{MM}{DD}-{SEQ:6}
         $val = $this->get('pos.receipt_format', 'INV-{YYYY}{MM}{DD}-{SEQ:6}');
         return is_string($val) ? $val : (string) ($val['value'] ?? 'INV-{YYYY}{MM}{DD}-{SEQ:6}');
+    }
+
+    /**
+     * Determine if the default database connection is available.
+     * This prevents crashes during composer install / package discovery.
+     */
+    private function isDatabaseReady(): bool
+    {
+        try {
+            $default = config('database.default');
+            $driver = config("database.connections.$default.driver");
+
+            if ($driver === 'sqlite') {
+                $dbPath = (string) config("database.connections.$default.database");
+                // Allow in-memory sqlite, otherwise ensure file exists
+                if ($dbPath !== ':memory:' && $dbPath !== '' && !file_exists($dbPath)) {
+                    return false;
+                }
+            }
+
+            // Attempt a lightweight connection check
+            DB::connection($default)->getPdo();
+            return true;
+        } catch (\Throwable $_) {
+            return false;
+        }
     }
 }
