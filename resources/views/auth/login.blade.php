@@ -51,10 +51,10 @@
                     <div class="brand">
                         <img src="{{ asset('assets/images/logo.webp') }}" alt="Logo" width="56" height="56"
                             class="rounded-circle">
-                        <div class="text-start">
-                            <div class="brand-title">{{ $appStoreName ?? config('app.name', 'POS') }}</div>
-                            <div class="small text-muted">Sistem Point of Sale</div>
-                        </div>
+                    </div>
+                    <div class="text-center">
+                        <div class="brand-title">{{ $appStoreName ?? config('app.name', 'POS') }}</div>
+                        <div class="small text-muted">Sistem Point of Sale</div>
                     </div>
                     <h1 class="h5 mt-3 mb-0">Masuk ke Akun Anda</h1>
                     <p class="text-muted small mt-1 mb-0">Gunakan email dan kata sandi yang terdaftar.</p>
@@ -119,7 +119,7 @@
                     </div>
                 </form>
 
-                
+
             </div>
         </div>
     </main>
