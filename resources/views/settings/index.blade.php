@@ -25,6 +25,7 @@
                             data-default-discount="{{ $appDiscountPercent ?? 0 }}"
                             data-default-tax="{{ $appTaxPercent ?? 0 }}" data-default-address="{{ $appStoreAddress ?? '' }}"
                             data-default-phone="{{ $appStorePhone ?? '' }}"
+                            data-default-bank="{{ $appStoreBankAccount ?? '' }}"
                             data-default-receipt="{{ $appReceiptFormat ?? 'INV-{YYYY}{MM}{DD}-{SEQ:6}' }}">
                             @csrf
                             @method('PUT')
@@ -102,6 +103,17 @@
                             </div>
 
                             <div class="col-12 col-md-6">
+                                <label for="store_bank_account" class="form-label">No. Rekening / Bank</label>
+                                <input type="text" id="store_bank_account" name="store_bank_account"
+                                    value="{{ old('store_bank_account', $store_bank_account ?? '') }}"
+                                    class="form-control @error('store_bank_account') is-invalid @enderror"
+                                    placeholder="BCA 123-456-7890">
+                                @error('store_bank_account')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="col-12 col-md-6">
                                 <label for="receipt_format" class="form-label">Format Penomoran Struk</label>
                                 <input type="text" id="receipt_format" name="receipt_format"
                                     value="{{ old('receipt_format', $receipt_format ?? ($appReceiptFormat ?? 'INV-{YYYY}{MM}{DD}-{SEQ:6}')) }}"
@@ -173,6 +185,7 @@
                                 <div id="prev_store_address" class="muted">{{ $store_address ?? $appStoreAddress }}
                                 </div>
                                 <div id="prev_store_phone" class="muted">{{ $store_phone ?? $appStorePhone }}</div>
+                                <div id="prev_store_bank" class="muted">{{ $store_bank_account ?? '' }}</div>
                             </div>
                             <div class="hr"></div>
                             <div class="d-flex flex-column">
@@ -255,6 +268,7 @@
                         setVal('tax_percent', get('defaultTax', '0'));
                         setVal('store_address', get('defaultAddress', ''));
                         setVal('store_phone', get('defaultPhone', ''));
+                        setVal('store_bank_account', get('defaultBank', ''));
                         setVal('receipt_format', get('defaultReceipt', 'INV-{YYYY}{MM}{DD}-{SEQ:6}'));
                         updateReceiptPreview();
                         updateReceiptPreviewHtml();
@@ -334,10 +348,12 @@
                     const storeName = el('store_name')?.value || '';
                     const storeAddr = el('store_address')?.value || '';
                     const storePhone = el('store_phone')?.value || '';
+                    const storeBank = el('store_bank_account')?.value || '';
 
                     if (el('prev_store_name')) el('prev_store_name').textContent = storeName;
                     if (el('prev_store_address')) el('prev_store_address').textContent = storeAddr;
                     if (el('prev_store_phone')) el('prev_store_phone').textContent = storePhone;
+                    if (el('prev_store_bank')) el('prev_store_bank').textContent = storeBank;
                     if (el('prev_date')) el('prev_date').textContent = new Date().toLocaleString('id-ID');
 
                     // Items
@@ -379,7 +395,7 @@
                 };
 
                 // Update saat input lain berubah
-                ['store_name', 'store_address', 'store_phone', 'currency', 'discount_percent', 'tax_percent'].forEach((
+                ['store_name', 'store_address', 'store_phone', 'store_bank_account', 'currency', 'discount_percent', 'tax_percent'].forEach((
                     id) => {
                     const x = el(id);
                     if (x) x.addEventListener('input', updateReceiptPreviewHtml);

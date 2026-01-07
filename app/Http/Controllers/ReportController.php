@@ -41,6 +41,7 @@ class ReportController extends Controller
 
         $methods = collect([
             (object) ['value' => 'cash'],
+            (object) ['value' => 'cash_tempo'],
             (object) ['value' => 'qris'],
         ]);
         $statuses = collect([

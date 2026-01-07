@@ -57,6 +57,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/transaksi', [TransactionController::class, 'index'])->name('transaksi');
         Route::get('/transaksi-data', [TransactionController::class, 'data'])->name('transaksi.data');
         Route::get('/transaksi/{transaction}', [TransactionController::class, 'show'])->name('transaksi.show');
+        // POST route for marking cash-tampo transactions as paid
+        Route::post('/transaksi/{transaction}/lunas', [TransactionController::class, 'markAsPaid'])->name('transaksi.lunas');
 
         // Pembayaran
         Route::get('/pembayaran/{transaction}', [PaymentController::class, 'show'])->name('pembayaran.show');

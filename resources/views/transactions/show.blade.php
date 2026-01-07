@@ -27,7 +27,15 @@
                                     <div>{{ $trx->user->name ?? '-' }}</div>
                                 </div>
                                 <div class="mt-2"><span class="text-muted">Metode</span>
-                                    <div class="text-uppercase">{{ $trx->payment_method->value ?? $trx->payment_method }}
+                                    <div class="text-uppercase">
+                                        @php
+                                            $pm = $trx->payment_method->value ?? $trx->payment_method;
+                                            if ($pm === 'cash_tempo') {
+                                                echo 'TUNAI TEMPO';
+                                            } else {
+                                                echo strtoupper($pm);
+                                            }
+                                        @endphp
                                     </div>
                                 </div>
                             </div>
@@ -47,6 +55,11 @@
                                 <div class="mt-2"><span class="text-muted">Kembali</span>
                                     <div>@money($trx->change)</div>
                                 </div>
+                                @if((($trx->payment_method->value ?? $trx->payment_method) === 'cash_tempo') && $trx->amount_paid < $trx->total)
+                                    <div class="mt-2"><span class="text-muted">Piutang</span>
+                                        <div>@money($trx->total - $trx->amount_paid)</div>
+                                    </div>
+                                @endif
                             </div>
                         </div>
 
@@ -101,9 +114,59 @@
                                         class="bi bi-qr-code"></i> Lanjutkan QRIS</a>
                             @endif
                         </div>
+                        @php
+                            $pm = $trx->payment_method->value ?? $trx->payment_method;
+                        @endphp
+                        @if($pm === 'cash_tempo' && $trx->amount_paid < $trx->total)
+                            <section class="card shadow-sm mt-3">
+                                <div class="card-body">
+                                    <h5 class="h6">Bayar Sisa (Piutang)</h5>
+                                    <form action="{{ route('transaksi.lunas', $trx) }}" method="POST" class="row g-2">
+                                        @csrf
+                                        <div class="col-12 col-md-6">
+                                            <label for="paid_amount" class="form-label">Jumlah Bayar</label>
+                                            <input type="text" name="paid_amount" id="paid_amount" class="form-control" placeholder="Rp 0" required>
+                                        </div>
+                                        <div class="col-12 col-md-6 d-grid">
+                                            <button type="submit" class="btn btn-success">Tandai Lunas</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </section>
+                        @endif
                     </div>
                 </div>
             </div>
         </div>
     </section>
 @endsection
+
+@push('script')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const el = document.getElementById('paid_amount');
+        if (el) {
+            const fmt = (n) => Number(n || 0).toLocaleString('id-ID');
+            el.addEventListener('input', function() {
+                let digits = this.value.replace(/[^0-9]/g, '');
+                this.value = digits ? 'Rp ' + fmt(digits) : '';
+            });
+            
+            // Clean value before form submit
+            const form = el.closest('form');
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    // Strip "Rp " and dots before submitting
+                    let cleaned = el.value.replace(/[^0-9]/g, '');
+                    if (!cleaned) {
+                        e.preventDefault();
+                        alert('Jumlah bayar harus diisi');
+                        return false;
+                    }
+                    el.value = cleaned;
+                });
+            }
+        }
+    });
+</script>
+@endpush

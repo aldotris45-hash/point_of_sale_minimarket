@@ -20,6 +20,7 @@ class UpdateSettingsRequest extends FormRequest
             'tax_percent' => ['required', 'numeric', 'min:0', 'max:100'],
             'store_address' => ['nullable', 'string', 'max:255'],
             'store_phone' => ['nullable', 'string', 'max:30'],
+            'store_bank_account' => ['nullable', 'string', 'max:64'],
             'receipt_format' => ['nullable', 'string', 'max:100', 'regex:/^[-_A-Za-z0-9{}:]+$/', 'regex:/^(?=.*\{(YYYY|YY)\}|.*\{MM\}|.*\{DD\}|.*\{SEQ:\d+\}).*$/'],
             'store_logo' => ['nullable', 'image', 'max:2048'],
         ];
@@ -34,6 +35,7 @@ class UpdateSettingsRequest extends FormRequest
             'tax_percent' => 'Pajak (%)',
             'store_address' => 'Alamat Toko',
             'store_phone' => 'No. Telepon',
+            'store_bank_account' => 'No. Rekening',
             'receipt_format' => 'Format Struk',
             'store_logo' => 'Logo Toko',
         ];

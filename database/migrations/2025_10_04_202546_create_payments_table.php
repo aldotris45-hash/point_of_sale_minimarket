@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('payments', function (Blueprint $table) {
             $table->id();
             $table->foreignId('transaction_id')->constrained()->cascadeOnDelete();
-            $table->enum('method', [PaymentMethod::CASH->value, PaymentMethod::QRIS->value])
+            $table->enum('method', [PaymentMethod::CASH->value, PaymentMethod::QRIS->value, PaymentMethod::CASH_TEMPO->value])
                 ->default(PaymentMethod::QRIS->value)
                 ->index();
             $table->string('provider')->default('midtrans')->index();

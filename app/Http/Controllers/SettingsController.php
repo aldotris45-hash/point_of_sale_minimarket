@@ -33,6 +33,7 @@ class SettingsController extends Controller
             'tax_percent' => $this->settings->taxPercent(),
             'store_address' => $this->settings->storeAddress(),
             'store_phone' => $this->settings->storePhone(),
+            'store_bank_account' => $this->settings->storeBankAccount(),
             'receipt_format' => $this->settings->receiptNumberFormat(),
         ];
 
@@ -62,7 +63,10 @@ class SettingsController extends Controller
             $phone = ($validated['store_phone'][0] === '+') ? ('+' . $phone) : $phone;
         }
 
+        $bank = $validated['store_bank_account'] ?? '';
+
         $this->settings->set('store.phone', $phone, 'store', 'No. Telepon Toko');
+        $this->settings->set('store.bank_account', $bank, 'store', 'No. Rekening / Bank');
         $this->settings->set('pos.currency', strtoupper($validated['currency']), 'pos', 'Mata Uang');
         $this->settings->set('pos.discount_percent', (float) $validated['discount_percent'], 'pos', 'Diskon Global (%)');
         $this->settings->set('pos.tax_percent', (float) $validated['tax_percent'], 'pos', 'Pajak (%)');

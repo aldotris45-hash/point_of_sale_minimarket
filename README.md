@@ -6,7 +6,7 @@ Sistem kasir (POS) untuk toko sembako berbasis Laravel 12. Mendukung manajemen p
 
 - Autentikasi & peran: admin, kasir
 - Manajemen kategori & produk (datatables)
-- Kasir: scan/cari produk, hold/resume transaksi, cetak struk dengan format kustom
+- Kasir: scan/cari produk, hold/resume transaksi, cetak struk dengan format kustom; metode pembayaran tunai, QRIS dan tunai tempo (piutang) — termasuk filter utang/lunas dan kemampuan menandai pembayaran tempo sebagai lunas.
 - Pembayaran: integrasi Midtrans (Snap), webhook notifikasi
 - Laporan penjualan + unduh
 - Pengaturan toko (nama, alamat, telepon, mata uang, pajak, diskon, format struk, logo)
@@ -98,7 +98,8 @@ Jika lokal, jalankan tunneling (ngrok) dan set `NGROK_HTTP_8000` agar Midtrans b
 ## ⚙️ Pengaturan Aplikasi
 
 Halaman Pengaturan memungkinkan ubah:
-- Nama/Alamat/Telepon/Logo Toko
+- Nama, Alamat, No. Telepon, dan Logo Toko (ditampilkan di header & struk)
+- Nomor rekening / informasi bank untuk pembayaran tempo
 - Mata uang, Pajak (%), Diskon (%)
 - Format Nomor Struk (mis: `INV-{YYYY}{MM}{DD}-{SEQ:6}`)
 

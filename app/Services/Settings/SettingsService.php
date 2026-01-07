@@ -90,6 +90,12 @@ class SettingsService implements SettingsServiceInterface
         return is_string($val) ? $val : (string) ($val['value'] ?? '');
     }
 
+    public function storeBankAccount(): string
+    {
+        $val = $this->get('store.bank_account', '');
+        return is_string($val) ? $val : (string) ($val['value'] ?? '');
+    }
+
     public function storeLogoPath(): ?string
     {
         $val = $this->get('store.logo_path', null);

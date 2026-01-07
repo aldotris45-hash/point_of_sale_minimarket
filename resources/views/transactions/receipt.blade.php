@@ -79,6 +79,9 @@
             @if ($store_phone)
                 <div class="muted">{{ $store_phone }}</div>
             @endif
+            @if ($store_bank_account)
+                <div class="muted">Rek: {{ $store_bank_account }}</div>
+            @endif
         </div>
         <div class="hr"></div>
         <div class="d-flex flex-column" style="font-size:12px;">
@@ -124,12 +127,23 @@
         <div class="hr"></div>
         <div class="small">
             <div class="d-flex justify-content-between">
-                <span>Metode</span><span>{{ strtoupper($transaction->payment_method->value ?? (string) $transaction->payment_method) }}</span>
+                <span>Metode</span><span>@php
+                    $m = $transaction->payment_method->value ?? (string) $transaction->payment_method;
+                    echo $m === 'cash_tempo' ? 'TUNAI TEMPO' : strtoupper($m);
+                @endphp</span>
             </div>
             <div class="d-flex justify-content-between">
                 <span>Bayar</span><span>{{ $fmt($transaction->amount_paid) }}</span></div>
             <div class="d-flex justify-content-between">
                 <span>Kembali</span><span>{{ $fmt($transaction->change) }}</span></div>
+            @if(($transaction->payment_method->value ?? (string) $transaction->payment_method) === 'cash_tempo' && $transaction->amount_paid < $transaction->total)
+                <div class="d-flex justify-content-between">
+                    <span>Piutang</span><span>{{ $fmt($transaction->total - $transaction->amount_paid) }}</span></div>
+            @endif
+            @if(($transaction->payment_method->value ?? (string) $transaction->payment_method) === 'cash_tempo' && $store_bank_account)
+                <div class="hr"></div>
+                <div class="muted">Silakan transfer ke rekening di atas untuk pelunasan.</div>
+            @endif
         </div>
         <div class="hr"></div>
         <div class="text-center muted">Simpan struk sebagai bukti pembelian</div>

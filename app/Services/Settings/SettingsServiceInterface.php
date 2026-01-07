@@ -16,6 +16,7 @@ interface SettingsServiceInterface
     public function storeName(): string;
     public function storeAddress(): string;
     public function storePhone(): string;
+    public function storeBankAccount(): string;
     public function storeLogoPath(): ?string;
     public function receiptNumberFormat(): string;
 }

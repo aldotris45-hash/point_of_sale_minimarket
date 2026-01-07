@@ -62,6 +62,7 @@ class AppServiceProvider extends ServiceProvider
             View::share('appTaxPercent', $settings->taxPercent());
             View::share('appStoreAddress', $settings->storeAddress());
             View::share('appStorePhone', $settings->storePhone());
+            View::share('appStoreBankAccount', $settings->storeBankAccount());
             View::share('appStoreLogoPath', $settings->storeLogoPath());
             View::share('appReceiptFormat', $settings->receiptNumberFormat());
         } catch (\Throwable $e) {
@@ -72,6 +73,7 @@ class AppServiceProvider extends ServiceProvider
             View::share('appTaxPercent', 0.0);
             View::share('appStoreAddress', '');
             View::share('appStorePhone', '');
+            View::share('appStoreBankAccount', '');
             View::share('appStoreLogoPath', null);
             View::share('appReceiptFormat', 'INV-{YYYY}{MM}{DD}-{SEQ:6}');
         }

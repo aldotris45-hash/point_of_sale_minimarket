@@ -64,24 +64,44 @@ class CashierService implements CashierServiceInterface
             $taxAmount = $afterDiscount * ($taxPercent / 100);
             $total = $afterDiscount + $taxAmount;
 
-            if ($method === PaymentMethod::CASH && $paidAmount < $total) {
-                throw new InvalidArgumentException('Nominal bayar kurang dari total.');
-            }
+            // for normal cash we must have paid >= total; tempo and qris can be less
+        if ($method === PaymentMethod::CASH && $paidAmount < $total) {
+            throw new InvalidArgumentException('Nominal bayar kurang dari total.');
+        }
 
-            $trx = Transaction::create([
-                'user_id' => Auth::id(),
-                'invoice_number' => 'TEMP',
-                'note' => $note,
-                'suspended_from_id' => $suspendedFromId,
-                'subtotal' => $subtotal,
-                'discount' => $discountAmount,
-                'tax' => $taxAmount,
-                'total' => $total,
-                'amount_paid' => $method === PaymentMethod::CASH ? $paidAmount : 0,
-                'change' => $method === PaymentMethod::CASH ? max(0, $paidAmount - $total) : 0,
-                'payment_method' => $method,
-                'status' => $method === PaymentMethod::CASH ? TransactionStatus::PAID : TransactionStatus::PENDING,
-            ]);
+        // determine fields that differ depending on method
+        $amountPaid = 0.0;
+        $change = 0.0;
+        $status = TransactionStatus::PENDING;
+
+        if ($method === PaymentMethod::CASH) {
+            $amountPaid = $paidAmount;
+            $change = max(0, $paidAmount - $total);
+            $status = TransactionStatus::PAID;
+        } elseif ($method === PaymentMethod::CASH_TEMPO) {
+            // customer will settle later; record whatever was paid (could be 0 or a partial amount)
+            $amountPaid = $paidAmount;
+            $change = max(0, $paidAmount - $total);
+            $status = $paidAmount >= $total ? TransactionStatus::PAID : TransactionStatus::PENDING;
+        } else {
+            // QRIS or any other non-cash
+            $status = TransactionStatus::PENDING;
+        }
+
+        $trx = Transaction::create([
+            'user_id' => Auth::id(),
+            'invoice_number' => 'TEMP',
+            'note' => $note,
+            'suspended_from_id' => $suspendedFromId,
+            'subtotal' => $subtotal,
+            'discount' => $discountAmount,
+            'tax' => $taxAmount,
+            'total' => $total,
+            'amount_paid' => $amountPaid,
+            'change' => $change,
+            'payment_method' => $method,
+            'status' => $status,
+        ]);
 
             $format = $this->settings->receiptNumberFormat();
             $invoice = $this->generateInvoiceNumber($trx->id, $format);
@@ -112,7 +132,7 @@ class CashierService implements CashierServiceInterface
                 $this->midtrans->createSnapTransaction($trx);
             }
 
-            if ($suspendedFromId && $method === PaymentMethod::CASH) {
+            if ($suspendedFromId && in_array($method, [PaymentMethod::CASH, PaymentMethod::CASH_TEMPO], true)) {
                 $original = Transaction::where('id', $suspendedFromId)
                     ->where('status', TransactionStatus::SUSPENDED)
                     ->first();

@@ -36,6 +36,14 @@
                     </select>
                 </div>
                 <div class="col-6 col-md-2">
+                    <label class="form-label">Piutang</label>
+                    <select class="form-select" name="due">
+                        <option value=""{{ empty($due) ? ' selected' : '' }}>Semua</option>
+                        <option value="utang"{{ ($due === 'utang') ? ' selected' : '' }}>Belum Lunas</option>
+                        <option value="lunas"{{ ($due === 'lunas') ? ' selected' : '' }}>Sudah Lunas</option>
+                    </select>
+                </div>
+                <div class="col-6 col-md-2">
                     <label class="form-label">Dari</label>
                     <input type="date" class="form-control" name="from" value="{{ $from }}">
                 </div>
@@ -70,6 +78,7 @@
                             <th>Tanggal</th>
                             <th>Kasir</th>
                             <th>Metode</th>
+                            <th>Piutang</th>
                             <th>Status</th>
                             <th class="text-end">Total</th>
                             <th class="text-end" style="width:120px;">Aksi</th>
@@ -131,6 +140,12 @@
                     {
                         data: 'method',
                         name: 'payment_method'
+                    },
+                    {
+                        data: 'due_badge',
+                        name: 'due',
+                        orderable: false,
+                        searchable: false
                     },
                     {
                         data: 'status_badge',

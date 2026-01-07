@@ -19,6 +19,7 @@ class TransactionController extends Controller
         $q = trim((string) $request->query('q', ''));
         $status = $request->query('status');
         $method = $request->query('method');
+        $due = $request->query('due');
         $cashier = $request->query('cashier');
         $from = $request->query('from');
         $to = $request->query('to');
@@ -29,6 +30,7 @@ class TransactionController extends Controller
             'q' => $q,
             'status' => $status,
             'method' => $method,
+            'due' => $due,
             'cashier' => $cashier,
             'from' => $from,
             'to' => $to,
@@ -43,6 +45,7 @@ class TransactionController extends Controller
         $q = trim((string) $request->input('q', ''));
         $status = $request->input('status');
         $method = $request->input('method');
+        $due = $request->input('due');
         $cashier = $request->input('cashier');
         $from = $request->input('from');
         $to = $request->input('to');
@@ -61,6 +64,14 @@ class TransactionController extends Controller
             })
             ->when($method && in_array($method, array_column(PaymentMethod::cases(), 'value'), true), function ($w) use ($method) {
                 $w->where('payment_method', $method);
+            })
+            ->when($due === 'utang', function ($w) {
+                $w->where('payment_method', PaymentMethod::CASH_TEMPO->value)
+                  ->whereColumn('amount_paid', '<', 'total');
+            })
+            ->when($due === 'lunas', function ($w) {
+                $w->where('payment_method', PaymentMethod::CASH_TEMPO->value)
+                  ->whereColumn('amount_paid', '>=', 'total');
             })
             ->when($cashier && ctype_digit((string) $cashier), function ($w) use ($cashier) {
                 $w->where('user_id', (int) $cashier);
@@ -88,7 +99,21 @@ class TransactionController extends Controller
             })
             ->addColumn('method', function (Transaction $t) {
                 $m = is_string($t->payment_method) ? $t->payment_method : ($t->payment_method?->value ?? '');
+                // humanize special code
+                if ($m === 'cash_tempo') {
+                    return 'TUNAI TEMPO';
+                }
                 return strtoupper($m);
+            })
+            ->addColumn('due_badge', function (Transaction $t) {
+                $m = is_string($t->payment_method) ? $t->payment_method : ($t->payment_method?->value ?? '');
+                if ($m === 'cash_tempo') {
+                    if ($t->amount_paid < $t->total) {
+                        return '<span class="badge bg-danger">UTANG</span>';
+                    }
+                    return '<span class="badge bg-success">LUNAS</span>';
+                }
+                return '';
             })
             ->addColumn('status_badge', function (Transaction $t) {
                 $s = is_string($t->status) ? $t->status : ($t->status?->value ?? '');
@@ -119,6 +144,35 @@ class TransactionController extends Controller
         ]);
     }
 
+    /**
+     * Mark a cash_tempo transaction as paid (accepts additional amount).
+     */
+    public function markAsPaid(Transaction $transaction)
+    {
+        if (($transaction->payment_method?->value ?? $transaction->payment_method) !== PaymentMethod::CASH_TEMPO->value) {
+            abort(400, 'Hanya transaksi tunai tempo yang bisa dilunasi di sini.');
+        }
+
+        if ($transaction->amount_paid >= $transaction->total) {
+            return back()->with('error', 'Transaksi sudah lunas.');
+        }
+
+        $data = request()->validate([
+            'paid_amount' => ['required','numeric','min:0'],
+        ]);
+
+        $paid = (float) $data['paid_amount'];
+        $transaction->amount_paid += $paid;
+        $transaction->change = max(0, $transaction->amount_paid - $transaction->total);
+        if ($transaction->amount_paid >= $transaction->total) {
+            $transaction->status = TransactionStatus::PAID;
+        }
+        $transaction->save();
+
+        return back()->with('success', 'Pembayaran dicatat.' .
+            ($transaction->change > 0 ? ' Kembalian: ' . number_format($transaction->change, 0, ',', '.') : '') );
+    }
+
     public function receipt(Transaction $transaction): View
     {
         $transaction->loadMissing(['details.product', 'user']);
@@ -128,6 +182,7 @@ class TransactionController extends Controller
             'store_name'     => $this->settings->storeName(),
             'store_address'  => $this->settings->storeAddress(),
             'store_phone'    => $this->settings->storePhone(),
+            'store_bank_account' => $this->settings->storeBankAccount(),
             'store_logo'     => $this->settings->storeLogoPath(),
             'currency'       => $this->settings->currency(),
             'discount_percent' => $this->settings->discountPercent(),

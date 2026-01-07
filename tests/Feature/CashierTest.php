@@ -115,9 +115,9 @@ class CashierTest extends TestCase
         $res = $this->post(route('kasir.checkout'), $payload);
         $res->assertRedirect(route('kasir'));
 
-        $userId = User::query()->latest('id')->value('id'); // fallback, but we can use currently authenticated
         $this->assertDatabaseHas('transactions', [
             'status' => TransactionStatus::PAID->value,
+            'payment_method' => 'cash',
         ]);
 
         $p->refresh();
@@ -136,5 +136,97 @@ class CashierTest extends TestCase
         // Fails validation (items required|min:1)
         $res->assertRedirect(route('kasir'));
         $res->assertSessionHasErrors('items');
+    }
+
+    public function test_checkout_cash_tempo_allows_zero_and_creates_pending(): void
+    {
+        $this->actingAsCashier();
+        $p = Product::factory()->create(['price' => 50.00, 'stock' => 5]);
+
+        $payload = [
+            'items' => [['product_id' => $p->id, 'qty' => 1]],
+            'payment_method' => 'cash_tempo',
+            'paid_amount' => 0,
+        ];
+
+        $res = $this->post(route('kasir.checkout'), $payload);
+        $res->assertRedirect(route('kasir'));
+
+        $this->assertDatabaseHas('transactions', [
+            'payment_method' => 'cash_tempo',
+            'status' => TransactionStatus::PENDING->value,
+            'amount_paid' => 0,
+        ]);
+
+        $p->refresh();
+        $this->assertEquals(4, $p->stock);
+    }
+
+    public function test_mark_cash_tempo_transaction_as_paid(): void
+    {
+        $this->actingAsCashier();
+        $trx = Transaction::create([
+            'user_id' => User::query()->first()->id ?? 1,
+            'invoice_number' => 'TEMP',
+            'subtotal' => 100,
+            'discount' => 0,
+            'tax' => 0,
+            'total' => 100,
+            'amount_paid' => 0,
+            'change' => 0,
+            'payment_method' => 'cash_tempo',
+            'status' => TransactionStatus::PENDING->value,
+        ]);
+        $trx->invoice_number = 'INV-' . $trx->id;
+        $trx->save();
+        $res = $this->post(route('transaksi.lunas', $trx), ['paid_amount' => 100]);
+        $res->assertRedirect();
+        $this->assertDatabaseHas('transactions', [
+            'id' => $trx->id,
+            'status' => TransactionStatus::PAID->value,
+            'amount_paid' => 100,
+        ]);
+    }
+
+    public function test_filter_due_and_lunas_in_transaction_data(): void
+    {
+        $this->actingAsCashier();
+        // unpaid tempo
+        $u = Transaction::create([
+            'user_id' => User::query()->first()->id ?? 1,
+            'invoice_number' => 'U1',
+            'subtotal' => 200,
+            'discount' => 0,
+            'tax' => 0,
+            'total' => 200,
+            'amount_paid' => 0,
+            'change' => 0,
+            'payment_method' => 'cash_tempo',
+            'status' => TransactionStatus::PENDING->value,
+        ]);
+        $l = Transaction::create([
+            'user_id' => User::query()->first()->id ?? 1,
+            'invoice_number' => 'L1',
+            'subtotal' => 200,
+            'discount' => 0,
+            'tax' => 0,
+            'total' => 200,
+            'amount_paid' => 200,
+            'change' => 0,
+            'payment_method' => 'cash_tempo',
+            'status' => TransactionStatus::PAID->value,
+        ]);
+
+        $res1 = $this->getJson(route('transaksi.data', ['due' => 'utang']));
+        $res1->assertOk();
+        $data1 = $res1->json('data');
+        $this->assertCount(1, $data1);
+        $this->assertStringContainsString($u->invoice_number, $data1[0]['invoice']);
+
+        $res2 = $this->getJson(route('transaksi.data', ['due' => 'lunas']));
+        $res2->assertOk();
+        $data2 = $res2->json('data');
+        $this->assertCount(1, $data2);
+        $this->assertStringContainsString($l->invoice_number, $data2[0]['invoice']);
     }
 }

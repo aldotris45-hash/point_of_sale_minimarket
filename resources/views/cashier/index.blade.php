@@ -149,6 +149,8 @@
                                 <div class="d-flex gap-2">
                                     <button type="button" class="btn btn-outline-primary active" data-method="cash"><i
                                             class="bi bi-cash"></i> Tunai</button>
+                                    <button type="button" class="btn btn-outline-warning" data-method="cash_tempo"><i
+                                            class="bi bi-clock-history"></i> Tempo</button>
                                     <button type="button" class="btn btn-outline-secondary" data-method="qris"><i
                                             class="bi bi-qr-code"></i> QRIS</button>
                                 </div>
@@ -703,7 +705,15 @@
                 const method = $(this).data('method');
                 $('#payment_method').val(method);
                 const isCash = method === 'cash';
-                $('#cashSection').toggle(isCash);
+                const isTempo = method === 'cash_tempo';
+                $('#cashSection').toggle(isCash || isTempo);
+                // update label for optional deposit when tempo
+                const $paidLabel = $('label[for="paid_amount"]');
+                if (isTempo) {
+                    $paidLabel.text('Jumlah Bayar (opsional) ({{ $currency }})');
+                } else {
+                    $paidLabel.text('Jumlah Bayar ({{ $currency }})');
+                }
                 updatePaidState();
             });
 
@@ -738,8 +748,8 @@
                 const paidInt = parseMoneyToInt($paidAmount.val());
                 $paidAmount.val(String(paidInt));
 
-                // Cash: submit normal
-                if (method === 'cash') {
+                // Cash or tempo: normal form submit
+                if (method === 'cash' || method === 'cash_tempo') {
                     HTMLFormElement.prototype.submit.call(this);
                     return false;
                 }

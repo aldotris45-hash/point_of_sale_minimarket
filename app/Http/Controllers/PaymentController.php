@@ -86,6 +86,9 @@ class PaymentController extends Controller
             })
             ->addColumn('method_text', function (Payment $p) {
                 $m = is_string($p->method) ? $p->method : ($p->method?->value ?? '');
+                if ($m === 'cash_tempo') {
+                    return 'TUNAI TEMPO';
+                }
                 return strtoupper($m);
             })
             ->addColumn('status_badge', function (Payment $p) {

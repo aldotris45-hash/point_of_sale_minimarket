@@ -27,7 +27,8 @@ return new class extends Migration
             $table->decimal('change', 12, 2)->default(0);
             $table->enum('payment_method', [
                 PaymentMethod::CASH->value,
-                PaymentMethod::QRIS->value
+                PaymentMethod::QRIS->value,
+                PaymentMethod::CASH_TEMPO->value
             ])->default(PaymentMethod::CASH->value);
             $table->enum('status', [
                 TransactionStatus::PENDING->value,
