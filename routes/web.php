@@ -5,6 +5,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProductPriceController;
+use App\Http\Controllers\ExpenseController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\CashierController;
@@ -90,6 +92,17 @@ Route::middleware('auth')->group(function () {
             ->except(['show']);
         Route::get('/produk-data', [ProductController::class, 'data'])->name('produk.data');
 
+        // Harga Produk (Fluktuatif)
+        Route::get('/harga-produk', [ProductPriceController::class, 'index'])->name('harga-produk.index');
+        Route::get('/harga-produk-data', [ProductPriceController::class, 'data'])->name('harga-produk.data');
+        Route::get('/harga-produk/create', [ProductPriceController::class, 'create'])->name('harga-produk.create');
+        Route::post('/harga-produk', [ProductPriceController::class, 'store'])->name('harga-produk.store');
+        Route::get('/harga-produk/{productPrice}/edit', [ProductPriceController::class, 'edit'])->name('harga-produk.edit');
+        Route::put('/harga-produk/{productPrice}', [ProductPriceController::class, 'update'])->name('harga-produk.update');
+        Route::delete('/harga-produk/{productPrice}', [ProductPriceController::class, 'destroy'])->name('harga-produk.destroy');
+        Route::get('/harga-produk/riwayat/{product}', [ProductPriceController::class, 'history'])->name('harga-produk.history');
+        Route::get('/harga-produk/riwayat-data/{product}', [ProductPriceController::class, 'historyData'])->name('harga-produk.history-data');
+
         // Pengguna
         Route::resource('pengguna', UserController::class)
             ->parameters(['pengguna' => 'user'])
@@ -105,5 +118,14 @@ Route::middleware('auth')->group(function () {
         // Log Aktivitas
         Route::get('/log-aktivitas', [ActivityLogController::class, 'index'])->name('log-aktivitas');
         Route::get('/log-aktivitas-data', [ActivityLogController::class, 'data'])->name('log-aktivitas.data');
+
+        // Pengeluaran
+        Route::get('/pengeluaran', [ExpenseController::class, 'index'])->name('pengeluaran.index');
+        Route::get('/pengeluaran-data', [ExpenseController::class, 'data'])->name('pengeluaran.data');
+        Route::get('/pengeluaran/create', [ExpenseController::class, 'create'])->name('pengeluaran.create');
+        Route::post('/pengeluaran', [ExpenseController::class, 'store'])->name('pengeluaran.store');
+        Route::get('/pengeluaran/{expense}/edit', [ExpenseController::class, 'edit'])->name('pengeluaran.edit');
+        Route::put('/pengeluaran/{expense}', [ExpenseController::class, 'update'])->name('pengeluaran.update');
+        Route::delete('/pengeluaran/{expense}', [ExpenseController::class, 'destroy'])->name('pengeluaran.destroy');
     });
 });
