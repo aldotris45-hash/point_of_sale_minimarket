@@ -7,7 +7,7 @@
     <title>{{ $appStoreName ?? config('app.name', 'POS') }} - @yield('title', 'Dashboard')</title>
     <meta name="description" content="" />
     <meta name="author" content="Mariani Krismonika" />
-    <link rel="icon" type="image/webp" href="{{ asset('assets/images/logo.webp') }}" />
+    <link rel="icon" type="image/png" href="{{ asset('assets/images/logo_trijaya.png') }}" />
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     {{-- Google Fonts --}}

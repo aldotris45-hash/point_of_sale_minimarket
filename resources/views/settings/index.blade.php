@@ -179,7 +179,7 @@
                             style="max-width: 320px;">
                             <div class="text-center">
                                 <img id="prev_logo"
-                                    src="{{ $appStoreLogoPath ? asset($appStoreLogoPath) : asset('assets/images/logo.webp') }}"
+                                    src="{{ $appStoreLogoPath ? asset($appStoreLogoPath) : asset('assets/images/logo_trijaya.png') }}"
                                     alt="Logo" width="48" height="48" class="mb-2" />
                                 <div id="prev_store_name" class="fw-bold">{{ $store_name ?? $appStoreName }}</div>
                                 <div id="prev_store_address" class="muted">{{ $store_address ?? $appStoreAddress }}
