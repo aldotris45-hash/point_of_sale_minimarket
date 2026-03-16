@@ -127,5 +127,11 @@ Route::middleware('auth')->group(function () {
         Route::get('/pengeluaran/{expense}/edit', [ExpenseController::class, 'edit'])->name('pengeluaran.edit');
         Route::put('/pengeluaran/{expense}', [ExpenseController::class, 'update'])->name('pengeluaran.update');
         Route::delete('/pengeluaran/{expense}', [ExpenseController::class, 'destroy'])->name('pengeluaran.destroy');
+
+// Kas
+    Route::get('/kas', [App\Http\Controllers\KasController::class, 'index'])->name('kas.index');
+    Route::post('/kas/topup', [App\Http\Controllers\KasController::class, 'topup'])->name('kas.topup');
+    Route::post('/kas/expense', [App\Http\Controllers\KasController::class, 'expense'])->name('kas.expense');
+    Route::delete('/kas/{kas}', [App\Http\Controllers\KasController::class, 'destroy'])->name('kas.destroy');
     });
 });

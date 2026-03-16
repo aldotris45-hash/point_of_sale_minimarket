@@ -11,7 +11,7 @@
         </button>
 
         <a class="navbar-brand d-flex align-items-center gap-2" href="{{ url('/') }}">
-            <img src="{{ $appStoreLogoPath ? asset($appStoreLogoPath) : asset('assets/images/logo.webp') }}"
+            <img src="{{ asset('assets/images/logo_kasir.png') }}"
                 alt="Logo" width="32" height="32" />
             <span class="fw-semibold">{{ $appStoreName ?? config('app.name', 'POS') }}</span>
         </a>

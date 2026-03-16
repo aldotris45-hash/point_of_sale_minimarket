@@ -3,7 +3,7 @@
         <div class="row g-3 align-items-center justify-content-between text-center text-md-start">
             <div
                 class="col-12 col-md-auto d-flex align-items-center justify-content-center justify-content-md-start gap-2">
-                <img src="{{ $appStoreLogoPath ? asset($appStoreLogoPath) : asset('assets/images/logo.webp') }}"
+                <img src="{{ asset('assets/images/logo_kasir.png') }}"
                     alt="Logo" width="24" height="24" class="border rounded bg-white p-1" />
                 <span class="text-truncate" style="max-width: 60vw">
                     &copy; {{ date('Y') }} {{ $appStoreName ?? config('app.name', 'POS') }}

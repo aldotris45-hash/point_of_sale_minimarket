@@ -19,9 +19,7 @@ return new class extends Migration
             $table->date('price_date')->index(); // Tanggal berlaku
             $table->text('notes')->nullable(); // Catatan harga
             $table->timestamps();
-            
             $table->unique(['product_id', 'price_date']);
-            $table->index('price_date');
         });
     }
 

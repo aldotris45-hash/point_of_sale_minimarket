@@ -69,9 +69,7 @@
 <body>
     <div class="receipt">
         <div class="text-center">
-            @if ($store_logo)
-                <img src="{{ asset($store_logo) }}" alt="Logo" width="48" height="48" class="mb-2" />
-            @endif
+            <img src="{{ asset('assets/images/logo_kasir.png') }}" alt="Logo" width="48" height="48" class="mb-2" />
             <div class="fw-bold">{{ $store_name }}</div>
             @if ($store_address)
                 <div class="muted">{{ $store_address }}</div>

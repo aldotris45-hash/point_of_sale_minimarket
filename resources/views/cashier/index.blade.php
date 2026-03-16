@@ -3,7 +3,7 @@
 @section('title', 'Kasir')
 
 @section('content')
-    <section class="container-fluid py-4">
+    <section class="container-fluid py-3 py-md-4">
         <header class="d-flex flex-wrap gap-2 justify-content-between align-items-center mb-3">
             <div>
                 <h1 class="h3 d-flex align-items-center gap-2 mb-1">
@@ -61,7 +61,7 @@
                     <div class="card-body">
                         <form id="productSearchForm" class="row g-2" role="search" aria-label="Pencarian produk"
                             onsubmit="return false;">
-                            <div class="col-12 col-md-8">
+                            <div class="col-12">
                                 <label for="q" class="visually-hidden">Cari produk</label>
                                 <div class="w-100 position-relative" id="searchDropdown">
                                     <div class="input-group">
@@ -77,7 +77,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-12 col-md-4 d-grid">
+                            <div class="col-12 d-grid">
                                 <button id="btnSearch" type="button" class="btn btn-outline-secondary">
                                     <i class="bi bi-search"></i> Cari
                                 </button>
@@ -88,7 +88,7 @@
 
                         <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center mt-3">
                             <div class="fw-semibold">Keranjang</div>
-                            <div class="d-flex gap-2">
+                            <div class="d-flex gap-2 flex-wrap">
                                 <button type="button" class="btn btn-sm btn-outline-secondary" id="btnShowHolds">
                                     <i class="bi bi-inboxes"></i> Tertunda
                                 </button>
@@ -146,7 +146,7 @@
 
                             <fieldset class="mb-3">
                                 <label class="form-label">Metode Pembayaran</label>
-                                <div class="d-flex gap-2">
+                                <div class="d-flex gap-2 flex-wrap">
                                     <button type="button" class="btn btn-outline-primary active" data-method="cash"><i
                                             class="bi bi-cash"></i> Tunai</button>
                                     <button type="button" class="btn btn-outline-warning" data-method="cash_tempo"><i
@@ -171,7 +171,7 @@
                             <input type="hidden" name="suspended_from_id" id="suspended_from_id" />
 
                             <div class="d-grid">
-                                <button type="submit" class="btn btn-success btn-lg" id="btnCheckout" disabled>
+                                <button type="submit" class="btn btn-success btn-lg btn-block" id="btnCheckout" disabled>
                                     <i class="bi bi-check2-circle"></i> Proses Pembayaran
                                 </button>
                             </div>
@@ -836,4 +836,53 @@
             @endif
         })();
     </script>
+
+    @push('css')
+        <style>
+            /* Optimasi Mobile */
+            @media (max-width: 991px) {
+                .card-body {
+                    padding: 1rem;
+                }
+                
+                .table-responsive {
+                    font-size: 0.875rem;
+                }
+                
+                .input-group input {
+                    font-size: 0.875rem;
+                }
+                
+                .btn-sm {
+                    font-size: 0.875rem;
+                    padding: 0.25rem 0.5rem;
+                }
+                
+                .btn-lg {
+                    font-size: 1rem;
+                    padding: 0.5rem 1rem;
+                }
+                
+                .table th, .table td {
+                    padding: 0.5rem;
+                }
+                
+                .table th {
+                    font-size: 0.75rem;
+                }
+                
+                .table td {
+                    font-size: 0.875rem;
+                }
+                
+                .input-group input[type="number"] {
+                    width: 60px;
+                }
+                
+                .btn-group .btn {
+                    margin-bottom: 0.25rem;
+                }
+            }
+        </style>
+    @endpush
 @endpush
