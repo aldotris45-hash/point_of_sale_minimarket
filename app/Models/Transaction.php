@@ -16,6 +16,7 @@ class Transaction extends Model
 
     protected $fillable = [
         'user_id',
+        'customer_id',
         'invoice_number',
         'note',
         'suspended_from_id',
@@ -58,6 +59,11 @@ class Transaction extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function customer(): BelongsTo
+    {
+        return $this->belongsTo(Customer::class);
     }
 
     public function suspendedFrom(): BelongsTo

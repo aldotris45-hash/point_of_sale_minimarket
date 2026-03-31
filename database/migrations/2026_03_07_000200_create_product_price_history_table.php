@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('product_price_history', function (Blueprint $table) {
+        Schema::create('product_price_histories', function (Blueprint $table) {
             $table->id();
             $table->foreignId('product_id')->constrained()->cascadeOnDelete();
             $table->decimal('selling_price', 12, 2); // Harga jual
@@ -27,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('product_price_history');
+        Schema::dropIfExists('product_price_histories');
     }
 };

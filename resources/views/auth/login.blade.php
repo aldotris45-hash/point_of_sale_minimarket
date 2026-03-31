@@ -49,7 +49,7 @@
             <div class="card-body p-4 p-md-4">
                 <header class="mb-3 text-center">
                     <div class="brand">
-                        <img src="{{ asset('assets/images/logo_trijaya.png') }}" alt="Logo" width="56" height="56"
+                        <img src="{{ asset('assets/images/logo.png') }}" alt="Logo" width="56" height="56"
                             class="rounded-circle">
                     </div>
                     <div class="text-center">

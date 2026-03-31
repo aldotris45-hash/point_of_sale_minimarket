@@ -16,6 +16,10 @@ use App\Http\Controllers\MidtransController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\TransactionController;
+use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\IncomingGoodController;
+use App\Http\Controllers\StockOpnameController;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 
 // Login
@@ -56,11 +60,16 @@ Route::middleware('auth')->group(function () {
 
         // Transaksi
         Route::get('/transaksi/{transaction}/struk', [TransactionController::class, 'receipt'])->name('transaksi.struk');
+        Route::get('/transaksi/{transaction}/invoice', [TransactionController::class, 'printInvoice'])->name('transaksi.invoice');
+        Route::get('/transaksi/{transaction}/faktur', [TransactionController::class, 'printFaktur'])->name('transaksi.faktur');
         Route::get('/transaksi', [TransactionController::class, 'index'])->name('transaksi');
         Route::get('/transaksi-data', [TransactionController::class, 'data'])->name('transaksi.data');
         Route::get('/transaksi/{transaction}', [TransactionController::class, 'show'])->name('transaksi.show');
         // POST route for marking cash-tampo transactions as paid
         Route::post('/transaksi/{transaction}/lunas', [TransactionController::class, 'markAsPaid'])->name('transaksi.lunas');
+
+        // Delete transaction (admin only, guarded in controller)
+        Route::delete('/transaksi/{transaction}', [TransactionController::class, 'destroy'])->name('transaksi.destroy');
 
         // Pembayaran
         Route::get('/pembayaran/{transaction}', [PaymentController::class, 'show'])->name('pembayaran.show');
@@ -77,6 +86,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/laporan', [ReportController::class, 'index'])->name('laporan');
         Route::get('/laporan-data', [ReportController::class, 'data'])->name('laporan.data');
         Route::get('/laporan/unduh', [ReportController::class, 'download'])->name('laporan.unduh');
+        Route::get('/laporan/cetak-transaksi', [ReportController::class, 'printTransactions'])->name('laporan.cetak-transaksi');
 
         // Kategori
         Route::resource('kategori', CategoryController::class)
@@ -127,5 +137,34 @@ Route::middleware('auth')->group(function () {
         Route::get('/pengeluaran/{expense}/edit', [ExpenseController::class, 'edit'])->name('pengeluaran.edit');
         Route::put('/pengeluaran/{expense}', [ExpenseController::class, 'update'])->name('pengeluaran.update');
         Route::delete('/pengeluaran/{expense}', [ExpenseController::class, 'destroy'])->name('pengeluaran.destroy');
+
+        // Supplier
+        Route::resource('supplier', SupplierController::class)
+            ->parameters(['supplier' => 'supplier'])
+            ->names('supplier')
+            ->except(['show']);
+        Route::get('/supplier-data', [SupplierController::class, 'data'])->name('supplier.data');
+
+        // Pelanggan
+        Route::resource('pelanggan', CustomerController::class)
+            ->parameters(['pelanggan' => 'customer'])
+            ->names('pelanggan')
+            ->except(['show']);
+        Route::get('/pelanggan-data', [CustomerController::class, 'data'])->name('pelanggan.data');
+
+        // Barang Masuk
+        Route::get('/barang-masuk', [IncomingGoodController::class, 'index'])->name('barang-masuk.index');
+        Route::get('/barang-masuk-data', [IncomingGoodController::class, 'data'])->name('barang-masuk.data');
+        Route::get('/barang-masuk/create', [IncomingGoodController::class, 'create'])->name('barang-masuk.create');
+        Route::post('/barang-masuk', [IncomingGoodController::class, 'store'])->name('barang-masuk.store');
+        Route::delete('/barang-masuk/{incomingGood}', [IncomingGoodController::class, 'destroy'])->name('barang-masuk.destroy');
+
+        // Stok Opname
+        Route::get('/stok-opname', [StockOpnameController::class, 'index'])->name('stok-opname.index');
+        Route::get('/stok-opname-data', [StockOpnameController::class, 'data'])->name('stok-opname.data');
+        Route::get('/stok-opname/create', [StockOpnameController::class, 'create'])->name('stok-opname.create');
+        Route::post('/stok-opname', [StockOpnameController::class, 'store'])->name('stok-opname.store');
+        Route::delete('/stok-opname/{stockOpname}', [StockOpnameController::class, 'destroy'])->name('stok-opname.destroy');
+        Route::get('/stok-opname/product-stock/{product}', [StockOpnameController::class, 'getProductStock'])->name('stok-opname.product-stock');
     });
 });

@@ -11,6 +11,18 @@
                     Kembali</a>
                 <a class="btn btn-primary" href="{{ route('transaksi.struk', $trx) }}" target="_blank"
                     rel="noopener noreferrer"><i class="bi bi-printer"></i> Cetak Struk</a>
+                <a class="btn btn-info text-white" href="{{ route('transaksi.invoice', $trx) }}" target="_blank"
+                    rel="noopener noreferrer"><i class="bi bi-file-earmark-text"></i> Cetak Invoice</a>
+                <a class="btn btn-success" href="{{ route('transaksi.faktur', $trx) }}" target="_blank"
+                    rel="noopener noreferrer"><i class="bi bi-receipt"></i> Cetak Faktur</a>
+                @if(auth()->user()->role === \App\Enums\RoleStatus::ADMIN->value)
+                    <form action="{{ route('transaksi.destroy', $trx) }}" method="POST" class="d-inline"
+                        onsubmit="return confirm('Yakin hapus transaksi {{ $trx->invoice_number }}? Stok produk akan dikembalikan.')">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" class="btn btn-danger"><i class="bi bi-trash"></i> Hapus Transaksi</button>
+                    </form>
+                @endif
             </div>
         </div>
 
@@ -109,6 +121,10 @@
                             <a class="btn btn-outline-secondary" href="{{ route('transaksi.struk', $trx) }}"
                                 target="_blank" rel="noopener noreferrer"><i class="bi bi-receipt-cutoff"></i> Lihat
                                 Struk</a>
+                            <a class="btn btn-outline-info" href="{{ route('transaksi.invoice', $trx) }}"
+                                target="_blank" rel="noopener noreferrer"><i class="bi bi-file-earmark-text"></i> Cetak Invoice</a>
+                            <a class="btn btn-outline-success" href="{{ route('transaksi.faktur', $trx) }}"
+                                target="_blank" rel="noopener noreferrer"><i class="bi bi-receipt"></i> Cetak Faktur Penjualan</a>
                             @if ($isPendingQris)
                                 <a class="btn btn-primary" href="{{ route('pembayaran.show', $trx) }}"><i
                                         class="bi bi-qr-code"></i> Lanjutkan QRIS</a>

@@ -33,6 +33,7 @@ class CheckoutRequest extends FormRequest
             'payment_method' => ['required', 'in:cash,qris,cash_tempo'],
             'paid_amount' => ['nullable', 'numeric', 'min:0'],
             'note' => ['nullable', 'string', 'max:255'],
+            'customer_id' => ['nullable', 'integer', 'exists:customers,id'],
             'suspended_from_id' => ['nullable', 'integer', 'min:1'],
         ];
     }
@@ -46,6 +47,7 @@ class CheckoutRequest extends FormRequest
             'payment_method' => 'Metode Pembayaran',
             'paid_amount' => 'Jumlah Bayar',
             'note' => 'Catatan',
+            'customer_id' => 'Pelanggan',
             'suspended_from_id' => 'Transaksi tertunda',
         ];
     }

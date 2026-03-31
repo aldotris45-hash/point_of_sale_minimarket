@@ -7,6 +7,10 @@
         <div class="d-flex align-items-center justify-content-between mb-3">
             <h1 class="h3 mb-0"><i class="bi bi-graph-up-arrow"></i> Laporan Penjualan</h1>
             <div class="d-flex gap-2">
+                <a id="printPdf" class="btn btn-danger" href="{{ route('laporan.cetak-transaksi', request()->query()) }}"
+                    data-url="{{ route('laporan.cetak-transaksi') }}" target="_blank" rel="noopener noreferrer">
+                    <i class="bi bi-file-earmark-pdf"></i> Cetak PDF Transaksi
+                </a>
                 <a id="downloadCsv" class="btn btn-outline-success" href="{{ route('laporan.unduh', request()->query()) }}"
                     data-url="{{ route('laporan.unduh') }}">
                     <i class="bi bi-download"></i> Unduh CSV
@@ -265,11 +269,20 @@
                 table.ajax.reload();
             });
 
-            $('#downloadCsv').on('click', function(e) {
-                const base = $(this).data('url');
+            // Update download/print links with current filter params
+            function updateActionLinks() {
                 const fd = new FormData($form[0]);
                 const params = new URLSearchParams(fd).toString();
-                $(this).attr('href', base + '?' + params);
+                $('#downloadCsv').attr('href', $('#downloadCsv').data('url') + '?' + params);
+                $('#printPdf').attr('href', $('#printPdf').data('url') + '?' + params);
+            }
+
+            $('#downloadCsv').on('click', function(e) { updateActionLinks(); });
+            $('#printPdf').on('click', function(e) { updateActionLinks(); });
+
+            // Also update on form submit
+            $form.on('submit', function() {
+                updateActionLinks();
             });
         })();
     </script>

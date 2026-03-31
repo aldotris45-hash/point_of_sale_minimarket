@@ -21,7 +21,6 @@ return new class extends Migration
             $table->timestamps();
             
             $table->unique(['product_id', 'price_date']);
-            $table->index('price_date');
         });
     }
 

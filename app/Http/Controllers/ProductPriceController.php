@@ -92,6 +92,17 @@ class ProductPriceController extends Controller
             'notes' => ['nullable', 'string', 'max:500'],
         ]);
 
+        // Cek duplikat: product_id + price_date harus unik
+        $exists = ProductPrice::where('product_id', $validated['product_id'])
+            ->whereDate('price_date', $validated['price_date'])
+            ->exists();
+
+        if ($exists) {
+            return back()->withInput()->withErrors([
+                'price_date' => 'Harga untuk produk ini pada tanggal tersebut sudah ada. Silakan edit data yang sudah ada atau pilih tanggal lain.',
+            ]);
+        }
+
         $product = Product::find($validated['product_id']);
 
         // Simpan harga
@@ -106,7 +117,10 @@ class ProductPriceController extends Controller
             'notes' => $validated['notes'],
         ]);
 
-        return redirect()->route('harga-produk.index')->with('success', 'Harga produk berhasil ditambahkan.');
+        // Auto-update harga jual di tabel produk utama
+        $product->update(['price' => $validated['selling_price']]);
+
+        return redirect()->route('harga-produk.index')->with('success', 'Harga produk berhasil ditambahkan. Harga jual di Manajemen Produk juga diperbarui.');
     }
 
     public function edit(ProductPrice $productPrice): View
@@ -137,6 +151,9 @@ class ProductPriceController extends Controller
                 'changed_at' => now(),
                 'notes' => 'Perubahan: ' . ($validated['notes'] ?? 'Tanpa keterangan'),
             ]);
+
+            // Auto-update harga jual di tabel produk utama
+            $productPrice->product->update(['price' => $validated['selling_price']]);
         }
 
         return redirect()->route('harga-produk.index')->with('success', 'Harga produk berhasil diperbarui.');

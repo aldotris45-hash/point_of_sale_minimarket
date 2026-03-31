@@ -8,6 +8,19 @@
             <h1 class="h3 mb-0"><i class="bi bi-receipt"></i> Transaksi</h1>
         </div>
 
+        @if (session('success'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                {{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+        @if (session('error'))
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                {{ session('error') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+
         <form id="filterForm" class="card shadow-sm mb-3">
             <div class="card-body row g-2 align-items-end">
                 <div class="col-12 col-md-3">
@@ -81,7 +94,7 @@
                             <th>Piutang</th>
                             <th>Status</th>
                             <th class="text-end">Total</th>
-                            <th class="text-end" style="width:120px;">Aksi</th>
+                            <th class="text-end" style="width:160px;">Aksi</th>
                         </tr>
                     </thead>
                     <tbody></tbody>

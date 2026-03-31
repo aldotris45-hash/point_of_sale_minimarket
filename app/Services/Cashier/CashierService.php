@@ -22,7 +22,7 @@ class CashierService implements CashierServiceInterface
         private readonly MidtransServiceInterface $midtrans,
     ) {}
 
-    public function checkout(array $items, string $paymentMethod, float $paidAmount = 0, ?string $note = null, ?int $suspendedFromId = null): Transaction
+    public function checkout(array $items, string $paymentMethod, float $paidAmount = 0, ?string $note = null, ?int $suspendedFromId = null, ?int $customerId = null): Transaction
     {
         if (empty($items)) {
             throw new InvalidArgumentException('Keranjang kosong.');
@@ -30,7 +30,7 @@ class CashierService implements CashierServiceInterface
 
         $method = PaymentMethod::tryFrom($paymentMethod) ?? PaymentMethod::CASH;
 
-        return DB::transaction(function () use ($items, $method, $paidAmount, $note, $suspendedFromId) {
+        return DB::transaction(function () use ($items, $method, $paidAmount, $note, $suspendedFromId, $customerId) {
             $subtotal = 0.0;
             $built = [];
 
@@ -90,6 +90,7 @@ class CashierService implements CashierServiceInterface
 
         $trx = Transaction::create([
             'user_id' => Auth::id(),
+            'customer_id' => $customerId,
             'invoice_number' => 'TEMP',
             'note' => $note,
             'suspended_from_id' => $suspendedFromId,
@@ -145,13 +146,13 @@ class CashierService implements CashierServiceInterface
         });
     }
 
-    public function hold(array $items, ?string $note = null, ?int $suspendedId = null): Transaction
+    public function hold(array $items, ?string $note = null, ?int $suspendedId = null, ?int $customerId = null): Transaction
     {
         if (empty($items)) {
             throw new InvalidArgumentException('Keranjang kosong.');
         }
 
-        return DB::transaction(function () use ($items, $note, $suspendedId) {
+        return DB::transaction(function () use ($items, $note, $suspendedId, $customerId) {
             $subtotal = 0.0;
             $built = [];
 
@@ -195,6 +196,7 @@ class CashierService implements CashierServiceInterface
                 // Update header
                 $trx->update([
                     'note' => $note,
+                    'customer_id' => $customerId,
                     'subtotal' => $subtotal,
                     'discount' => $discountAmount,
                     'tax' => $taxAmount,
@@ -211,6 +213,7 @@ class CashierService implements CashierServiceInterface
             } else {
                 $trx = Transaction::create([
                     'user_id' => Auth::id(),
+                    'customer_id' => $customerId,
                     'invoice_number' => 'TEMP',
                     'note' => $note,
                     'subtotal' => $subtotal,

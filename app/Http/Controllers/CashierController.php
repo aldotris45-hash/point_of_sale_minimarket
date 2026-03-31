@@ -7,6 +7,7 @@ use App\Http\Requests\Cashier\CheckoutRequest;
 use App\Http\Requests\Cashier\HoldRequest;
 use App\Models\Transaction;
 use App\Enums\TransactionStatus;
+use App\Models\Customer;
 use App\Models\Product;
 use App\Services\Cashier\CashierServiceInterface;
 use App\Services\Settings\SettingsServiceInterface;
@@ -38,6 +39,7 @@ class CashierController extends Controller
             'discount_percent' => $this->settings->discountPercent(),
             'tax_percent' => $this->settings->taxPercent(),
             'receipt_format' => $this->settings->receiptNumberFormat(),
+            'customers' => Customer::orderBy('name')->get(['id', 'name']),
         ]);
     }
 
@@ -73,7 +75,8 @@ class CashierController extends Controller
                 $data['payment_method'],
                 (float) ($data['paid_amount'] ?? 0),
                 $data['note'] ?? null,
-                isset($data['suspended_from_id']) ? (int) $data['suspended_from_id'] : null
+                isset($data['suspended_from_id']) ? (int) $data['suspended_from_id'] : null,
+                isset($data['customer_id']) ? (int) $data['customer_id'] : null
             );
 
             $this->logger->log('Buat Transaksi', 'Transaksi baru dibuat', [
@@ -115,7 +118,12 @@ class CashierController extends Controller
     {
         $data = $request->validated();
         try {
-            $trx = $this->cashier->hold($data['items'], $data['note'] ?? null, isset($data['suspended_from_id']) ? (int)$data['suspended_from_id'] : null);
+            $trx = $this->cashier->hold(
+                $data['items'],
+                $data['note'] ?? null,
+                isset($data['suspended_from_id']) ? (int) $data['suspended_from_id'] : null,
+                isset($data['customer_id']) ? (int) $data['customer_id'] : null
+            );
             $this->logger->log('Tunda Transaksi', 'Transaksi ditunda', [
                 'transaction_id' => $trx->id,
                 'invoice' => $trx->invoice_number,
@@ -160,6 +168,7 @@ class CashierController extends Controller
             'id' => $transaction->id,
             'invoice' => $transaction->invoice_number,
             'note' => $transaction->note,
+            'customer_id' => $transaction->customer_id,
             'suspended_from_id' => $transaction->id,
             'items' => $transaction->details->map(fn($d) => [
                 'product_id' => $d->product_id,

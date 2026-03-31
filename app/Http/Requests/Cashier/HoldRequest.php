@@ -32,6 +32,7 @@ class HoldRequest extends FormRequest
             'items.*.product_id' => ['required', 'integer', 'min:1'],
             'items.*.qty' => ['required', 'integer', 'min:1'],
             'note' => ['nullable', 'string', 'max:255'],
+            'customer_id' => ['nullable', 'integer', 'exists:customers,id'],
             'suspended_from_id' => ['nullable', 'integer', 'min:1'],
         ];
     }
@@ -43,6 +44,7 @@ class HoldRequest extends FormRequest
             'items.*.product_id' => 'Produk',
             'items.*.qty' => 'Jumlah',
             'note' => 'Catatan',
+            'customer_id' => 'Pelanggan',
             'suspended_from_id' => 'Transaksi tertunda',
         ];
     }

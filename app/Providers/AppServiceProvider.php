@@ -20,6 +20,14 @@ use App\Services\Cashier\CashierService;
 use App\Services\Payments\MidtransServiceInterface;
 use App\Services\Payments\MidtransService;
 use App\Services\Report\ReportService;
+use App\Services\Supplier\SupplierServiceInterface;
+use App\Services\Supplier\SupplierService;
+use App\Services\Customer\CustomerServiceInterface;
+use App\Services\Customer\CustomerService;
+use App\Services\IncomingGood\IncomingGoodServiceInterface;
+use App\Services\IncomingGood\IncomingGoodService;
+use App\Services\StockOpname\StockOpnameServiceInterface;
+use App\Services\StockOpname\StockOpnameService;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Blade;
@@ -42,6 +50,10 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(MidtransServiceInterface::class, MidtransService::class);
         $this->app->bind(ReportServiceInterface::class, ReportService::class);
         $this->app->singleton(ActivityLoggerInterface::class, ActivityLogger::class);
+        $this->app->singleton(SupplierServiceInterface::class, SupplierService::class);
+        $this->app->singleton(CustomerServiceInterface::class, CustomerService::class);
+        $this->app->singleton(IncomingGoodServiceInterface::class, IncomingGoodService::class);
+        $this->app->singleton(StockOpnameServiceInterface::class, StockOpnameService::class);
     }
 
     /**

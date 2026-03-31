@@ -3,16 +3,26 @@
 namespace App\Http\Controllers;
 
 use App\Enums\PaymentMethod;
+use App\Enums\RoleStatus;
 use App\Enums\TransactionStatus;
+use App\Models\Product;
 use App\Models\Transaction;
+use App\Services\ActivityLog\ActivityLoggerInterface;
 use App\Services\Settings\SettingsServiceInterface;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use App\Helpers\Terbilang;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use Yajra\DataTables\Facades\DataTables;
 
 class TransactionController extends Controller
 {
-    public function __construct(private readonly SettingsServiceInterface $settings) {}
+    public function __construct(
+        private readonly SettingsServiceInterface $settings,
+        private readonly ActivityLoggerInterface $logger,
+    ) {}
 
     public function index(Request $request): View
     {
@@ -126,12 +136,22 @@ class TransactionController extends Controller
             ->addColumn('action', function (Transaction $t) {
                 $showUrl = route('transaksi.show', $t);
                 $receiptUrl = route('transaksi.struk', $t);
-                return '<div class="d-flex justify-content-end gap-1">'
+                $html = '<div class="d-flex justify-content-end gap-1">'
                     . '<a class="btn btn-sm btn-outline-primary" href="' . e($showUrl) . '"><i class="bi bi-eye"></i></a>'
-                    . '<a class="btn btn-sm btn-outline-secondary" href="' . e($receiptUrl) . '" target="_blank" rel="noopener noreferrer"><i class="bi bi-receipt-cutoff"></i></a>'
-                    . '</div>';
+                    . '<a class="btn btn-sm btn-outline-secondary" href="' . e($receiptUrl) . '" target="_blank" rel="noopener noreferrer"><i class="bi bi-receipt-cutoff"></i></a>';
+
+                if (Auth::check() && Auth::user()->role === RoleStatus::ADMIN->value) {
+                    $deleteUrl = route('transaksi.destroy', $t);
+                    $html .= '<form action="' . e($deleteUrl) . '" method="POST" class="d-inline" onsubmit="return confirm(\'Yakin hapus transaksi ' . e($t->invoice_number) . '? Stok akan dikembalikan.\')">'
+                        . csrf_field() . method_field('DELETE')
+                        . '<button type="submit" class="btn btn-sm btn-outline-danger" title="Hapus"><i class="bi bi-trash"></i></button>'
+                        . '</form>';
+                }
+
+                $html .= '</div>';
+                return $html;
             })
-            ->rawColumns(['invoice', 'status_badge', 'action'])
+            ->rawColumns(['invoice', 'status_badge', 'due_badge', 'action'])
             ->toJson();
     }
 
@@ -173,6 +193,43 @@ class TransactionController extends Controller
             ($transaction->change > 0 ? ' Kembalian: ' . number_format($transaction->change, 0, ',', '.') : '') );
     }
 
+    /**
+     * Delete a transaction (admin only). Restores product stock.
+     */
+    public function destroy(Transaction $transaction): RedirectResponse
+    {
+        // Guard: only admin
+        if (!Auth::check() || Auth::user()->role !== RoleStatus::ADMIN->value) {
+            abort(403, 'Hanya admin yang dapat menghapus transaksi.');
+        }
+
+        $invoiceNumber = $transaction->invoice_number;
+
+        DB::transaction(function () use ($transaction) {
+            // Restore stock for each detail (only if transaction was paid/pending, not suspended)
+            $statusVal = $transaction->status->value ?? $transaction->status;
+            if (in_array($statusVal, ['paid', 'pending'])) {
+                foreach ($transaction->details as $detail) {
+                    Product::whereKey($detail->product_id)
+                        ->increment('stock', (int) $detail->quantity);
+                }
+            }
+
+            // Delete related records
+            $transaction->details()->delete();
+            $transaction->payments()->delete();
+            $transaction->delete();
+        });
+
+        $this->logger->log('Hapus Transaksi', 'Transaksi dihapus oleh admin', [
+            'transaction_id' => $transaction->id,
+            'invoice' => $invoiceNumber,
+        ]);
+
+        return redirect()->route('transaksi')
+            ->with('success', "Transaksi {$invoiceNumber} berhasil dihapus dan stok dikembalikan.");
+    }
+
     public function receipt(Transaction $transaction): View
     {
         $transaction->loadMissing(['details.product', 'user']);
@@ -187,6 +244,48 @@ class TransactionController extends Controller
             'currency'       => $this->settings->currency(),
             'discount_percent' => $this->settings->discountPercent(),
             'tax_percent'      => $this->settings->taxPercent(),
+        ]);
+    }
+
+    /**
+     * Print Invoice (formal invoice document).
+     */
+    public function printInvoice(Transaction $transaction): View
+    {
+        $transaction->loadMissing(['details.product', 'user', 'customer']);
+
+        return view('transactions.print-invoice', [
+            'transaction'       => $transaction,
+            'store_name'        => $this->settings->storeName(),
+            'store_address'     => $this->settings->storeAddress(),
+            'store_phone'       => $this->settings->storePhone(),
+            'store_bank_account' => $this->settings->storeBankAccount(),
+            'store_logo'        => $this->settings->storeLogoPath(),
+            'currency'          => $this->settings->currency(),
+            'discount_percent'  => $this->settings->discountPercent(),
+            'tax_percent'       => $this->settings->taxPercent(),
+            'terbilang'         => Terbilang::rupiah((float) $transaction->total),
+        ]);
+    }
+
+    /**
+     * Print Faktur Penjualan (sales receipt document).
+     */
+    public function printFaktur(Transaction $transaction): View
+    {
+        $transaction->loadMissing(['details.product', 'user', 'customer']);
+
+        return view('transactions.print-faktur', [
+            'transaction'       => $transaction,
+            'store_name'        => $this->settings->storeName(),
+            'store_address'     => $this->settings->storeAddress(),
+            'store_phone'       => $this->settings->storePhone(),
+            'store_bank_account' => $this->settings->storeBankAccount(),
+            'store_logo'        => $this->settings->storeLogoPath(),
+            'currency'          => $this->settings->currency(),
+            'discount_percent'  => $this->settings->discountPercent(),
+            'tax_percent'       => $this->settings->taxPercent(),
+            'terbilang'         => Terbilang::rupiah((float) $transaction->total),
         ]);
     }
 }

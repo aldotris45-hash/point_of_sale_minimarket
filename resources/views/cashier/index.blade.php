@@ -164,9 +164,19 @@
                             </fieldset>
 
                             <fieldset class="mb-3">
-                                <label for="note" class="form-label">Catatan/Pelanggan</label>
+                                <label for="customer_id" class="form-label">Pelanggan</label>
+                                <select name="customer_id" id="customer_id" class="form-select">
+                                    <option value="">-- Umum / Tanpa Pelanggan --</option>
+                                    @foreach ($customers as $cust)
+                                        <option value="{{ $cust->id }}">{{ $cust->name }}</option>
+                                    @endforeach
+                                </select>
+                            </fieldset>
+
+                            <fieldset class="mb-3">
+                                <label for="note" class="form-label">Catatan</label>
                                 <input type="text" name="note" id="note" class="form-control"
-                                    maxlength="255" placeholder="Misal: Nama pelanggan / no. telp / catatan">
+                                    maxlength="255" placeholder="Catatan tambahan (opsional)">
                             </fieldset>
                             <input type="hidden" name="suspended_from_id" id="suspended_from_id" />
 
@@ -589,6 +599,7 @@
                     _token: @json(csrf_token()),
                     items: JSON.parse($itemsJson.val() || '[]'),
                     note: ($('#note').val() || '').trim(),
+                    customer_id: ($('#customer_id').val() || '').trim() || null,
                     suspended_from_id: ($('#suspended_from_id').val() || '').trim()
                 };
                 $.ajax({
@@ -605,6 +616,7 @@
                     renderCart();
                     $('#suspended_from_id').val('');
                     $('#note').val('');
+                    $('#customer_id').val('');
                     if ($('#holdsModal').hasClass('show')) loadHolds();
                 }).fail((xhr) => {
                     alert(xhr?.responseJSON?.message || 'Gagal menunda transaksi');
@@ -658,6 +670,7 @@
                             const items = res.items;
                             $('#suspended_from_id').val(id);
                             $('#note').val(res.note || '');
+                            $('#customer_id').val(res.customer_id || '');
                             const ids = items.map(i => i.product_id);
                             $.get(@json(route('kasir.products')), {
                                 q: '',

@@ -7,7 +7,7 @@
     <title>{{ $appStoreName ?? config('app.name', 'POS') }} - @yield('title', 'Dashboard')</title>
     <meta name="description" content="" />
     <meta name="author" content="Mariani Krismonika" />
-    <link rel="icon" type="image/png" href="{{ asset('assets/images/logo_trijaya.png') }}" />
+    <link rel="icon" type="image/png" href="{{ asset('assets/images/logo.png') }}" />
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     {{-- Google Fonts --}}
@@ -38,6 +38,7 @@
     {{-- JS Libraries --}}
     <script src="{{ asset('assets/vendor/jquery-3.7.0.min.js') }}"></script>
     <script src="{{ asset('assets/vendor/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ asset('assets/vendor/datatables.min.js') }}"></script>
 
     {{-- Custom JS --}}
     <script src="{{ asset('assets/js/custom-js.js') }}"></script>

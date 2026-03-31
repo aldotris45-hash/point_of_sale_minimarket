@@ -3,12 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Enums\RoleStatus;
+use App\Enums\TransactionStatus;
+use App\Models\ProductPrice;
+use App\Models\Transaction;
 use App\Services\Report\ReportServiceInterface;
 use App\Services\Settings\SettingsServiceInterface;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use Illuminate\View\View;
 use Yajra\DataTables\Facades\DataTables;
 
 class ReportController extends Controller
@@ -171,5 +175,111 @@ class ReportController extends Controller
         };
 
         return response()->stream($callback, Response::HTTP_OK, $headers);
+    }
+
+    /**
+     * Print-friendly view of detailed transactions for PDF export via browser.
+     */
+    public function printTransactions(Request $request): View
+    {
+        $from   = $request->query('from');
+        $to     = $request->query('to');
+        $status = $request->query('status', 'paid');
+        $method = $request->query('method');
+        $period = $request->query('period', 'daily');
+
+        // Build query for transactions with details
+        $query = Transaction::query()
+            ->with(['details.product', 'user', 'customer'])
+            ->where('status', '!=', 'suspended')
+            ->when($status, fn($q) => $q->where('status', $status))
+            ->when($method, fn($q) => $q->where('payment_method', $method))
+            ->when($from, fn($q) => $q->whereDate('created_at', '>=', $from))
+            ->when($to, fn($q) => $q->whereDate('created_at', '<=', $to))
+            ->orderBy('created_at', 'asc');
+
+        $transactions = $query->get();
+
+        // Build cost price cache (latest cost per product)
+        $costPriceCache = [];
+        $productIds = $transactions->pluck('details')->flatten()->pluck('product_id')->unique();
+        if ($productIds->isNotEmpty()) {
+            $latestPrices = ProductPrice::query()
+                ->whereIn('product_id', $productIds)
+                ->orderByDesc('price_date')
+                ->get()
+                ->unique('product_id')
+                ->keyBy('product_id');
+            foreach ($latestPrices as $pid => $pp) {
+                $costPriceCache[$pid] = (float) $pp->cost_price;
+            }
+        }
+
+        // Build flat records (one row per item)
+        $records = collect();
+        $totals = ['cost' => 0, 'selling' => 0, 'qty' => 0, 'amount' => 0, 'kas_masuk' => 0, 'profit' => 0];
+
+        foreach ($transactions as $trx) {
+            $pm = is_string($trx->payment_method) ? $trx->payment_method : ($trx->payment_method?->value ?? '');
+            $pmLabel = $pm === 'cash_tempo' ? 'Tunai Tempo' : ucfirst($pm);
+
+            foreach ($trx->details as $detail) {
+                $costPrice = $costPriceCache[$detail->product_id] ?? 0;
+                $sellingPrice = (float) $detail->price;
+                $qty = (int) $detail->quantity;
+                $amount = (float) $detail->total;
+                $kasMasuk = $amount; // kas masuk = jumlah penjualan
+                $profit = $amount - ($costPrice * $qty);
+
+                $row = [
+                    'invoice_number' => $trx->invoice_number,
+                    'date'           => $trx->created_at->format('d/M/Y'),
+                    'cashier'        => $trx->user->name ?? '-',
+                    'customer'       => $trx->customer->name ?? '',
+                    'payment_method' => $pmLabel,
+                    'product_name'   => $detail->product->name ?? '-',
+                    'cost_price'     => $costPrice,
+                    'selling_price'  => $sellingPrice,
+                    'qty'            => $qty,
+                    'unit'           => $detail->product->unit ?? 'Pcs',
+                    'amount'         => $amount,
+                    'kas_masuk'      => $kasMasuk,
+                    'profit'         => $profit,
+                ];
+
+                $records->push($row);
+
+                $totals['cost']      += $costPrice * $qty;
+                $totals['selling']   += $sellingPrice * $qty;
+                $totals['qty']       += $qty;
+                $totals['amount']    += $amount;
+                $totals['kas_masuk'] += $kasMasuk;
+                $totals['profit']    += $profit;
+            }
+        }
+
+        // Period label
+        $periodLabel = $period === 'monthly' ? 'Bulanan' : 'Harian';
+        if ($from && $to) {
+            $periodLabel .= " ({$from} s/d {$to})";
+        } elseif ($from) {
+            $periodLabel .= " (dari {$from})";
+        } elseif ($to) {
+            $periodLabel .= " (s/d {$to})";
+        }
+
+        return view('reports.print-transaksi', [
+            'records'      => $records,
+            'totals'       => $totals,
+            'period_label' => $periodLabel,
+            'from'         => $from,
+            'to'           => $to,
+            'status'       => $status,
+            'method'       => $method,
+            'store_name'   => $this->settings->storeName(),
+            'store_address' => $this->settings->storeAddress(),
+            'store_phone'  => $this->settings->storePhone(),
+            'store_logo'   => $this->settings->storeLogoPath(),
+        ]);
     }
 }

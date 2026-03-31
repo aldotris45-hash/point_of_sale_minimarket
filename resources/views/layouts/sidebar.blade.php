@@ -51,6 +51,21 @@
                         </a>
                     </li>
 
+                    <!-- Master Data -->
+                    <li class="nav-item px-3 pt-3 pb-2 text-muted text-uppercase small">Master Data</li>
+                    <li class="nav-item">
+                        <a class="nav-link d-flex align-items-center gap-2 {{ request()->is('supplier*') ? 'active' : '' }}"
+                            href="{{ url('/supplier') }}">
+                            <i class="bi bi-building"></i><span>Supplier</span>
+                        </a>
+                    </li>
+                    <li class="nav-item mt-1">
+                        <a class="nav-link d-flex align-items-center gap-2 {{ request()->is('pelanggan*') ? 'active' : '' }}"
+                            href="{{ url('/pelanggan') }}">
+                            <i class="bi bi-person-lines-fill"></i><span>Pelanggan</span>
+                        </a>
+                    </li>
+
                     <!-- Katalog -->
                     <li class="nav-item px-3 pt-3 pb-2 text-muted text-uppercase small">Katalog</li>
                     <li class="nav-item">
@@ -69,6 +84,21 @@
                         <a class="nav-link d-flex align-items-center gap-2 {{ request()->is('harga-produk*') ? 'active' : '' }}"
                             href="{{ url('/harga-produk') }}">
                             <i class="bi bi-tag"></i><span>Harga Produk (Sayur)</span>
+                        </a>
+                    </li>
+
+                    <!-- Operasional -->
+                    <li class="nav-item px-3 pt-3 pb-2 text-muted text-uppercase small">Operasional</li>
+                    <li class="nav-item">
+                        <a class="nav-link d-flex align-items-center gap-2 {{ request()->is('barang-masuk*') ? 'active' : '' }}"
+                            href="{{ url('/barang-masuk') }}">
+                            <i class="bi bi-box-arrow-in-down"></i><span>Barang Masuk</span>
+                        </a>
+                    </li>
+                    <li class="nav-item mt-1">
+                        <a class="nav-link d-flex align-items-center gap-2 {{ request()->is('stok-opname*') ? 'active' : '' }}"
+                            href="{{ url('/stok-opname') }}">
+                            <i class="bi bi-clipboard-check"></i><span>Stok Opname</span>
                         </a>
                     </li>
 
