@@ -6,44 +6,44 @@
 - [x] `database/migrations/2026_03_10_000005_add_customer_id_to_transactions_table.php`
 
 ### 1.2 Update Model Transaction
-- [ ] Tambah `customer_id` ke `$fillable`
-- [ ] Tambah `customer()` belongsTo relationship
+- [x] Tambah `customer_id` ke `$fillable`
+- [x] Tambah `customer()` belongsTo relationship
 
 ### 1.3 Update Model Customer
-- [ ] Tambah `transactions()` hasMany relationship
+- [x] Tambah `transactions()` hasMany relationship
 
 ### 1.4 Update CashierServiceInterface
-- [ ] Tambah parameter `?int $customerId = null` di `checkout()` dan `hold()`
+- [x] Tambah parameter `?int $customerId = null` di `checkout()` dan `hold()`
 
 ### 1.5 Update CashierService
-- [ ] Terima `$customerId` dan simpan ke transaksi
+- [x] Terima `$customerId` dan simpan ke transaksi
 
 ### 1.6 Update CheckoutRequest & HoldRequest
-- [ ] Tambah validasi `customer_id`
+- [x] Tambah validasi `customer_id`
 
 ### 1.7 Update CashierController
-- [ ] Pass customers ke view
-- [ ] Kirim `customer_id` ke service
+- [x] Pass customers ke view
+- [x] Kirim `customer_id` ke service
 
 ### 1.8 Update Cashier View
-- [ ] Tambah dropdown pilih pelanggan
+- [x] Tambah dropdown pilih pelanggan
 
 ### 1.9 Update TransactionController
-- [ ] Tambah method `invoice()`
+- [x] Tambah method `invoice()`
 
 ### 1.10 Buat Invoice View (A4)
-- [ ] `resources/views/transactions/invoice.blade.php`
-- [ ] Info toko dari Settings (nama, alamat, telp, logo, no rek)
-- [ ] Info pelanggan
-- [ ] Tabel item
-- [ ] Untuk tempo: tampilkan piutang
+- [x] `resources/views/transactions/invoice.blade.php`
+- [x] Info toko dari Settings (nama, alamat, telp, logo, no rek)
+- [x] Info pelanggan
+- [x] Tabel item
+- [x] Untuk tempo: tampilkan piutang
 
 ### 1.11 Update Transaction Show View
-- [ ] Tambah tombol "Cetak Invoice"
-- [ ] Tampilkan nama pelanggan
+- [x] Tambah tombol "Cetak Invoice"
+- [x] Tampilkan nama pelanggan
 
 ### 1.12 Update Routes
-- [ ] Tambah route invoice
+- [x] Tambah route invoice
 
 ## Fitur 2: Arus Kas (Cash Flow)
 
