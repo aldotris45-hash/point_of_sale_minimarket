@@ -8,6 +8,8 @@ use Illuminate\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\Facades\DataTables;
+use App\Enums\PaymentStatus;
+use App\Enums\PaymentMethod;
 
 class PaymentController extends Controller
 {
