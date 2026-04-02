@@ -103,5 +103,16 @@ class PaymentController extends Controller
             ->rawColumns(['invoice', 'status_badge', 'action'])
             ->toJson();
     }
+
+    public function destroy(Payment $payment): \Illuminate\Http\RedirectResponse
+    {
+        if (!Auth::check() || Auth::user()->role !== \App\Enums\RoleStatus::ADMIN->value) {
+            abort(403, 'Hanya admin yang dapat menghapus pembayaran.');
+        }
+
+        $payment->delete();
+
+        return back()->with('success', 'Data pembayaran berhasil dihapus.');
+    }
 }
 

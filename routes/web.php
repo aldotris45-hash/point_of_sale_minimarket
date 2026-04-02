@@ -76,6 +76,7 @@ Route::middleware('auth')->group(function () {
         // Pembayaran
         Route::get('/pembayaran', [PaymentController::class, 'index'])->name('pembayaran');
         Route::get('/pembayaran-data', [PaymentController::class, 'data'])->name('pembayaran.data');
+        Route::delete('/pembayaran/{payment}', [PaymentController::class, 'destroy'])->name('pembayaran.destroy');
 
         // Laporan
         Route::get('/laporan', [ReportController::class, 'index'])->name('laporan');
