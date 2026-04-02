@@ -156,7 +156,7 @@
                             <input type="hidden" name="items" id="items_json" />
 
                             <fieldset class="mb-3">
-                                <label class="form-label">Metode Pembayaran</label>
+                                <legend class="col-form-label pt-0 fw-semibold fs-6">Metode Pembayaran</legend>
                                 <div class="d-flex gap-2">
                                     <button type="button" class="btn btn-outline-primary active" data-method="cash"><i
                                             class="bi bi-cash"></i> Tunai</button>
