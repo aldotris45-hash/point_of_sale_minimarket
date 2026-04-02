@@ -58,11 +58,19 @@ class ImportLegacyExcel extends Command
 
             $invoiceDate = $invoice['date'] . ' 12:00:00';
 
+            $baseInvoiceNo = $invoice['invoiceNo'] ?: 'INV-LEGACY-' . uniqid();
+            $finalInvoiceNo = $baseInvoiceNo;
+            $counter = 1;
+            while (Transaction::where('invoice_number', $finalInvoiceNo)->exists()) {
+                $finalInvoiceNo = $baseInvoiceNo . '-' . $counter;
+                $counter++;
+            }
+
             // Buat transaksi
             $transaction = Transaction::create([
                 'user_id'        => 1,
                 'customer_id'    => $customer->id,
-                'invoice_number' => $invoice['invoiceNo'] ?: 'INV-LEGACY-' . uniqid(),
+                'invoice_number' => $finalInvoiceNo,
                 'subtotal'       => $invoice['totalSales'],
                 'discount'       => 0,
                 'tax'            => 0,
