@@ -29,6 +29,8 @@ class Transaction extends Model
         'change',
         'payment_method',
         'status',
+        'created_at',
+        'updated_at',
     ];
 
     protected $casts = [

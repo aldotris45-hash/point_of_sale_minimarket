@@ -103,7 +103,7 @@ class CashierService implements CashierServiceInterface
         ]);
 
             $format = $this->settings->receiptNumberFormat();
-            $invoice = $this->generateInvoiceNumber($trx->id, $format);
+            $invoice = $this->generateInvoiceNumber($trx->id, $format, $transactionDate ? \Carbon\Carbon::parse($transactionDate) : null);
             $trx->update(['invoice_number' => $invoice]);
 
             foreach ($built as $b) {
@@ -249,14 +249,14 @@ class CashierService implements CashierServiceInterface
         });
     }
 
-    public function generateInvoiceNumber(int $transactionId, string $format): string
+    public function generateInvoiceNumber(int $transactionId, string $format, ?\Carbon\Carbon $date = null): string
     {
-        $now = now();
+        $dt = $date ?? now();
         $map = [
-            '{YYYY}' => $now->format('Y'),
-            '{YY}' => $now->format('y'),
-            '{MM}' => $now->format('m'),
-            '{DD}' => $now->format('d'),
+            '{YYYY}' => $dt->format('Y'),
+            '{YY}' => $dt->format('y'),
+            '{MM}' => $dt->format('m'),
+            '{DD}' => $dt->format('d'),
         ];
         $result = strtr($format, $map);
         $seqWidth = $this->extractSeqWidth($format) ?? 6;
