@@ -62,3 +62,24 @@
 ### 2.5 Update Sidebar
 - [x] Tambah menu "Arus Kas"
 
+## Update Pekerjaan (02 April 2026) -> Selesai ✅
+
+### ✅ 1. Perbaikan Bug Import Excel (Legacy Data)
+- [x] Memperbaiki *constraint violation* nomor invoice duplikat pada file `ImportLegacyExcel.php` saat mengeksekusi data Januari & Februari.
+- [x] Sistem otomatis memberikan akhiran (suffix) jika mendeteksi *duplicate invoice number*.
+
+### ✅ 2. Penambahan Fitur "Ubah Tanggal Transaksi" di Kasir
+- [x] Memperbarui `CheckoutRequest` untuk menerima parameter format tanggal bebas.
+- [x] Memperbarui Service & Controller Kasir untuk menampung waktu input.
+- [x] Menambahkan antarmuka (UI) form input waktu (datetime-local) di Sidebar Kasir untuk menunjang pencatatan transaksi manual yang belum sempat masuk sistem.
+
+### ✅ 3. Perombakan Total "Pengeluaran" -> "Buku Kas" (Cashbook)
+- [x] **Database**: Migration merubah tabel `expenses` menjadi `cash_transactions` dengan menambahkan penanda `type` (Pemasukan/Pengeluaran).
+- [x] **Controller & Enum**: Refactoring menyeluruh membedakan 2 jenis `in` dan `out` menggunakan `CashTransactionController.php`
+- [x] **Views**: Memperbarui tampilan List Table yang menunjukkan indikator "hijau" (+) dan "merah" (-)
+- [x] **Sidebar**: Mengubah nama menu menjadi Buku Kas.
+- [x] **Arus Kas Dashboard**: Menggabungkan suntikan "Modal / Pemasukan Lain" dengan total Penjualan dalam query kalkulasi Net Balance hari/bulan.
+
+### ✅ 4. Perbaikan Bug Dashboard (Soft Deletes)
+- [x] Memperbaiki issue dimana Invoice transaksi cacat (Excel) yang susah dihapus manual dari Tong Sampah (Soft Deletes) masih terbaca di kalkulasi grafik omset dan dashboard `DashboardController.php` & `ReportService.php`.
+- [x] Semua *raw query* (penggunaan DB::table) untuk laporan & dashboard telah disuntik filter `whereNull('deleted_at')`.
