@@ -187,6 +187,12 @@
                                 <input type="text" name="note" id="note" class="form-control"
                                     maxlength="255" placeholder="Catatan tambahan (opsional)">
                             </fieldset>
+
+                            <fieldset class="mb-3">
+                                <label for="transaction_date" class="form-label">Ubah Tanggal Transaksi</label>
+                                <input type="datetime-local" name="transaction_date" id="transaction_date" class="form-control" title="Kosongkan jika ingin memakai tanggal & jam saat ini.">
+                                <div class="form-text small text-muted">Abaikan jika transaksi baru (hari ini).</div>
+                            </fieldset>
                             <input type="hidden" name="suspended_from_id" id="suspended_from_id" />
 
                             <div class="d-grid">

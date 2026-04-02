@@ -68,7 +68,8 @@ class CashierController extends Controller
                 (float) ($data['paid_amount'] ?? 0),
                 $data['note'] ?? null,
                 isset($data['suspended_from_id']) ? (int) $data['suspended_from_id'] : null,
-                isset($data['customer_id']) ? (int) $data['customer_id'] : null
+                isset($data['customer_id']) ? (int) $data['customer_id'] : null,
+                $data['transaction_date'] ?? null
             );
 
             $this->logger->log('Buat Transaksi', 'Transaksi baru dibuat', [

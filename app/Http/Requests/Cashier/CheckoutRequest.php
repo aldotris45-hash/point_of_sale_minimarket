@@ -35,6 +35,7 @@ class CheckoutRequest extends FormRequest
             'note' => ['nullable', 'string', 'max:255'],
             'customer_id' => ['nullable', 'integer', 'exists:customers,id'],
             'suspended_from_id' => ['nullable', 'integer', 'min:1'],
+            'transaction_date' => ['nullable', 'date'],
         ];
     }
 

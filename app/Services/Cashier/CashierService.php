@@ -20,7 +20,7 @@ class CashierService implements CashierServiceInterface
         private readonly SettingsServiceInterface $settings,
     ) {}
 
-    public function checkout(array $items, string $paymentMethod, float $paidAmount = 0, ?string $note = null, ?int $suspendedFromId = null, ?int $customerId = null): Transaction
+    public function checkout(array $items, string $paymentMethod, float $paidAmount = 0, ?string $note = null, ?int $suspendedFromId = null, ?int $customerId = null, ?string $transactionDate = null): Transaction
     {
         if (empty($items)) {
             throw new InvalidArgumentException('Keranjang kosong.');
@@ -28,62 +28,8 @@ class CashierService implements CashierServiceInterface
 
         $method = PaymentMethod::tryFrom($paymentMethod) ?? PaymentMethod::CASH;
 
-        return DB::transaction(function () use ($items, $method, $paidAmount, $note, $suspendedFromId, $customerId) {
-            $subtotal = 0.0;
-            $built = [];
-
-            foreach ($items as $row) {
-                $pid = (int) ($row['product_id'] ?? 0);
-                $qty = (int) ($row['qty'] ?? 0);
-                if ($pid <= 0 || $qty <= 0) {
-                    throw new InvalidArgumentException('Item keranjang tidak valid.');
-                }
-
-                $product = Product::lockForUpdate()->findOrFail($pid);
-                if ($product->stock < $qty) {
-                    throw new InvalidArgumentException("Stok tidak mencukupi untuk {$product->name}.");
-                }
-
-                $line = (float) $product->price * $qty;
-                $subtotal += $line;
-                $built[] = [
-                    'product_id' => $product->id,
-                    'price' => (float) $product->price,
-                    'quantity' => $qty,
-                    'total' => $line,
-                    '_product' => $product, // simpan instance untuk dipakai nanti
-                ];
-            }
-
-            $discountPercent = $this->settings->discountPercent();
-            $taxPercent = $this->settings->taxPercent();
-
-            $discountAmount = $subtotal * ($discountPercent / 100);
-            $afterDiscount = $subtotal - $discountAmount;
-            $taxAmount = $afterDiscount * ($taxPercent / 100);
-            $total = $afterDiscount + $taxAmount;
-
-            // for normal cash we must have paid >= total; tempo can be less
-        if ($method === PaymentMethod::CASH && $paidAmount < $total) {
-            throw new InvalidArgumentException('Nominal bayar kurang dari total.');
-        }
-
-        // determine fields that differ depending on method
-        $amountPaid = 0.0;
-        $change = 0.0;
-        $status = TransactionStatus::PENDING;
-
-        if ($method === PaymentMethod::CASH) {
-            $amountPaid = $paidAmount;
-            $change = max(0, $paidAmount - $total);
-            $status = TransactionStatus::PAID;
-        } elseif ($method === PaymentMethod::CASH_TEMPO) {
-            // customer will settle later; record whatever was paid (could be 0 or a partial amount)
-            $amountPaid = $paidAmount;
-            $change = max(0, $paidAmount - $total);
-            $status = $paidAmount >= $total ? TransactionStatus::PAID : TransactionStatus::PENDING;
-        }
-
+        return DB::transaction(function () use ($items, $method, $paidAmount, $note, $suspendedFromId, $customerId, $transactionDate) {
+...
         $trx = Transaction::create([
             'user_id' => Auth::id(),
             'customer_id' => $customerId,
@@ -98,6 +44,8 @@ class CashierService implements CashierServiceInterface
             'change' => $change,
             'payment_method' => $method,
             'status' => $status,
+            'created_at' => $transactionDate ?? now(),
+            'updated_at' => $transactionDate ?? now(),
         ]);
 
             $format = $this->settings->receiptNumberFormat();
