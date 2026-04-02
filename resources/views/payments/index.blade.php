@@ -16,13 +16,13 @@
         <form id="payFilter" class="card shadow-sm mb-3">
             <div class="card-body row g-2 align-items-end">
                 <div class="col-12 col-md-3">
-                    <label class="form-label">Cari</label>
-                    <input type="text" class="form-control" name="q" value="{{ $q }}"
+                    <label for="filter_q" class="form-label">Cari</label>
+                    <input type="text" class="form-control" id="filter_q" name="q" value="{{ $q }}"
                         placeholder="Invoice / Order ID">
                 </div>
                 <div class="col-6 col-md-2">
-                    <label class="form-label">Status</label>
-                    <select class="form-select" name="status">
+                    <label for="filter_status" class="form-label">Status</label>
+                    <select class="form-select" id="filter_status" name="status">
                         <option value="">Semua</option>
                         @foreach ($statuses as $s)
                             <option value="{{ $s->value }}" {{ $status === $s->value ? 'selected' : '' }}>
@@ -31,8 +31,8 @@
                     </select>
                 </div>
                 <div class="col-6 col-md-2">
-                    <label class="form-label">Metode</label>
-                    <select class="form-select" name="method">
+                    <label for="filter_method" class="form-label">Metode</label>
+                    <select class="form-select" id="filter_method" name="method">
                         <option value="">Semua</option>
                         @foreach ($methods as $m)
                             <option value="{{ $m->value }}" {{ $method === $m->value ? 'selected' : '' }}>
@@ -41,17 +41,17 @@
                     </select>
                 </div>
                 <div class="col-6 col-md-1">
-                    <label class="form-label">Provider</label>
-                    <input type="text" class="form-control" name="provider" value="{{ $provider }}"
+                    <label for="filter_provider" class="form-label">Provider</label>
+                    <input type="text" class="form-control" id="filter_provider" name="provider" value="{{ $provider }}"
                         placeholder="provider">
                 </div>
                 <div class="col-6 col-md-2">
-                    <label class="form-label">Dari</label>
-                    <input type="date" class="form-control" name="from" value="{{ $from }}">
+                    <label for="filter_from" class="form-label">Dari</label>
+                    <input type="date" class="form-control" id="filter_from" name="from" value="{{ $from }}">
                 </div>
                 <div class="col-6 col-md-2">
-                    <label class="form-label">Sampai</label>
-                    <input type="date" class="form-control" name="to" value="{{ $to }}">
+                    <label for="filter_to" class="form-label">Sampai</label>
+                    <input type="date" class="form-control" id="filter_to" name="to" value="{{ $to }}">
                 </div>
                 <div class="col-12 col-md-12 d-flex gap-2 justify-content-end">
                     <button type="button" id="btnReset" class="btn btn-outline-secondary"><i class="bi bi-x-circle"></i>
