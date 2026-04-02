@@ -83,3 +83,10 @@
 ### ✅ 4. Perbaikan Bug Dashboard (Soft Deletes)
 - [x] Memperbaiki issue dimana Invoice transaksi cacat (Excel) yang susah dihapus manual dari Tong Sampah (Soft Deletes) masih terbaca di kalkulasi grafik omset dan dashboard `DashboardController.php` & `ReportService.php`.
 - [x] Semua *raw query* (penggunaan DB::table) untuk laporan & dashboard telah disuntik filter `whereNull('deleted_at')`.
+
+## Update Pekerjaan (03 April 2026) -> Selesai ✅
+
+### ✅ 5. Perbaikan Bug Tanggal Transaksi Tidak Sinkron
+- [x] **Model `Transaction.php`**: Menambahkan `created_at` dan `updated_at` ke `$fillable` agar tanggal custom tidak di-ignore oleh mass assignment protection Laravel.
+- [x] **Service `CashierService.php`**: Method `generateInvoiceNumber()` sekarang menerima parameter tanggal opsional dan menggunakan tanggal transaksi (bukan `now()`) untuk bagian `{YYYY}`, `{MM}`, `{DD}` di nomor invoice.
+- [x] **Interface `CashierServiceInterface.php`**: Update signature `generateInvoiceNumber()` agar konsisten dengan implementasi.
