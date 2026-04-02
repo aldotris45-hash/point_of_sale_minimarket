@@ -1,0 +1,1541 @@
+[
+  {
+    "file": "Invoice Februari.xlsx",
+    "sheet": "01",
+    "customer": "SPPG BEDADUNG",
+    "invoiceNo": "001/01022026",
+    "date": "2026-02-01",
+    "totalItems": 4,
+    "totalCost": 1315400,
+    "totalSales": 1590000,
+    "profit": 274600,
+    "items": [
+      {
+        "name": "Bawang prei",
+        "unit": "Kilogram",
+        "sell_price": 11000,
+        "cost_price": 5000,
+        "qty": 5,
+        "subtotal": 55000
+      },
+      {
+        "name": "Jahe",
+        "unit": "Kilogram",
+        "sell_price": 30000,
+        "cost_price": 22000,
+        "qty": 2,
+        "subtotal": 60000
+      },
+      {
+        "name": "Daun seledri",
+        "unit": "Kilogram",
+        "sell_price": 25000,
+        "cost_price": 10000,
+        "qty": 1,
+        "subtotal": 25000
+      },
+      {
+        "name": "Kacang polong",
+        "unit": "Kilogram",
+        "sell_price": 72500,
+        "cost_price": 61820,
+        "qty": 20,
+        "subtotal": 1450000
+      }
+    ]
+  },
+  {
+    "file": "Invoice Februari.xlsx",
+    "sheet": "02",
+    "customer": "SPPG BEDADUNG",
+    "invoiceNo": "001/02022026",
+    "date": "2026-02-02",
+    "totalItems": 10,
+    "totalCost": 903500,
+    "totalSales": 1607000,
+    "profit": 703500,
+    "items": [
+      {
+        "name": "Bawang prei",
+        "unit": "Kilogram",
+        "sell_price": 11000,
+        "cost_price": 5000,
+        "qty": 5,
+        "subtotal": 55000
+      },
+      {
+        "name": "Daun jeruk",
+        "unit": "Kilogram",
+        "sell_price": 20000,
+        "cost_price": 12000,
+        "qty": 1,
+        "subtotal": 20000
+      },
+      {
+        "name": "Kunyit",
+        "unit": "Kilogram",
+        "sell_price": 13000,
+        "cost_price": 8000,
+        "qty": 1,
+        "subtotal": 13000
+      },
+      {
+        "name": "Daun Salam",
+        "unit": "Kilogram",
+        "sell_price": 20000,
+        "cost_price": 15000,
+        "qty": 1,
+        "subtotal": 20000
+      },
+      {
+        "name": "Kemiri",
+        "unit": "Kilogram",
+        "sell_price": 50000,
+        "cost_price": 41000,
+        "qty": 2,
+        "subtotal": 100000
+      },
+      {
+        "name": "Serai",
+        "unit": "Kilogram",
+        "sell_price": 10000,
+        "cost_price": 5000,
+        "qty": 2,
+        "subtotal": 20000
+      },
+      {
+        "name": "Jahe",
+        "unit": "Kilogram",
+        "sell_price": 30000,
+        "cost_price": 23000,
+        "qty": 1,
+        "subtotal": 30000
+      },
+      {
+        "name": "Laos",
+        "unit": "Kilogram",
+        "sell_price": 15000,
+        "cost_price": 7000,
+        "qty": 1,
+        "subtotal": 15000
+      },
+      {
+        "name": "Buncis",
+        "unit": "Kilogram",
+        "sell_price": 14000,
+        "cost_price": 6500,
+        "qty": 60,
+        "subtotal": 840000
+      },
+      {
+        "name": "Jagung Pipil",
+        "unit": "Kilogram",
+        "sell_price": 38000,
+        "cost_price": 25500,
+        "qty": 13,
+        "subtotal": 494000
+      }
+    ]
+  },
+  {
+    "file": "Invoice Februari.xlsx",
+    "sheet": "03",
+    "customer": "SPPG BEDADUNG",
+    "invoiceNo": "001/03022026",
+    "date": "2026-02-03",
+    "totalItems": 4,
+    "totalCost": 559500,
+    "totalSales": 970500,
+    "profit": 411000,
+    "items": [
+      {
+        "name": "Bawang prei",
+        "unit": "Kilogram",
+        "sell_price": 11000,
+        "cost_price": 5000,
+        "qty": 3,
+        "subtotal": 33000
+      },
+      {
+        "name": "Cabe Merah",
+        "unit": "Kilogram",
+        "sell_price": 27500,
+        "cost_price": 20000,
+        "qty": 10,
+        "subtotal": 275000
+      },
+      {
+        "name": "Kemiri",
+        "unit": "Kilogram",
+        "sell_price": 50000,
+        "cost_price": 41000,
+        "qty": 2,
+        "subtotal": 100000
+      },
+      {
+        "name": "Timun",
+        "unit": "Kilogram",
+        "sell_price": 7500,
+        "cost_price": 3500,
+        "qty": 75,
+        "subtotal": 562500
+      }
+    ]
+  },
+  {
+    "file": "Invoice Februari.xlsx",
+    "sheet": "04",
+    "customer": "SPPG BEDADUNG",
+    "invoiceNo": "001/04022026",
+    "date": "2026-02-04",
+    "totalItems": 7,
+    "totalCost": 1302000,
+    "totalSales": 1730000,
+    "profit": 428000,
+    "items": [
+      {
+        "name": "Tauge",
+        "unit": "Kilogram",
+        "sell_price": 17500,
+        "cost_price": 11500,
+        "qty": 50,
+        "subtotal": 875000
+      },
+      {
+        "name": "Bawang prei",
+        "unit": "Kilogram",
+        "sell_price": 11000,
+        "cost_price": 5000,
+        "qty": 3,
+        "subtotal": 33000
+      },
+      {
+        "name": "Cabe Merah",
+        "unit": "Kilogram",
+        "sell_price": 27500,
+        "cost_price": 18000,
+        "qty": 5,
+        "subtotal": 137500
+      },
+      {
+        "name": "Kemangi",
+        "unit": "Ikat",
+        "sell_price": 3500,
+        "cost_price": 1750,
+        "qty": 20,
+        "subtotal": 70000
+      },
+      {
+        "name": "Ladaku Blackpapper 250gr",
+        "unit": "Pcs",
+        "sell_price": 78000,
+        "cost_price": 76000,
+        "qty": 4,
+        "subtotal": 312000
+      },
+      {
+        "name": "Bango Reff 520ML",
+        "unit": "Pcs",
+        "sell_price": 24500,
+        "cost_price": 23000,
+        "qty": 5,
+        "subtotal": 122500
+      },
+      {
+        "name": "Tepung Maizena 1KG",
+        "unit": "Pcs",
+        "sell_price": 22500,
+        "cost_price": 21000,
+        "qty": 8,
+        "subtotal": 180000
+      }
+    ]
+  },
+  {
+    "file": "Invoice Februari.xlsx",
+    "sheet": "04 (2)",
+    "customer": "SPPG KEMUNINGSARI",
+    "invoiceNo": "001/04022026",
+    "date": "2026-02-04",
+    "totalItems": 3,
+    "totalCost": 664000,
+    "totalSales": 808000,
+    "profit": 144000,
+    "items": [
+      {
+        "name": "Wortel",
+        "unit": "Kilogram",
+        "sell_price": 12000,
+        "cost_price": 8000,
+        "qty": 20,
+        "subtotal": 240000
+      },
+      {
+        "name": "Bawang Merah",
+        "unit": "Kilogram",
+        "sell_price": 38000,
+        "cost_price": 33000,
+        "qty": 8,
+        "subtotal": 304000
+      },
+      {
+        "name": "Bawang Putih",
+        "unit": "Kilogram",
+        "sell_price": 33000,
+        "cost_price": 30000,
+        "qty": 8,
+        "subtotal": 264000
+      }
+    ]
+  },
+  {
+    "file": "Invoice Februari.xlsx",
+    "sheet": "05",
+    "customer": "SPPG BEDADUNG",
+    "invoiceNo": "001/04022026",
+    "date": "2026-02-05",
+    "totalItems": 2,
+    "totalCost": 512500,
+    "totalSales": 1012500,
+    "profit": 500000,
+    "items": [
+      {
+        "name": "Kacang Panjang",
+        "unit": "Kilogram",
+        "sell_price": 9000,
+        "cost_price": 5000,
+        "qty": 50,
+        "subtotal": 450000
+      },
+      {
+        "name": "Timun",
+        "unit": "Kilogram",
+        "sell_price": 7500,
+        "cost_price": 3500,
+        "qty": 75,
+        "subtotal": 562500
+      }
+    ]
+  },
+  {
+    "file": "Invoice Februari.xlsx",
+    "sheet": "09",
+    "customer": "SPPG BEDADUNG",
+    "invoiceNo": "001/09022026",
+    "date": "2026-02-09",
+    "totalItems": 5,
+    "totalCost": 299000,
+    "totalSales": 792000,
+    "profit": 493000,
+    "items": [
+      {
+        "name": "Bawang Pree",
+        "unit": "Kilogram",
+        "sell_price": 11000,
+        "cost_price": 5000,
+        "qty": 3,
+        "subtotal": 33000
+      },
+      {
+        "name": "Serai",
+        "unit": "Kilogram",
+        "sell_price": 10000,
+        "cost_price": 4000,
+        "qty": 1,
+        "subtotal": 10000
+      },
+      {
+        "name": "Daun Jeruk",
+        "unit": "Kilogram",
+        "sell_price": 20000,
+        "cost_price": 12000,
+        "qty": 1,
+        "subtotal": 20000
+      },
+      {
+        "name": "Jahe",
+        "unit": "Kilogram",
+        "sell_price": 29000,
+        "cost_price": 23000,
+        "qty": 1,
+        "subtotal": 29000
+      },
+      {
+        "name": "Pakcoy",
+        "unit": "Kilogram",
+        "sell_price": 10000,
+        "cost_price": 3500,
+        "qty": 70,
+        "subtotal": 700000
+      }
+    ]
+  },
+  {
+    "file": "Invoice Februari.xlsx",
+    "sheet": "10",
+    "customer": "SPPG BEDADUNG",
+    "invoiceNo": "001/10022026",
+    "date": "2026-02-10",
+    "totalItems": 2,
+    "totalCost": 832000,
+    "totalSales": 1112000,
+    "profit": 280000,
+    "items": [
+      {
+        "name": "Bawang Bombay",
+        "unit": "Kilogram",
+        "sell_price": 38000,
+        "cost_price": 28000,
+        "qty": 4,
+        "subtotal": 152000
+      },
+      {
+        "name": "Labu Siam",
+        "unit": "Kilogram",
+        "sell_price": 8000,
+        "cost_price": 6000,
+        "qty": 120,
+        "subtotal": 960000
+      }
+    ]
+  },
+  {
+    "file": "Invoice Februari.xlsx",
+    "sheet": "11",
+    "customer": "SPPG BEDADUNG",
+    "invoiceNo": "001/10022026",
+    "date": "2026-02-11",
+    "totalItems": 7,
+    "totalCost": 1386000,
+    "totalSales": 1849500,
+    "profit": 463500,
+    "items": [
+      {
+        "name": "Daun Jeruk",
+        "unit": "Kilogram",
+        "sell_price": 20000,
+        "cost_price": 12000,
+        "qty": 2,
+        "subtotal": 40000
+      },
+      {
+        "name": "Daun Salam",
+        "unit": "Kilogram",
+        "sell_price": 20000,
+        "cost_price": 20000,
+        "qty": 1,
+        "subtotal": 20000
+      },
+      {
+        "name": "Jahe",
+        "unit": "Kilogram",
+        "sell_price": 30000,
+        "cost_price": 23000,
+        "qty": 1,
+        "subtotal": 30000
+      },
+      {
+        "name": "Serai",
+        "unit": "Kilogram",
+        "sell_price": 7000,
+        "cost_price": 4000,
+        "qty": 1,
+        "subtotal": 7000
+      },
+      {
+        "name": "Selada Keriting",
+        "unit": "Kilogram",
+        "sell_price": 42000,
+        "cost_price": 36000,
+        "qty": 25,
+        "subtotal": 1050000
+      },
+      {
+        "name": "Cabe Merah",
+        "unit": "Kilogram",
+        "sell_price": 28000,
+        "cost_price": 23000,
+        "qty": 5,
+        "subtotal": 140000
+      },
+      {
+        "name": "Timun",
+        "unit": "Kilogram",
+        "sell_price": 7500,
+        "cost_price": 4000,
+        "qty": 75,
+        "subtotal": 562500
+      }
+    ]
+  },
+  {
+    "file": "Invoice Februari.xlsx",
+    "sheet": "12",
+    "customer": "SPPG BEDADUNG",
+    "invoiceNo": "001/12022026",
+    "date": "2026-02-12",
+    "totalItems": 6,
+    "totalCost": 690000,
+    "totalSales": 1391500,
+    "profit": 701500,
+    "items": [
+      {
+        "name": "Bawang Bombay",
+        "unit": "Kilogram",
+        "sell_price": 38000,
+        "cost_price": 28000,
+        "qty": 4,
+        "subtotal": 152000
+      },
+      {
+        "name": "Daun Jeruk",
+        "unit": "Kilogram",
+        "sell_price": 20000,
+        "cost_price": 12000,
+        "qty": 1,
+        "subtotal": 20000
+      },
+      {
+        "name": "Serai",
+        "unit": "Kilogram",
+        "sell_price": 7000,
+        "cost_price": 4000,
+        "qty": 1,
+        "subtotal": 7000
+      },
+      {
+        "name": "Kemiri",
+        "unit": "Kilogram",
+        "sell_price": 50000,
+        "cost_price": 41000,
+        "qty": 2,
+        "subtotal": 100000
+      },
+      {
+        "name": "Cabe Merah",
+        "unit": "Kilogram",
+        "sell_price": 27500,
+        "cost_price": 21000,
+        "qty": 5,
+        "subtotal": 137500
+      },
+      {
+        "name": "Buncis",
+        "unit": "Kilogram",
+        "sell_price": 13000,
+        "cost_price": 5000,
+        "qty": 75,
+        "subtotal": 975000
+      }
+    ]
+  },
+  {
+    "file": "Invoice Februari.xlsx",
+    "sheet": "12 (2)",
+    "customer": "SPPG KEMUNING",
+    "invoiceNo": "001/12022026",
+    "date": "2026-02-12",
+    "totalItems": 1,
+    "totalCost": 2400000,
+    "totalSales": 4050000,
+    "profit": 1650000,
+    "items": [
+      {
+        "name": "Kentang",
+        "unit": "Kilogram",
+        "sell_price": 13500,
+        "cost_price": 8000,
+        "qty": 300,
+        "subtotal": 4050000
+      }
+    ]
+  },
+  {
+    "file": "Invoice Februari.xlsx",
+    "sheet": "02maret",
+    "customer": "SPPG PATEMON PAKUSARI",
+    "invoiceNo": "001/02032026",
+    "date": "2026-03-02",
+    "totalItems": 1,
+    "totalCost": 650000,
+    "totalSales": 1000000,
+    "profit": 350000,
+    "items": [
+      {
+        "name": "Ubi Ungu",
+        "unit": "Kilogram",
+        "sell_price": 10000,
+        "cost_price": 6500,
+        "qty": 100,
+        "subtotal": 1000000
+      }
+    ]
+  },
+  {
+    "file": "Invoice Februari.xlsx",
+    "sheet": "05maret ",
+    "customer": "SPPG PATEMON PAKUSARI",
+    "invoiceNo": "001/05032026",
+    "date": "2026-03-05",
+    "totalItems": 1,
+    "totalCost": 385000,
+    "totalSales": 700000,
+    "profit": 315000,
+    "items": [
+      {
+        "name": "Ubi Ungu",
+        "unit": "Kilogram",
+        "sell_price": 10000,
+        "cost_price": 5500,
+        "qty": 70,
+        "subtotal": 700000
+      }
+    ]
+  },
+  {
+    "file": "Invoice januari - ledokombo.xlsx",
+    "sheet": "11",
+    "customer": "SPPG PATEMON PAKUSARI",
+    "invoiceNo": "001/10012026",
+    "date": "2026-01-11",
+    "totalItems": 5,
+    "totalCost": 360000,
+    "totalSales": 624000,
+    "profit": 264000,
+    "items": [
+      {
+        "name": "Timun",
+        "unit": "Kilogram",
+        "sell_price": 11000,
+        "cost_price": 3000,
+        "qty": 25,
+        "subtotal": 275000
+      },
+      {
+        "name": "Selada Keriting",
+        "unit": "Kilogram",
+        "sell_price": 35000,
+        "cost_price": 30000,
+        "qty": 6,
+        "subtotal": 210000
+      },
+      {
+        "name": "Laos",
+        "unit": "Kilogram",
+        "sell_price": 17000,
+        "cost_price": 13000,
+        "qty": 5,
+        "subtotal": 85000
+      },
+      {
+        "name": "Daun Jeruk",
+        "unit": "Kilogram",
+        "sell_price": 27000,
+        "cost_price": 20000,
+        "qty": 1,
+        "subtotal": 27000
+      },
+      {
+        "name": "Kunyit",
+        "unit": "Kilogram",
+        "sell_price": 27000,
+        "cost_price": 20000,
+        "qty": 1,
+        "subtotal": 27000
+      }
+    ]
+  },
+  {
+    "file": "Invoice januari - ledokombo.xlsx",
+    "sheet": "12",
+    "customer": "SPPG PATEMON PAKUSARI",
+    "invoiceNo": "001/12012026",
+    "date": "2026-01-12",
+    "totalItems": 5,
+    "totalCost": 798000,
+    "totalSales": 1419000,
+    "profit": 621000,
+    "items": [
+      {
+        "name": "Pala",
+        "unit": "Kilogram",
+        "sell_price": 120000,
+        "cost_price": 91000,
+        "qty": 4,
+        "subtotal": 480000
+      },
+      {
+        "name": "Bawang Pree utuh",
+        "unit": "Kilogram",
+        "sell_price": 13000,
+        "cost_price": 7000,
+        "qty": 3,
+        "subtotal": 39000
+      },
+      {
+        "name": "Kayu Manis",
+        "unit": "Kilogram",
+        "sell_price": 100000,
+        "cost_price": 75000,
+        "qty": 1,
+        "subtotal": 100000
+      },
+      {
+        "name": "Jahe",
+        "unit": "Kilogram",
+        "sell_price": 30000,
+        "cost_price": 23000,
+        "qty": 1,
+        "subtotal": 30000
+      },
+      {
+        "name": "Pakcoy",
+        "unit": "Kilogram",
+        "sell_price": 11000,
+        "cost_price": 4500,
+        "qty": 70,
+        "subtotal": 770000
+      }
+    ]
+  },
+  {
+    "file": "Invoice januari - ledokombo.xlsx",
+    "sheet": "14",
+    "customer": "SPPG PATEMON PAKUSARI",
+    "invoiceNo": "001/14012026",
+    "date": "2026-01-14",
+    "totalItems": 13,
+    "totalCost": 1094550,
+    "totalSales": 1628750,
+    "profit": 534200,
+    "items": [
+      {
+        "name": "Daun jeruk",
+        "unit": "Kilogram",
+        "sell_price": 27000,
+        "cost_price": 12000,
+        "qty": 4,
+        "subtotal": 108000
+      },
+      {
+        "name": "Daun salam",
+        "unit": "Kilogram",
+        "sell_price": 15000,
+        "cost_price": 15000,
+        "qty": 2,
+        "subtotal": 30000
+      },
+      {
+        "name": "Jahe",
+        "unit": "Kilogram",
+        "sell_price": 30000,
+        "cost_price": 22000,
+        "qty": 5,
+        "subtotal": 150000
+      },
+      {
+        "name": "Sereh",
+        "unit": "Ikat",
+        "sell_price": 8000,
+        "cost_price": 4900,
+        "qty": 5,
+        "subtotal": 40000
+      },
+      {
+        "name": "Cabe rawit",
+        "unit": "Kilogram",
+        "sell_price": 40000,
+        "cost_price": 35000,
+        "qty": 4,
+        "subtotal": 160000
+      },
+      {
+        "name": "Jeruk limau",
+        "unit": "Butir",
+        "sell_price": 650,
+        "cost_price": 370,
+        "qty": 15,
+        "subtotal": 9750
+      },
+      {
+        "name": "Tomat",
+        "unit": "Kilogram",
+        "sell_price": 13000,
+        "cost_price": 7000,
+        "qty": 3,
+        "subtotal": 39000
+      },
+      {
+        "name": "Bawang prei",
+        "unit": "Kilogram",
+        "sell_price": 13000,
+        "cost_price": 8500,
+        "qty": 5,
+        "subtotal": 65000
+      },
+      {
+        "name": "Cabe merah",
+        "unit": "Kilogram",
+        "sell_price": 22000,
+        "cost_price": 16000,
+        "qty": 5,
+        "subtotal": 110000
+      },
+      {
+        "name": "Asam jawa",
+        "unit": "Kilogram",
+        "sell_price": 38000,
+        "cost_price": 33000,
+        "qty": 2,
+        "subtotal": 76000
+      },
+      {
+        "name": "Timun",
+        "unit": "Kilogram",
+        "sell_price": 7000,
+        "cost_price": 3000,
+        "qty": 75,
+        "subtotal": 525000
+      },
+      {
+        "name": "Malkist abon",
+        "unit": "Renteng",
+        "sell_price": 12000,
+        "cost_price": 9000,
+        "qty": 3,
+        "subtotal": 36000
+      },
+      {
+        "name": "Telur",
+        "unit": "Kilogram",
+        "sell_price": 28000,
+        "cost_price": 27500,
+        "qty": 10,
+        "subtotal": 280000
+      }
+    ]
+  },
+  {
+    "file": "Invoice januari - ledokombo.xlsx",
+    "sheet": "18",
+    "customer": "SPPG PATEMON PAKUSARI",
+    "invoiceNo": "001/18012026",
+    "date": "2026-01-18",
+    "totalItems": 7,
+    "totalCost": 1164000,
+    "totalSales": 1984500,
+    "profit": 820500,
+    "items": [
+      {
+        "name": "Daun jeruk",
+        "unit": "Kilogram",
+        "sell_price": 20000,
+        "cost_price": 12000,
+        "qty": 1,
+        "subtotal": 20000
+      },
+      {
+        "name": "Kunyit",
+        "unit": "Kilogram",
+        "sell_price": 20000,
+        "cost_price": 4900,
+        "qty": 5,
+        "subtotal": 100000
+      },
+      {
+        "name": "Sereh",
+        "unit": "Ikat",
+        "sell_price": 8000,
+        "cost_price": 6000,
+        "qty": 4,
+        "subtotal": 32000
+      },
+      {
+        "name": "Tomat",
+        "unit": "Kilogram",
+        "sell_price": 13000,
+        "cost_price": 7000,
+        "qty": 10,
+        "subtotal": 130000
+      },
+      {
+        "name": "Kecambah",
+        "unit": "Kilogram",
+        "sell_price": 17500,
+        "cost_price": 10500,
+        "qty": 85,
+        "subtotal": 1487500
+      },
+      {
+        "name": "Seledri",
+        "unit": "Kilogram",
+        "sell_price": 35000,
+        "cost_price": 17000,
+        "qty": 3,
+        "subtotal": 105000
+      },
+      {
+        "name": "Kemiri",
+        "unit": "Kilogram",
+        "sell_price": 55000,
+        "cost_price": 45000,
+        "qty": 2,
+        "subtotal": 110000
+      }
+    ]
+  },
+  {
+    "file": "Invoice januari - ledokombo.xlsx",
+    "sheet": "19",
+    "customer": "SPPG PATEMON PAKUSARI",
+    "invoiceNo": "001/19012026",
+    "date": "2026-01-19",
+    "totalItems": 3,
+    "totalCost": 676000,
+    "totalSales": 1255000,
+    "profit": 579000,
+    "items": [
+      {
+        "name": "Bombai",
+        "unit": "Kilogram",
+        "sell_price": 50000,
+        "cost_price": 35000,
+        "qty": 5,
+        "subtotal": 250000
+      },
+      {
+        "name": "Seledri",
+        "unit": "Kilogram",
+        "sell_price": 35000,
+        "cost_price": 17000,
+        "qty": 3,
+        "subtotal": 105000
+      },
+      {
+        "name": "Buncis",
+        "unit": "Kilogram",
+        "sell_price": 15000,
+        "cost_price": 7500,
+        "qty": 60,
+        "subtotal": 900000
+      }
+    ]
+  },
+  {
+    "file": "Invoice januari - ledokombo.xlsx",
+    "sheet": "20",
+    "customer": "Sumberlesung",
+    "invoiceNo": "001/20012026",
+    "date": "2026-01-20",
+    "totalItems": 8,
+    "totalCost": 776000,
+    "totalSales": 1180500,
+    "profit": 404500,
+    "items": [
+      {
+        "name": "Jahe",
+        "unit": "Kilogram",
+        "sell_price": 30000,
+        "cost_price": 22000,
+        "qty": 1,
+        "subtotal": 30000
+      },
+      {
+        "name": "Bombai",
+        "unit": "Kilogram",
+        "sell_price": 38000,
+        "cost_price": 28000,
+        "qty": 5,
+        "subtotal": 190000
+      },
+      {
+        "name": "Cabe merah",
+        "unit": "Kilogram",
+        "sell_price": 20000,
+        "cost_price": 18000,
+        "qty": 2,
+        "subtotal": 40000
+      },
+      {
+        "name": "Tomat",
+        "unit": "Kilogram",
+        "sell_price": 9000,
+        "cost_price": 6000,
+        "qty": 3,
+        "subtotal": 27000
+      },
+      {
+        "name": "Seledri",
+        "unit": "Kilogram",
+        "sell_price": 25000,
+        "cost_price": 10000,
+        "qty": 2,
+        "subtotal": 50000
+      },
+      {
+        "name": "Lengkuas",
+        "unit": "Kilogram",
+        "sell_price": 11000,
+        "cost_price": 10000,
+        "qty": 1,
+        "subtotal": 11000
+      },
+      {
+        "name": "Kentang",
+        "unit": "Kilogram",
+        "sell_price": 15000,
+        "cost_price": 10000,
+        "qty": 0.5,
+        "subtotal": 7500
+      },
+      {
+        "name": "Buncis",
+        "unit": "Kilogram",
+        "sell_price": 11000,
+        "cost_price": 7000,
+        "qty": 75,
+        "subtotal": 825000
+      }
+    ]
+  },
+  {
+    "file": "Invoice januari.xlsx",
+    "sheet": "18",
+    "customer": "Sumberlesung",
+    "invoiceNo": "001/18012026",
+    "date": "2026-01-18",
+    "totalItems": 7,
+    "totalCost": 1164000,
+    "totalSales": 1946500,
+    "profit": 782500,
+    "items": [
+      {
+        "name": "Daun jeruk",
+        "unit": "Kilogram",
+        "sell_price": 20000,
+        "cost_price": 12000,
+        "qty": 1,
+        "subtotal": 20000
+      },
+      {
+        "name": "Kunyit",
+        "unit": "Kilogram",
+        "sell_price": 20000,
+        "cost_price": 4900,
+        "qty": 5,
+        "subtotal": 100000
+      },
+      {
+        "name": "Sereh",
+        "unit": "Ikat",
+        "sell_price": 6000,
+        "cost_price": 6000,
+        "qty": 4,
+        "subtotal": 24000
+      },
+      {
+        "name": "Tomat",
+        "unit": "Kilogram",
+        "sell_price": 10000,
+        "cost_price": 7000,
+        "qty": 10,
+        "subtotal": 100000
+      },
+      {
+        "name": "Kecambah",
+        "unit": "Kilogram",
+        "sell_price": 17500,
+        "cost_price": 10500,
+        "qty": 85,
+        "subtotal": 1487500
+      },
+      {
+        "name": "Seledri",
+        "unit": "Kilogram",
+        "sell_price": 35000,
+        "cost_price": 17000,
+        "qty": 3,
+        "subtotal": 105000
+      },
+      {
+        "name": "Kemiri",
+        "unit": "Kilogram",
+        "sell_price": 55000,
+        "cost_price": 45000,
+        "qty": 2,
+        "subtotal": 110000
+      }
+    ]
+  },
+  {
+    "file": "Invoice januari.xlsx",
+    "sheet": "20",
+    "customer": "SPPG BEDADUNG",
+    "invoiceNo": "001/20012026",
+    "date": "2026-01-20",
+    "totalItems": 1,
+    "totalCost": 496000,
+    "totalSales": 1240000,
+    "profit": 744000,
+    "items": [
+      {
+        "name": "Pakcoy",
+        "unit": "Kilogram",
+        "sell_price": 10000,
+        "cost_price": 4000,
+        "qty": 124,
+        "subtotal": 1240000
+      }
+    ]
+  },
+  {
+    "file": "Invoice januari.xlsx",
+    "sheet": "21",
+    "customer": "SPPG BEDADUNG",
+    "invoiceNo": "001/21012026",
+    "date": "2026-01-21",
+    "totalItems": 5,
+    "totalCost": 957500,
+    "totalSales": 1310000,
+    "profit": 352500,
+    "items": [
+      {
+        "name": "Seledri",
+        "unit": "Kilogram",
+        "sell_price": 25000,
+        "cost_price": 10000,
+        "qty": 1,
+        "subtotal": 25000
+      },
+      {
+        "name": "Tauge",
+        "unit": "Kilogram",
+        "sell_price": 17500,
+        "cost_price": 10000,
+        "qty": 10,
+        "subtotal": 175000
+      },
+      {
+        "name": "Daun Bawang",
+        "unit": "Kilogram",
+        "sell_price": 40000,
+        "cost_price": 33000,
+        "qty": 5,
+        "subtotal": 200000
+      },
+      {
+        "name": "Timun",
+        "unit": "Kilogram",
+        "sell_price": 7000,
+        "cost_price": 3500,
+        "qty": 55,
+        "subtotal": 385000
+      },
+      {
+        "name": "Selada Keriting",
+        "unit": "Kilogram",
+        "sell_price": 37500,
+        "cost_price": 35000,
+        "qty": 14,
+        "subtotal": 525000
+      }
+    ]
+  },
+  {
+    "file": "Invoice januari.xlsx",
+    "sheet": "22",
+    "customer": "SPPG BEDADUNG",
+    "invoiceNo": "001/22012026",
+    "date": "2026-01-22",
+    "totalItems": 2,
+    "totalCost": 620000,
+    "totalSales": 1230000,
+    "profit": 610000,
+    "items": [
+      {
+        "name": "Bombay",
+        "unit": "Kilogram",
+        "sell_price": 38000,
+        "cost_price": 28000,
+        "qty": 5,
+        "subtotal": 190000
+      },
+      {
+        "name": "Brokoli Putih",
+        "unit": "Kilogram",
+        "sell_price": 13000,
+        "cost_price": 6000,
+        "qty": 80,
+        "subtotal": 1040000
+      }
+    ]
+  },
+  {
+    "file": "Invoice januari.xlsx",
+    "sheet": "25",
+    "customer": "SPPG BEDADUNG",
+    "invoiceNo": "001/25012026",
+    "date": "2026-01-25",
+    "totalItems": 3,
+    "totalCost": 1135800,
+    "totalSales": 1650000,
+    "profit": 514200,
+    "items": [
+      {
+        "name": "Jahe",
+        "unit": "Kilogram",
+        "sell_price": 29000,
+        "cost_price": 21000,
+        "qty": 3,
+        "subtotal": 87000
+      },
+      {
+        "name": "Buncis",
+        "unit": "Kilogram",
+        "sell_price": 15000,
+        "cost_price": 8000,
+        "qty": 60,
+        "subtotal": 900000
+      },
+      {
+        "name": "Jagung pipil 1kg golden farm",
+        "unit": "Pcs",
+        "sell_price": 51000,
+        "cost_price": 45600,
+        "qty": 13,
+        "subtotal": 663000
+      }
+    ]
+  },
+  {
+    "file": "Invoice januari.xlsx",
+    "sheet": "26",
+    "customer": "SPPG BEDADUNG",
+    "invoiceNo": "001/26012026",
+    "date": "2026-01-26",
+    "totalItems": 8,
+    "totalCost": 1401500,
+    "totalSales": 2140000,
+    "profit": 738500,
+    "items": [
+      {
+        "name": "Jahe",
+        "unit": "Kilogram",
+        "sell_price": 29000,
+        "cost_price": 20000,
+        "qty": 3,
+        "subtotal": 87000
+      },
+      {
+        "name": "Kunyit",
+        "unit": "Kilogram",
+        "sell_price": 13000,
+        "cost_price": 6000,
+        "qty": 5,
+        "subtotal": 65000
+      },
+      {
+        "name": "Bawang prei utuh",
+        "unit": "Kilogram",
+        "sell_price": 11000,
+        "cost_price": 5000,
+        "qty": 3,
+        "subtotal": 33000
+      },
+      {
+        "name": "Daun salam",
+        "unit": "Kilogram",
+        "sell_price": 17000,
+        "cost_price": 15000,
+        "qty": 1,
+        "subtotal": 17000
+      },
+      {
+        "name": "Kemiri",
+        "unit": "Kilogram",
+        "sell_price": 50000,
+        "cost_price": 45000,
+        "qty": 2,
+        "subtotal": 100000
+      },
+      {
+        "name": "Labu siam",
+        "unit": "Kilogram",
+        "sell_price": 6500,
+        "cost_price": 3000,
+        "qty": 150,
+        "subtotal": 975000
+      },
+      {
+        "name": "Cabe merah",
+        "unit": "Kilogram",
+        "sell_price": 20000,
+        "cost_price": 15000,
+        "qty": 10,
+        "subtotal": 200000
+      },
+      {
+        "name": "Jagung pipil 1kg golden farm",
+        "unit": "Pcs",
+        "sell_price": 51000,
+        "cost_price": 45500,
+        "qty": 13,
+        "subtotal": 663000
+      }
+    ]
+  },
+  {
+    "file": "Invoice januari.xlsx",
+    "sheet": "26 (2)",
+    "customer": "SPPG KEMUNINGSARI",
+    "invoiceNo": "002/26012026",
+    "date": "2026-01-26",
+    "totalItems": 1,
+    "totalCost": 105000,
+    "totalSales": 245000,
+    "profit": 140000,
+    "items": [
+      {
+        "name": "Labu siam",
+        "unit": "Kilogram",
+        "sell_price": 7000,
+        "cost_price": 3000,
+        "qty": 35,
+        "subtotal": 245000
+      }
+    ]
+  },
+  {
+    "file": "Invoice januari.xlsx",
+    "sheet": "27",
+    "customer": "SPPG BEDADUNG",
+    "invoiceNo": "001/27012026",
+    "date": "2026-01-27",
+    "totalItems": 6,
+    "totalCost": 2850000,
+    "totalSales": 5501000,
+    "profit": 2651000,
+    "items": [
+      {
+        "name": "Bawang bombai",
+        "unit": "Kilogram",
+        "sell_price": 38000,
+        "cost_price": 25000,
+        "qty": 5,
+        "subtotal": 190000
+      },
+      {
+        "name": "Bawang prei utuh",
+        "unit": "Kilogram",
+        "sell_price": 11000,
+        "cost_price": 7000,
+        "qty": 3,
+        "subtotal": 33000
+      },
+      {
+        "name": "Buah nanas",
+        "unit": "Pcs",
+        "sell_price": 11000,
+        "cost_price": 8000,
+        "qty": 5,
+        "subtotal": 55000
+      },
+      {
+        "name": "Selada kriting",
+        "unit": "Kilogram",
+        "sell_price": 37500,
+        "cost_price": 22500,
+        "qty": 26,
+        "subtotal": 975000
+      },
+      {
+        "name": "Buncis",
+        "unit": "Kilogram",
+        "sell_price": 15000,
+        "cost_price": 7000,
+        "qty": 90,
+        "subtotal": 1350000
+      },
+      {
+        "name": "Kentang",
+        "unit": "Kilogram",
+        "sell_price": 14000,
+        "cost_price": 7000,
+        "qty": 207,
+        "subtotal": 2898000
+      }
+    ]
+  },
+  {
+    "file": "Invoice januari.xlsx",
+    "sheet": "27 (2)",
+    "customer": "SPPG KEMUNINGSARI",
+    "invoiceNo": "002/27012026",
+    "date": "2026-01-27",
+    "totalItems": 2,
+    "totalCost": 687000,
+    "totalSales": 1147000,
+    "profit": 460000,
+    "items": [
+      {
+        "name": "Selada Keriting",
+        "unit": "Kilogram",
+        "sell_price": 37500,
+        "cost_price": 22500,
+        "qty": 30,
+        "subtotal": 1125000
+      },
+      {
+        "name": "Jeruk Nipis",
+        "unit": "Kilogram",
+        "sell_price": 11000,
+        "cost_price": 6000,
+        "qty": 2,
+        "subtotal": 22000
+      }
+    ]
+  },
+  {
+    "file": "Invoice januari.xlsx",
+    "sheet": "28",
+    "customer": "SPPG BEDADUNG",
+    "invoiceNo": "001/28012026",
+    "date": "2026-01-28",
+    "totalItems": 4,
+    "totalCost": 526000,
+    "totalSales": 1348000,
+    "profit": 822000,
+    "items": [
+      {
+        "name": "Bawang prei utuh",
+        "unit": "Kilogram",
+        "sell_price": 11000,
+        "cost_price": 11000,
+        "qty": 3,
+        "subtotal": 33000
+      },
+      {
+        "name": "Seledri",
+        "unit": "Kilogram",
+        "sell_price": 25000,
+        "cost_price": 25000,
+        "qty": 1,
+        "subtotal": 25000
+      },
+      {
+        "name": "Sawi",
+        "unit": "Kilogram",
+        "sell_price": 12000,
+        "cost_price": 4000,
+        "qty": 100,
+        "subtotal": 1200000
+      },
+      {
+        "name": "Bawang goreng BJ",
+        "unit": "Kilogram",
+        "sell_price": 45000,
+        "cost_price": 34000,
+        "qty": 2,
+        "subtotal": 90000
+      }
+    ]
+  },
+  {
+    "file": "Invoice januari.xlsx",
+    "sheet": "28 (2)",
+    "customer": "SPPG KEMUNINGSARI",
+    "invoiceNo": "002/28012026",
+    "date": "2026-01-28",
+    "totalItems": 3,
+    "totalCost": 321000,
+    "totalSales": 862000,
+    "profit": 541000,
+    "items": [
+      {
+        "name": "Tomat",
+        "unit": "Kilogram",
+        "sell_price": 10000,
+        "cost_price": 3000,
+        "qty": 55,
+        "subtotal": 550000
+      },
+      {
+        "name": "Sereh",
+        "unit": "Kilogram",
+        "sell_price": 12000,
+        "cost_price": 12000,
+        "qty": 1,
+        "subtotal": 12000
+      },
+      {
+        "name": "Plastik klip 7x10 isi 100",
+        "unit": "pcs",
+        "sell_price": 7500,
+        "cost_price": 3600,
+        "qty": 40,
+        "subtotal": 300000
+      }
+    ]
+  },
+  {
+    "file": "Invoice januari.xlsx",
+    "sheet": "29",
+    "customer": "SPPG BEDADUNG",
+    "invoiceNo": "001/28012026",
+    "date": "2026-01-28",
+    "totalItems": 6,
+    "totalCost": 579000,
+    "totalSales": 1267000,
+    "profit": 688000,
+    "items": [
+      {
+        "name": "Jahe",
+        "unit": "Kilogram",
+        "sell_price": 30000,
+        "cost_price": 22000,
+        "qty": 2,
+        "subtotal": 60000
+      },
+      {
+        "name": "Serai utuh",
+        "unit": "Kilogram",
+        "sell_price": 8000,
+        "cost_price": 7000,
+        "qty": 4,
+        "subtotal": 32000
+      },
+      {
+        "name": "Daun Salam",
+        "unit": "Kilogram",
+        "sell_price": 15000,
+        "cost_price": 15000,
+        "qty": 1,
+        "subtotal": 15000
+      },
+      {
+        "name": "Daun Jeruk",
+        "unit": "Kilogram",
+        "sell_price": 20000,
+        "cost_price": 12000,
+        "qty": 1,
+        "subtotal": 20000
+      },
+      {
+        "name": "Sawi hijau",
+        "unit": "Kilogram",
+        "sell_price": 12000,
+        "cost_price": 4500,
+        "qty": 60,
+        "subtotal": 720000
+      },
+      {
+        "name": "Timun",
+        "unit": "Kilogram",
+        "sell_price": 7000,
+        "cost_price": 3500,
+        "qty": 60,
+        "subtotal": 420000
+      }
+    ]
+  }
+]
