@@ -19,22 +19,17 @@ class SecurityHeaders
         $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
         $response->headers->set('Permissions-Policy', "geolocation=(), microphone=(), camera=()");
 
-        // Content Security Policy tuned for app needs (Midtrans Snap + QR API)
-        $isProd = (bool) config('midtrans.is_production', false);
-        $midtrans = $isProd ? 'https://app.midtrans.com' : 'https://app.sandbox.midtrans.com';
+        // Content Security Policy
         $csp = [
             "default-src 'self'",
-            "img-src 'self' data: https://api.qrserver.com",
-            // Allow Midtrans Snap script; keep inline for Blade stacks and Bootstrap inline styles
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval' {$midtrans}",
+            "img-src 'self' data:",
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net",
             // Allow Google Fonts stylesheet
             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
             // Allow font files from Google Fonts
             "font-src 'self' https://fonts.gstatic.com data:",
-            // Allow XHR/fetch to Midtrans if needed (e.g., Snap internal calls)
-            "connect-src 'self' {$midtrans}",
-            // Allow embedding Midtrans Snap iframe
-            "frame-src 'self' {$midtrans}",
+            "connect-src 'self'",
+            "frame-src 'none'",
             // Do not allow our pages to be framed by other sites
             "frame-ancestors 'none'",
         ];

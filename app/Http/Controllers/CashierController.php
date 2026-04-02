@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\RoleStatus;
 use App\Http\Requests\Cashier\CheckoutRequest;
 use App\Http\Requests\Cashier\HoldRequest;
 use App\Models\Transaction;
@@ -23,14 +22,7 @@ class CashierController extends Controller
         private readonly CashierServiceInterface $cashier,
         private readonly SettingsServiceInterface $settings,
         private readonly ActivityLoggerInterface $logger
-    ) {
-        $this->middleware(function ($request, $next) {
-            if (!Auth::check() || !in_array(Auth::user()->role, [RoleStatus::ADMIN->value, RoleStatus::CASHIER->value], true)) {
-                abort(403, 'Anda tidak memiliki izin untuk mengakses halaman ini.');
-            }
-            return $next($request);
-        });
-    }
+    ) {}
 
     public function index(): View
     {
@@ -87,21 +79,6 @@ class CashierController extends Controller
                 'note' => $data['note'] ?? null,
             ]);
 
-            if (
-                ($data['payment_method'] === 'qris') &&
-                ($request->ajax() || $request->wantsJson() || $request->expectsJson())
-            ) {
-                $order->loadMissing('latestPayment');
-                $payment = $order->latestPayment;
-                $token = $payment->metadata['snap_token'] ?? null;
-                $redir = $payment->metadata['redirect_url'] ?? null;
-                return response()->json([
-                    'transaction_id' => $order->id,
-                    'invoice' => $order->invoice_number,
-                    'snap_token' => $token,
-                    'redirect_url' => $redir,
-                ]);
-            }
         } catch (\Throwable $e) {
             return back()
                 ->withInput()

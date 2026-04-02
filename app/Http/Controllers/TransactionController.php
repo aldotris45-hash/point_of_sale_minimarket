@@ -12,6 +12,7 @@ use App\Services\Settings\SettingsServiceInterface;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use App\Helpers\Terbilang;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
@@ -109,47 +110,22 @@ class TransactionController extends Controller
             })
             ->addColumn('method', function (Transaction $t) {
                 $m = is_string($t->payment_method) ? $t->payment_method : ($t->payment_method?->value ?? '');
-                // humanize special code
                 if ($m === 'cash_tempo') {
                     return 'TUNAI TEMPO';
                 }
                 return strtoupper($m);
             })
             ->addColumn('due_badge', function (Transaction $t) {
-                $m = is_string($t->payment_method) ? $t->payment_method : ($t->payment_method?->value ?? '');
-                if ($m === 'cash_tempo') {
-                    if ($t->amount_paid < $t->total) {
-                        return '<span class="badge bg-danger">UTANG</span>';
-                    }
-                    return '<span class="badge bg-success">LUNAS</span>';
-                }
-                return '';
+                return view('transactions.partials.due-badge', ['t' => $t])->render();
             })
             ->addColumn('status_badge', function (Transaction $t) {
-                $s = is_string($t->status) ? $t->status : ($t->status?->value ?? '');
-                $class = $s === 'paid' ? 'bg-success' : ($s === 'pending' ? 'bg-warning text-dark' : 'bg-secondary');
-                return '<span class="badge ' . $class . '">' . strtoupper($s) . '</span>';
+                return view('partials.status-badge', ['status' => $t->status])->render();
             })
             ->editColumn('total', function (Transaction $t) {
                 return 'Rp ' . number_format((float) $t->total, 0, ',', '.');
             })
             ->addColumn('action', function (Transaction $t) {
-                $showUrl = route('transaksi.show', $t);
-                $receiptUrl = route('transaksi.struk', $t);
-                $html = '<div class="d-flex justify-content-end gap-1">'
-                    . '<a class="btn btn-sm btn-outline-primary" href="' . e($showUrl) . '"><i class="bi bi-eye"></i></a>'
-                    . '<a class="btn btn-sm btn-outline-secondary" href="' . e($receiptUrl) . '" target="_blank" rel="noopener noreferrer"><i class="bi bi-receipt-cutoff"></i></a>';
-
-                if (Auth::check() && Auth::user()->role === RoleStatus::ADMIN->value) {
-                    $deleteUrl = route('transaksi.destroy', $t);
-                    $html .= '<form action="' . e($deleteUrl) . '" method="POST" class="d-inline" onsubmit="return confirm(\'Yakin hapus transaksi ' . e($t->invoice_number) . '? Stok akan dikembalikan.\')">'
-                        . csrf_field() . method_field('DELETE')
-                        . '<button type="submit" class="btn btn-sm btn-outline-danger" title="Hapus"><i class="bi bi-trash"></i></button>'
-                        . '</form>';
-                }
-
-                $html .= '</div>';
-                return $html;
+                return view('transactions.partials.action', ['t' => $t])->render();
             })
             ->rawColumns(['invoice', 'status_badge', 'due_badge', 'action'])
             ->toJson();
@@ -215,13 +191,11 @@ class TransactionController extends Controller
                 }
             }
 
-            // Delete related records
-            $transaction->details()->delete();
-            $transaction->payments()->delete();
+            // Soft delete — data tetap tersimpan untuk audit trail
             $transaction->delete();
         });
 
-        $this->logger->log('Hapus Transaksi', 'Transaksi dihapus oleh admin', [
+        $this->logger->log('Hapus Transaksi', 'Transaksi dihapus oleh admin (soft delete)', [
             'transaction_id' => $transaction->id,
             'invoice' => $invoiceNumber,
         ]);
@@ -288,4 +262,75 @@ class TransactionController extends Controller
             'terbilang'         => Terbilang::rupiah((float) $transaction->total),
         ]);
     }
+
+    // ── PDF Downloads ──────────────────────────────────────────────
+
+    /**
+     * Shared helper: gather common receipt/invoice data.
+     */
+    private function pdfData(Transaction $transaction, bool $withTerbilang = false): array
+    {
+        $transaction->loadMissing(['details.product', 'user', 'customer']);
+
+        $data = [
+            'transaction'        => $transaction,
+            'store_name'         => $this->settings->storeName(),
+            'store_address'      => $this->settings->storeAddress(),
+            'store_phone'        => $this->settings->storePhone(),
+            'store_bank_account' => $this->settings->storeBankAccount(),
+            'store_logo'         => $this->settings->storeLogoPath(),
+            'currency'           => $this->settings->currency(),
+            'discount_percent'   => $this->settings->discountPercent(),
+            'tax_percent'        => $this->settings->taxPercent(),
+        ];
+
+        if ($withTerbilang) {
+            $data['terbilang'] = Terbilang::rupiah((float) $transaction->total);
+        }
+
+        return $data;
+    }
+
+    /**
+     * Download struk as PDF (80mm thermal receipt width).
+     */
+    public function receiptPdf(Transaction $transaction)
+    {
+        $data = $this->pdfData($transaction);
+
+        $pdf = Pdf::loadView('transactions.receipt', $data)
+            ->setPaper([0, 0, 226.77, 841.89], 'portrait') // ~80mm x ~297mm
+            ->setOption(['isRemoteEnabled' => true]);
+
+        return $pdf->download("struk-{$transaction->invoice_number}.pdf");
+    }
+
+    /**
+     * Download invoice as PDF (A4).
+     */
+    public function invoicePdf(Transaction $transaction)
+    {
+        $data = $this->pdfData($transaction, true);
+
+        $pdf = Pdf::loadView('transactions.print-invoice', $data)
+            ->setPaper('a4', 'portrait')
+            ->setOption(['isRemoteEnabled' => true]);
+
+        return $pdf->download("invoice-{$transaction->invoice_number}.pdf");
+    }
+
+    /**
+     * Download faktur as PDF (A4).
+     */
+    public function fakturPdf(Transaction $transaction)
+    {
+        $data = $this->pdfData($transaction, true);
+
+        $pdf = Pdf::loadView('transactions.print-faktur', $data)
+            ->setPaper('a4', 'portrait')
+            ->setOption(['isRemoteEnabled' => true]);
+
+        return $pdf->download("faktur-{$transaction->invoice_number}.pdf");
+    }
 }
+

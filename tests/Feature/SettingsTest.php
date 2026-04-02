@@ -90,4 +90,46 @@ class SettingsTest extends TestCase
         $page->assertSee('Toko XYZ');
         $page->assertSee('BCA 000-111-222');
     }
+
+    public function test_admin_can_update_threshold_settings(): void
+    {
+        $this->actingAsAdmin();
+
+        $payload = [
+            'store_name' => 'Toko Test',
+            'currency' => 'IDR',
+            'discount_percent' => 0,
+            'tax_percent' => 11,
+            'low_stock_threshold' => 10,
+            'expiry_alert_days' => 14,
+        ];
+
+        $res = $this->put(route('pengaturan.update'), $payload);
+        $res->assertRedirect(route('pengaturan.index'));
+        $res->assertSessionHas('success');
+
+        $lowStock = Setting::where('key', 'pos.low_stock_threshold')->firstOrFail();
+        $this->assertEquals(10, $lowStock->value);
+
+        $expiry = Setting::where('key', 'pos.expiry_alert_days')->firstOrFail();
+        $this->assertEquals(14, $expiry->value);
+    }
+
+    public function test_threshold_settings_validation(): void
+    {
+        $this->actingAsAdmin();
+
+        $payload = [
+            'store_name' => 'Toko Test',
+            'currency' => 'IDR',
+            'discount_percent' => 0,
+            'tax_percent' => 11,
+            'low_stock_threshold' => 0,   // below min:1
+            'expiry_alert_days' => 999,   // above max:365
+        ];
+
+        $res = $this->from(route('pengaturan.index'))->put(route('pengaturan.update'), $payload);
+        $res->assertRedirect(route('pengaturan.index'));
+        $res->assertSessionHasErrors(['low_stock_threshold', 'expiry_alert_days']);
+    }
 }

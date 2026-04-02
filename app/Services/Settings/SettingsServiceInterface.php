@@ -19,4 +19,6 @@ interface SettingsServiceInterface
     public function storeBankAccount(): string;
     public function storeLogoPath(): ?string;
     public function receiptNumberFormat(): string;
+    public function lowStockThreshold(): int;
+    public function expiryAlertDays(): int;
 }

@@ -9,7 +9,6 @@ use App\Models\Product;
 use App\Models\Transaction;
 use App\Models\TransactionDetail;
 use App\Services\Settings\SettingsServiceInterface;
-use App\Services\Payments\MidtransServiceInterface;
 use App\Services\Product\ProductAlertService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -19,7 +18,6 @@ class CashierService implements CashierServiceInterface
 {
     public function __construct(
         private readonly SettingsServiceInterface $settings,
-        private readonly MidtransServiceInterface $midtrans,
     ) {}
 
     public function checkout(array $items, string $paymentMethod, float $paidAmount = 0, ?string $note = null, ?int $suspendedFromId = null, ?int $customerId = null): Transaction
@@ -53,6 +51,7 @@ class CashierService implements CashierServiceInterface
                     'price' => (float) $product->price,
                     'quantity' => $qty,
                     'total' => $line,
+                    '_product' => $product, // simpan instance untuk dipakai nanti
                 ];
             }
 
@@ -64,7 +63,7 @@ class CashierService implements CashierServiceInterface
             $taxAmount = $afterDiscount * ($taxPercent / 100);
             $total = $afterDiscount + $taxAmount;
 
-            // for normal cash we must have paid >= total; tempo and qris can be less
+            // for normal cash we must have paid >= total; tempo can be less
         if ($method === PaymentMethod::CASH && $paidAmount < $total) {
             throw new InvalidArgumentException('Nominal bayar kurang dari total.');
         }
@@ -83,9 +82,6 @@ class CashierService implements CashierServiceInterface
             $amountPaid = $paidAmount;
             $change = max(0, $paidAmount - $total);
             $status = $paidAmount >= $total ? TransactionStatus::PAID : TransactionStatus::PENDING;
-        } else {
-            // QRIS or any other non-cash
-            $status = TransactionStatus::PENDING;
         }
 
         $trx = Transaction::create([
@@ -109,16 +105,18 @@ class CashierService implements CashierServiceInterface
             $trx->update(['invoice_number' => $invoice]);
 
             foreach ($built as $b) {
+                $product = $b['_product'];
+                unset($b['_product']); // jangan simpan ke DB
+
                 TransactionDetail::create([
                     'transaction_id' => $trx->id,
                     ...$b,
                 ]);
                 Product::whereKey($b['product_id'])->decrement('stock', (int) $b['quantity']);
 
-                $p = Product::find($b['product_id']);
-                if ($p) {
-                    app(ProductAlertService::class)->checkAndNotifyForProduct($p, 7);
-                }
+                // Gunakan instance yang sudah ada, refresh untuk stok terbaru
+                $product->refresh();
+                app(ProductAlertService::class)->checkAndNotifyForProduct($product, $this->settings->expiryAlertDays());
             }
 
             ActivityLog::create([
@@ -129,9 +127,7 @@ class CashierService implements CashierServiceInterface
                 'user_agent' => request()->userAgent(),
             ]);
 
-            if ($method === PaymentMethod::QRIS) {
-                $this->midtrans->createSnapTransaction($trx);
-            }
+
 
             if ($suspendedFromId && in_array($method, [PaymentMethod::CASH, PaymentMethod::CASH_TEMPO], true)) {
                 $original = Transaction::where('id', $suspendedFromId)

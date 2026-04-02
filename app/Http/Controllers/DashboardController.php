@@ -31,8 +31,9 @@ class DashboardController extends Controller
             ->whereDate('created_at', $today)
             ->count('id');
 
+        $lowStockThreshold = $this->settings->lowStockThreshold();
         $outOfStock = (int) Product::query()->where('stock', '<=', 0)->count('id');
-        $lowStock = (int) Product::query()->where('stock', '>', 0)->where('stock', '<=', 5)->count('id');
+        $lowStock = (int) Product::query()->where('stock', '>', 0)->where('stock', '<=', $lowStockThreshold)->count('id');
 
         $rows = $this->report->dailySalesQuery([
             'from' => $from7->toDateString(),

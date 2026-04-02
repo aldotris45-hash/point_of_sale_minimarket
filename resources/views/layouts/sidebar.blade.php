@@ -105,6 +105,12 @@
                     <!-- Administrasi -->
                     <li class="nav-item px-3 pt-3 pb-2 text-muted text-uppercase small">Administrasi</li>
                     <li class="nav-item">
+                        <a class="nav-link d-flex align-items-center gap-2 {{ request()->is('arus-kas*') ? 'active' : '' }}"
+                            href="{{ url('/arus-kas') }}">
+                            <i class="bi bi-arrow-left-right"></i><span>Arus Kas</span>
+                        </a>
+                    </li>
+                    <li class="nav-item mt-1">
                         <a class="nav-link d-flex align-items-center gap-2 {{ request()->is('pengeluaran*') ? 'active' : '' }}"
                             href="{{ url('/pengeluaran') }}">
                             <i class="bi bi-cash-flow"></i><span>Pengeluaran</span>

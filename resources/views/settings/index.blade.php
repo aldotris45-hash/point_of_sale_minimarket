@@ -129,6 +129,28 @@
                                 @enderror
                             </div>
 
+                            <div class="col-12 col-md-3">
+                                <label for="low_stock_threshold" class="form-label">Batas Stok Rendah</label>
+                                <input type="number" step="1" min="1" max="1000" id="low_stock_threshold"
+                                    name="low_stock_threshold" value="{{ old('low_stock_threshold', $low_stock_threshold ?? 5) }}"
+                                    class="form-control @error('low_stock_threshold') is-invalid @enderror" required>
+                                <div class="form-text">Notifikasi jika stok ≤ nilai ini.</div>
+                                @error('low_stock_threshold')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="col-12 col-md-3">
+                                <label for="expiry_alert_days" class="form-label">Peringatan Kadaluarsa (hari)</label>
+                                <input type="number" step="1" min="1" max="365" id="expiry_alert_days"
+                                    name="expiry_alert_days" value="{{ old('expiry_alert_days', $expiry_alert_days ?? 7) }}"
+                                    class="form-control @error('expiry_alert_days') is-invalid @enderror" required>
+                                <div class="form-text">Notifikasi jika produk kadaluarsa dalam X hari.</div>
+                                @error('expiry_alert_days')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
+
                             <div class="col-12">
                                 <label for="store_logo" class="form-label">Logo Toko</label>
                                 <input class="form-control @error('store_logo') is-invalid @enderror" type="file"

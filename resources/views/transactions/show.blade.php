@@ -15,6 +15,44 @@
                     rel="noopener noreferrer"><i class="bi bi-file-earmark-text"></i> Cetak Invoice</a>
                 <a class="btn btn-success" href="{{ route('transaksi.faktur', $trx) }}" target="_blank"
                     rel="noopener noreferrer"><i class="bi bi-receipt"></i> Cetak Faktur</a>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-outline-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i class="bi bi-whatsapp"></i> Bagikan
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                            <a class="dropdown-item" href="{{ 'https://wa.me/?text=' . rawurlencode("*Struk Pembayaran*\nNo: {$trx->invoice_number}\nTotal: Rp " . number_format($trx->total, 0, ',', '.') . "\n\nDownload PDF:\n" . route('transaksi.struk.pdf', $trx)) }}" target="_blank" rel="noopener noreferrer">
+                                <i class="bi bi-receipt-cutoff"></i> Struk via WA
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="{{ 'https://wa.me/?text=' . rawurlencode("*Invoice*\nNo: {$trx->invoice_number}\nTotal: Rp " . number_format($trx->total, 0, ',', '.') . "\n\nDownload PDF:\n" . route('transaksi.invoice.pdf', $trx)) }}" target="_blank" rel="noopener noreferrer">
+                                <i class="bi bi-file-earmark-text"></i> Invoice via WA
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="{{ 'https://wa.me/?text=' . rawurlencode("*Faktur Penjualan*\nNo: {$trx->invoice_number}\nTotal: Rp " . number_format($trx->total, 0, ',', '.') . "\n\nDownload PDF:\n" . route('transaksi.faktur.pdf', $trx)) }}" target="_blank" rel="noopener noreferrer">
+                                <i class="bi bi-receipt"></i> Faktur via WA
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a class="dropdown-item" href="{{ route('transaksi.struk.pdf', $trx) }}">
+                                <i class="bi bi-file-earmark-pdf"></i> Download Struk PDF
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="{{ route('transaksi.invoice.pdf', $trx) }}">
+                                <i class="bi bi-file-earmark-pdf"></i> Download Invoice PDF
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" href="{{ route('transaksi.faktur.pdf', $trx) }}">
+                                <i class="bi bi-file-earmark-pdf"></i> Download Faktur PDF
+                            </a>
+                        </li>
+                    </ul>
+                </div>
                 @if(auth()->user()->role === \App\Enums\RoleStatus::ADMIN->value)
                     <form action="{{ route('transaksi.destroy', $trx) }}" method="POST" class="d-inline"
                         onsubmit="return confirm('Yakin hapus transaksi {{ $trx->invoice_number }}? Stok produk akan dikembalikan.')">
@@ -116,7 +154,6 @@
                                 <span>Total</span><span>@money($trx->total)</span>
                             </div>
                         </div>
-                        @php $isPendingQris = (($trx->payment_method->value ?? $trx->payment_method) === 'qris') && (($trx->status->value ?? $trx->status) === 'pending'); @endphp
                         <div class="d-grid gap-2 mt-3">
                             <a class="btn btn-outline-secondary" href="{{ route('transaksi.struk', $trx) }}"
                                 target="_blank" rel="noopener noreferrer"><i class="bi bi-receipt-cutoff"></i> Lihat
@@ -125,10 +162,6 @@
                                 target="_blank" rel="noopener noreferrer"><i class="bi bi-file-earmark-text"></i> Cetak Invoice</a>
                             <a class="btn btn-outline-success" href="{{ route('transaksi.faktur', $trx) }}"
                                 target="_blank" rel="noopener noreferrer"><i class="bi bi-receipt"></i> Cetak Faktur Penjualan</a>
-                            @if ($isPendingQris)
-                                <a class="btn btn-primary" href="{{ route('pembayaran.show', $trx) }}"><i
-                                        class="bi bi-qr-code"></i> Lanjutkan QRIS</a>
-                            @endif
                         </div>
                         @php
                             $pm = $trx->payment_method->value ?? $trx->payment_method;

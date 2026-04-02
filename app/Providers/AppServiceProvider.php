@@ -17,8 +17,6 @@ use App\Services\User\UserServiceInterface;
 use App\Services\User\UserService;
 use App\Services\Cashier\CashierServiceInterface;
 use App\Services\Cashier\CashierService;
-use App\Services\Payments\MidtransServiceInterface;
-use App\Services\Payments\MidtransService;
 use App\Services\Report\ReportService;
 use App\Services\Supplier\SupplierServiceInterface;
 use App\Services\Supplier\SupplierService;
@@ -47,7 +45,6 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(ProductServiceInterface::class, ProductService::class);
         $this->app->singleton(UserServiceInterface::class, UserService::class);
         $this->app->singleton(CashierServiceInterface::class, CashierService::class);
-        $this->app->singleton(MidtransServiceInterface::class, MidtransService::class);
         $this->app->bind(ReportServiceInterface::class, ReportService::class);
         $this->app->singleton(ActivityLoggerInterface::class, ActivityLogger::class);
         $this->app->singleton(SupplierServiceInterface::class, SupplierService::class);
@@ -102,7 +99,8 @@ class AppServiceProvider extends ServiceProvider
         View::composer('layouts.header', function () {
             if (Auth::check()) {
                 try {
-                    app(\App\Services\Product\ProductAlertService::class)->scanAndNotify(7);
+                    $days = app(\App\Services\Settings\SettingsServiceInterface::class)->expiryAlertDays();
+                    app(\App\Services\Product\ProductAlertService::class)->scanAndNotify($days);
                 } catch (\Throwable $e) {
                     // swallow to avoid blocking request
                 }

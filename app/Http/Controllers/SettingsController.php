@@ -35,6 +35,8 @@ class SettingsController extends Controller
             'store_phone' => $this->settings->storePhone(),
             'store_bank_account' => $this->settings->storeBankAccount(),
             'receipt_format' => $this->settings->receiptNumberFormat(),
+            'low_stock_threshold' => $this->settings->lowStockThreshold(),
+            'expiry_alert_days' => $this->settings->expiryAlertDays(),
         ];
 
         return view('settings.index', $data);
@@ -51,6 +53,8 @@ class SettingsController extends Controller
             'store_address' => $this->settings->storeAddress(),
             'store_phone' => $this->settings->storePhone(),
             'receipt_format' => $this->settings->receiptNumberFormat(),
+            'low_stock_threshold' => $this->settings->lowStockThreshold(),
+            'expiry_alert_days' => $this->settings->expiryAlertDays(),
         ];
 
         $this->settings->set('store.name', $validated['store_name'], 'store', 'Nama Toko');
@@ -71,6 +75,8 @@ class SettingsController extends Controller
         $this->settings->set('pos.discount_percent', (float) $validated['discount_percent'], 'pos', 'Diskon Global (%)');
         $this->settings->set('pos.tax_percent', (float) $validated['tax_percent'], 'pos', 'Pajak (%)');
         $this->settings->set('pos.receipt_format', $validated['receipt_format'] ?? 'INV-{YYYY}{MM}{DD}-{SEQ:6}', 'pos', 'Format Penomoran Struk');
+        $this->settings->set('pos.low_stock_threshold', (int) ($validated['low_stock_threshold'] ?? 5), 'pos', 'Batas stok rendah (notifikasi)');
+        $this->settings->set('pos.expiry_alert_days', (int) ($validated['expiry_alert_days'] ?? 7), 'pos', 'Jumlah hari sebelum kadaluarsa untuk notifikasi');
 
         if ($request->hasFile('store_logo')) {
             $file = $request->file('store_logo');
@@ -86,6 +92,8 @@ class SettingsController extends Controller
             'store_address' => $this->settings->storeAddress(),
             'store_phone' => $this->settings->storePhone(),
             'receipt_format' => $this->settings->receiptNumberFormat(),
+            'low_stock_threshold' => $this->settings->lowStockThreshold(),
+            'expiry_alert_days' => $this->settings->expiryAlertDays(),
         ];
         $this->logger->log('Ubah Pengaturan', 'Mengubah pengaturan aplikasi', ['before' => $before, 'after' => $after]);
 

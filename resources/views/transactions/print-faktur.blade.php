@@ -65,8 +65,9 @@
 </head>
 <body>
     <div class="page">
-        <div class="no-print">
+        <div class="no-print" style="display:flex; gap:8px; justify-content:center;">
             <button onclick="window.print()">🖨️ Cetak Faktur Penjualan</button>
+            <x-share-wa :transaction="$transaction" type="faktur" btnClass="btn btn-success" />
         </div>
 
         <!-- Header -->

@@ -110,6 +110,18 @@ class SettingsService implements SettingsServiceInterface
         return is_string($val) ? $val : (string) ($val['value'] ?? 'INV-{YYYY}{MM}{DD}-{SEQ:6}');
     }
 
+    public function lowStockThreshold(): int
+    {
+        $val = $this->get('pos.low_stock_threshold', 5);
+        return is_numeric($val) ? (int) $val : 5;
+    }
+
+    public function expiryAlertDays(): int
+    {
+        $val = $this->get('pos.expiry_alert_days', 7);
+        return is_numeric($val) ? (int) $val : 7;
+    }
+
     /**
      * Determine if the default database connection is available.
      * This prevents crashes during composer install / package discovery.

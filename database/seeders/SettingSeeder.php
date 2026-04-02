@@ -23,5 +23,7 @@ class SettingSeeder extends Seeder
         $settings->set('pos.tax_percent', 11, 'pos', 'PPN dalam persen');
         $settings->set('pos.discount_percent', 0, 'pos', 'Diskon default dalam persen');
         $settings->set('pos.receipt_format', 'INV-{YYYY}{MM}{DD}-{SEQ:6}', 'pos', 'Format Penomoran Struk');
+        $settings->set('pos.low_stock_threshold', 5, 'pos', 'Batas stok rendah (notifikasi)');
+        $settings->set('pos.expiry_alert_days', 7, 'pos', 'Jumlah hari sebelum kadaluarsa untuk notifikasi');
     }
 }

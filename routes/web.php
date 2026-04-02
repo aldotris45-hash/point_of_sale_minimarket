@@ -12,7 +12,6 @@ use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\CashierController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PaymentController;
-use App\Http\Controllers\MidtransController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\TransactionController;
@@ -20,6 +19,7 @@ use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\IncomingGoodController;
 use App\Http\Controllers\StockOpnameController;
+use App\Http\Controllers\CashFlowController;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 
 // Login
@@ -33,10 +33,6 @@ Route::post('/logout', [AuthController::class, 'logout'])
     ->middleware('auth')
     ->name('logout');
 
-// Midtrans webhook
-Route::post('/midtrans/notification', [MidtransController::class, 'notification'])
-    ->middleware(['throttle:30,1'])
-    ->withoutMiddleware([VerifyCsrfToken::class]);
 
 Route::middleware('auth')->group(function () {
     // Notifications
@@ -62,6 +58,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/transaksi/{transaction}/struk', [TransactionController::class, 'receipt'])->name('transaksi.struk');
         Route::get('/transaksi/{transaction}/invoice', [TransactionController::class, 'printInvoice'])->name('transaksi.invoice');
         Route::get('/transaksi/{transaction}/faktur', [TransactionController::class, 'printFaktur'])->name('transaksi.faktur');
+        Route::get('/transaksi/{transaction}/struk/pdf', [TransactionController::class, 'receiptPdf'])->name('transaksi.struk.pdf');
+        Route::get('/transaksi/{transaction}/invoice/pdf', [TransactionController::class, 'invoicePdf'])->name('transaksi.invoice.pdf');
+        Route::get('/transaksi/{transaction}/faktur/pdf', [TransactionController::class, 'fakturPdf'])->name('transaksi.faktur.pdf');
         Route::get('/transaksi', [TransactionController::class, 'index'])->name('transaksi');
         Route::get('/transaksi-data', [TransactionController::class, 'data'])->name('transaksi.data');
         Route::get('/transaksi/{transaction}', [TransactionController::class, 'show'])->name('transaksi.show');
@@ -71,10 +70,6 @@ Route::middleware('auth')->group(function () {
         // Delete transaction (admin only, guarded in controller)
         Route::delete('/transaksi/{transaction}', [TransactionController::class, 'destroy'])->name('transaksi.destroy');
 
-        // Pembayaran
-        Route::get('/pembayaran/{transaction}', [PaymentController::class, 'show'])->name('pembayaran.show');
-        Route::get('/pembayaran/{transaction}/status', [PaymentController::class, 'status'])->name('pembayaran.status');
-        Route::get('/pembayaran/{transaction}/complete', [PaymentController::class, 'complete'])->name('pembayaran.complete');
     });
 
     Route::middleware('role:admin')->group(function () {
@@ -137,6 +132,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/pengeluaran/{expense}/edit', [ExpenseController::class, 'edit'])->name('pengeluaran.edit');
         Route::put('/pengeluaran/{expense}', [ExpenseController::class, 'update'])->name('pengeluaran.update');
         Route::delete('/pengeluaran/{expense}', [ExpenseController::class, 'destroy'])->name('pengeluaran.destroy');
+
+        // Arus Kas
+        Route::get('/arus-kas', [CashFlowController::class, 'index'])->name('arus-kas');
 
         // Supplier
         Route::resource('supplier', SupplierController::class)

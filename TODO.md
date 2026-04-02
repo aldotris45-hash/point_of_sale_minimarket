@@ -48,16 +48,17 @@
 ## Fitur 2: Arus Kas (Cash Flow)
 
 ### 2.1 Tambah Kategori Pengeluaran
-- [ ] Update `ExpenseCategory` enum
+- [x] `ExpenseCategory` enum sudah lengkap (gaji, listrik, bensin, supplies, lainnya)
 
 ### 2.2 Buat CashFlowController
-- [ ] `app/Http/Controllers/CashFlowController.php`
+- [x] `app/Http/Controllers/CashFlowController.php`
 
 ### 2.3 Buat Cash Flow View
-- [ ] `resources/views/cash_flow/index.blade.php`
+- [x] `resources/views/cash_flow/index.blade.php`
 
 ### 2.4 Update Routes
-- [ ] Tambah route arus-kas
+- [x] Tambah route arus-kas
 
 ### 2.5 Update Sidebar
-- [ ] Tambah menu "Arus Kas"
+- [x] Tambah menu "Arus Kas"
+

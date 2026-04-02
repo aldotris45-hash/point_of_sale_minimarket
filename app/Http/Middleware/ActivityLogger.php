@@ -34,7 +34,6 @@ class ActivityLogger
                 'horizon*',
                 'telescope*',
                 'debugbar*',
-                'midtrans/notification',
             ];
             foreach ($skips as $skip) {
                 if (Str::is($skip, $path)) {

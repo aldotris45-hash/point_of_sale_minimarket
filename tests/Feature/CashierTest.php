@@ -8,7 +8,6 @@ use App\Models\Product;
 use App\Models\Transaction;
 use App\Models\User;
 use App\Services\ActivityLog\ActivityLoggerInterface;
-use App\Services\Payments\MidtransServiceInterface;
 use App\Services\Product\ProductAlertService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -23,17 +22,6 @@ class CashierTest extends TestCase
         // Fake side-effect services
         $this->app->instance(ActivityLoggerInterface::class, new class implements ActivityLoggerInterface {
             public function log(string $activity, ?string $description = null, ?array $context = null): void {}
-        });
-        $this->app->instance(MidtransServiceInterface::class, new class implements MidtransServiceInterface {
-            public function createQrisPayment($transaction): \App\Models\Payment
-            {
-                return new \App\Models\Payment();
-            }
-            public function handleNotification(): void {}
-            public function createSnapTransaction($transaction): array
-            {
-                return ['token' => 'dummy', 'redirect_url' => 'https://example.com'];
-            }
         });
         $this->app->instance(ProductAlertService::class, new class extends ProductAlertService {
             public function __construct() {}

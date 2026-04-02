@@ -24,7 +24,7 @@
             <div class="alert alert-danger" role="alert">{{ session('error') }}</div>
         @endif
 
-        {{-- Modal sukses pembayaran (tunai/QRIS) --}}
+        {{-- Modal sukses pembayaran --}}
         <div class="modal fade" id="cashSuccessModal" tabindex="-1" aria-labelledby="cashSuccessLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
@@ -41,7 +41,7 @@
                             <p class="text-muted small mb-0">No. Transaksi: <span
                                     class="fw-semibold">{{ session('printed_invoice') }}</span></p>
                         @endif
-                        <p class="text-muted small">Anda dapat mencetak struk untuk pelanggan.</p>
+                        <p class="text-muted small">Anda dapat mencetak atau bagikan struk ke pelanggan.</p>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Tutup</button>
@@ -49,6 +49,17 @@
                             <a id="btnPrintReceipt" class="btn btn-primary" target="_blank"
                                 href="{{ route('transaksi.struk', ['transaction' => session('printed_transaction_id'), 'print' => 1]) }}"><i
                                     class="bi bi-printer"></i> Cetak Struk</a>
+                            <a class="btn btn-outline-primary" href="{{ route('transaksi.struk.pdf', session('printed_transaction_id')) }}">
+                                <i class="bi bi-file-earmark-pdf"></i> PDF
+                            </a>
+                            @php
+                                $__trx = \App\Models\Transaction::find(session('printed_transaction_id'));
+                                $__waText = "*Struk Pembayaran*\nNo: " . session('printed_invoice', '-') . "\nTotal: Rp " . number_format($__trx->total ?? 0, 0, ',', '.') . "\n\nDownload PDF:\n" . route('transaksi.struk.pdf', session('printed_transaction_id'));
+                            @endphp
+                            <a class="btn btn-success" href="{{ 'https://wa.me/?text=' . rawurlencode($__waText) }}"
+                                target="_blank" rel="noopener noreferrer">
+                                <i class="bi bi-whatsapp"></i> WhatsApp
+                            </a>
                         @endif
                     </div>
                 </div>
@@ -151,8 +162,6 @@
                                             class="bi bi-cash"></i> Tunai</button>
                                     <button type="button" class="btn btn-outline-warning" data-method="cash_tempo"><i
                                             class="bi bi-clock-history"></i> Tempo</button>
-                                    <button type="button" class="btn btn-outline-secondary" data-method="qris"><i
-                                            class="bi bi-qr-code"></i> QRIS</button>
                                 </div>
                             </fieldset>
 
@@ -185,16 +194,7 @@
                                     <i class="bi bi-check2-circle"></i> Proses Pembayaran
                                 </button>
                             </div>
-                            <div id="snapSection" class="mt-3" style="display:none;">
-                                <div class="card">
-                                    <div class="card-header">
-                                        <i class="bi bi-qr-code"></i> Pembayaran QRIS
-                                    </div>
-                                    <div class="card-body">
-                                        <div id="snapContainer"></div>
-                                    </div>
-                                </div>
-                            </div>
+
                         </form>
                     </div>
                 </aside>
@@ -221,9 +221,6 @@
 @endsection
 
 @push('script')
-    <script
-        src="{{ config('midtrans.is_production') ? 'https://app.midtrans.com/snap/snap.js' : 'https://app.sandbox.midtrans.com/snap/snap.js' }}"
-        data-client-key="{{ config('midtrans.client_key') }}"></script>
     <script src="{{ asset('assets/vendor/jquery-3.7.0.min.js') }}"></script>
 
     <script>
@@ -255,7 +252,6 @@
             let lastTotal = 0;
             let dropdownReq = null;
             let dropDebounce = null;
-            let pollTimer = null;
 
             function renderInlineResults(list) {
                 if (!Array.isArray(list) || !list.length) {
@@ -427,39 +423,7 @@
                 }
             }
 
-            function startStatusPolling(trxId) {
-                if (pollTimer) {
-                    clearInterval(pollTimer);
-                    pollTimer = null;
-                }
-                const toShowUrl = (id) => @json(route('pembayaran.complete', ['transaction' => '__ID__'])).replace('__ID__', id);
-                const statusUrlTmpl = @json(route('pembayaran.status', ['transaction' => '__ID__']));
-                const url = statusUrlTmpl.replace('__ID__', trxId);
 
-                pollTimer = setInterval(() => {
-                    $.ajax({
-                        url: url,
-                        method: 'GET',
-                        headers: {
-                            'Accept': 'application/json'
-                        }
-                    }).done((res) => {
-                        const s = String(res?.status || '').toLowerCase();
-                        if (s === 'settlement' || s === 'paid') {
-                            clearInterval(pollTimer);
-                            pollTimer = null;
-                            window.location = toShowUrl(trxId);
-                            return;
-                        }
-                        if (['expire', 'cancel', 'deny', 'failure', 'refunded', 'canceled'].includes(
-                                s)) {
-                            clearInterval(pollTimer);
-                            pollTimer = null;
-                            alert('Pembayaran tidak berhasil (' + s + ').');
-                        }
-                    }).fail(() => {});
-                }, 3000);
-            }
 
             $('#btnSearch').on('click', function() {
                 const q = ($q.val() || '').trim();
@@ -762,69 +726,7 @@
                 $paidAmount.val(String(paidInt));
 
                 // Cash or tempo: normal form submit
-                if (method === 'cash' || method === 'cash_tempo') {
-                    HTMLFormElement.prototype.submit.call(this);
-                    return false;
-                }
-
-                // QRIS: AJAX -> Snap Embedded
-                const $form = $(this);
-                $.ajax({
-                    url: $form.attr('action'),
-                    method: 'POST',
-                    data: $form.serialize(),
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    },
-                    beforeSend: function() {
-                        $btnCheckout.prop('disabled', true).text('Memproses…');
-                    },
-                    complete: function() {
-                        $btnCheckout.prop('disabled', false).html(
-                            '<i class="bi bi-check2-circle"></i> Proses Pembayaran');
-                    }
-                }).done((res) => {
-                    const token = res?.snap_token;
-                    const trxId = res?.transaction_id;
-                    if (!token || !trxId) {
-                        alert('Gagal memulai pembayaran.');
-                        return;
-                    }
-                    $('#snapSection').show();
-
-                    // Start polling status after embed started
-                    startStatusPolling(trxId);
-
-                    const toShowUrl = (id) => @json(route('pembayaran.complete', ['transaction' => '__ID__'])).replace('__ID__', id);
-                    try {
-                        window.snap.embed(token, {
-                            embedId: 'snapContainer',
-                            onSuccess: function() {
-                                if (pollTimer) {
-                                    clearInterval(pollTimer);
-                                    pollTimer = null;
-                                }
-                                window.location = toShowUrl(trxId);
-                            },
-                            onPending: function() {
-                                if (pollTimer) {
-                                    clearInterval(pollTimer);
-                                    pollTimer = null;
-                                }
-                            },
-                            onError: function() {
-                                alert('Pembayaran gagal. Coba lagi.');
-                            },
-                            onClose: function() {}
-                        });
-                    } catch (err) {
-                        alert('Gagal memuat Snap. ' + (err?.message || ''));
-                    }
-                }).fail((xhr) => {
-                    const msg = xhr?.responseJSON?.message || 'Gagal membuat transaksi QRIS.';
-                    alert(msg);
-                });
+                HTMLFormElement.prototype.submit.call(this);
                 return false;
             });
 

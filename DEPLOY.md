@@ -267,13 +267,13 @@ Ketik perintah ini satu per satu (perhatikan titik koma di akhir!):
 
 ```sql
 CREATE DATABASE point_of_sale_minimarket CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-CREATE USER 'pos_user'@'localhost' IDENTIFIED BY 'GantiDenganPasswordKuat123!';
+CREATE USER 'pos_user'@'localhost' IDENTIFIED BY 'aldo2304';
 GRANT ALL PRIVILEGES ON point_of_sale_minimarket.* TO 'pos_user'@'localhost';
 FLUSH PRIVILEGES;
 EXIT;
 ```
 
-> ⚠️ **GANTI** `GantiDenganPasswordKuat123!` dengan password kamu sendiri! Catat!
+> ⚠️ **GANTI** `aldo2304` dengan password kamu sendiri! Catat!
 
 ---
 

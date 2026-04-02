@@ -30,7 +30,7 @@ class CheckoutRequest extends FormRequest
             'items' => ['required', 'array', 'min:1'],
             'items.*.product_id' => ['required', 'integer', 'min:1'],
             'items.*.qty' => ['required', 'integer', 'min:1'],
-            'payment_method' => ['required', 'in:cash,qris,cash_tempo'],
+            'payment_method' => ['required', 'in:cash,cash_tempo'],
             'paid_amount' => ['nullable', 'numeric', 'min:0'],
             'note' => ['nullable', 'string', 'max:255'],
             'customer_id' => ['nullable', 'integer', 'exists:customers,id'],

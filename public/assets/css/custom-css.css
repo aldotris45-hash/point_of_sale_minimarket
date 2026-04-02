@@ -135,6 +135,11 @@ body {
         visibility: visible !important;
         border-right: 1px solid rgba(0, 0, 0, 0.125);
         background-color: #fff;
+        overflow-y: auto;
+    }
+
+    #appSidebar .offcanvas-body {
+        overflow-y: auto;
     }
 
     body > main {

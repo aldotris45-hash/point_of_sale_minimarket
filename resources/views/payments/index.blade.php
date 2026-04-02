@@ -9,7 +9,7 @@
                 <h1 class="h3 d-flex align-items-center gap-2 mb-1">
                     <i class="bi bi-credit-card-2-front"></i> Pembayaran
                 </h1>
-                <p class="text-muted mb-0">Daftar pembayaran QRIS dari transaksi.</p>
+                <p class="text-muted mb-0">Daftar riwayat pembayaran dari transaksi.</p>
             </div>
         </header>
 
@@ -43,7 +43,7 @@
                 <div class="col-6 col-md-1">
                     <label class="form-label">Provider</label>
                     <input type="text" class="form-control" name="provider" value="{{ $provider }}"
-                        placeholder="midtrans">
+                        placeholder="provider">
                 </div>
                 <div class="col-6 col-md-2">
                     <label class="form-label">Dari</label>

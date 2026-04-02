@@ -153,6 +153,7 @@
             <a class="btn btn-primary btn-sm"
                 href="{{ route('transaksi.struk', ['transaction' => $transaction->id, 'print' => 1]) }}"
                 target="_blank" rel="noopener noreferrer"><i class="bi bi-printer"></i> Cetak</a>
+            <x-share-wa :transaction="$transaction" type="struk" />
             <a class="btn btn-outline-secondary btn-sm" href="{{ route('kasir') }}">Kembali ke Kasir</a>
         </div>
     </div>
