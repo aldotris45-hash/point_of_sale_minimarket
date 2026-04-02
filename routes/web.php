@@ -6,7 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ProductPriceController;
-use App\Http\Controllers\ExpenseController;
+use App\Http\Controllers\CashTransactionController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\CashierController;
@@ -124,14 +124,12 @@ Route::middleware('auth')->group(function () {
         Route::get('/log-aktivitas', [ActivityLogController::class, 'index'])->name('log-aktivitas');
         Route::get('/log-aktivitas-data', [ActivityLogController::class, 'data'])->name('log-aktivitas.data');
 
-        // Pengeluaran
-        Route::get('/pengeluaran', [ExpenseController::class, 'index'])->name('pengeluaran.index');
-        Route::get('/pengeluaran-data', [ExpenseController::class, 'data'])->name('pengeluaran.data');
-        Route::get('/pengeluaran/create', [ExpenseController::class, 'create'])->name('pengeluaran.create');
-        Route::post('/pengeluaran', [ExpenseController::class, 'store'])->name('pengeluaran.store');
-        Route::get('/pengeluaran/{expense}/edit', [ExpenseController::class, 'edit'])->name('pengeluaran.edit');
-        Route::put('/pengeluaran/{expense}', [ExpenseController::class, 'update'])->name('pengeluaran.update');
-        Route::delete('/pengeluaran/{expense}', [ExpenseController::class, 'destroy'])->name('pengeluaran.destroy');
+        // Buku Kas
+        Route::get('/buku-kas', [CashTransactionController::class, 'index'])->name('buku-kas.index');
+        Route::get('/buku-kas-data', [CashTransactionController::class, 'data'])->name('buku-kas.data');
+        Route::get('/buku-kas/create', [CashTransactionController::class, 'create'])->name('buku-kas.create');
+        Route::post('/buku-kas', [CashTransactionController::class, 'store'])->name('buku-kas.store');
+        Route::delete('/buku-kas/{cashTransaction}', [CashTransactionController::class, 'destroy'])->name('buku-kas.destroy');
 
         // Arus Kas
         Route::get('/arus-kas', [CashFlowController::class, 'index'])->name('arus-kas');

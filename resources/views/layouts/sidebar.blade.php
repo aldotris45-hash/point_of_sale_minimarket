@@ -111,9 +111,9 @@
                         </a>
                     </li>
                     <li class="nav-item mt-1">
-                        <a class="nav-link d-flex align-items-center gap-2 {{ request()->is('pengeluaran*') ? 'active' : '' }}"
-                            href="{{ url('/pengeluaran') }}">
-                            <i class="bi bi-wallet2"></i><span>Pengeluaran</span>
+                        <a class="nav-link d-flex align-items-center gap-2 {{ request()->is('buku-kas*') ? 'active' : '' }}"
+                            href="{{ url('/buku-kas') }}">
+                            <i class="bi bi-wallet2"></i><span>Buku Kas</span>
                         </a>
                     </li>
                     <li class="nav-item mt-1">

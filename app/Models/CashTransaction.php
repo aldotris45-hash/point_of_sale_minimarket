@@ -2,27 +2,27 @@
 
 namespace App\Models;
 
-use App\Enums\ExpenseCategory;
+use App\Enums\CashTransactionCategory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Expense extends Model
+class CashTransaction extends Model
 {
     use HasFactory;
 
     protected $fillable = [
         'user_id',
+        'type',
         'category',
-        'expense_date',
+        'date',
         'amount',
         'description',
         'file_path',
     ];
 
     protected $casts = [
-        'category' => ExpenseCategory::class,
-        'expense_date' => 'date',
+        'date' => 'date',
         'amount' => 'decimal:2',
     ];
 

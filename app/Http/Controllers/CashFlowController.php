@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Enums\ExpenseCategory;
+use App\Enums\CashTransactionCategory;
 use App\Enums\RoleStatus;
 use App\Enums\TransactionStatus;
-use App\Models\Expense;
+use App\Models\CashTransaction;
 use App\Models\Transaction;
 use App\Services\Settings\SettingsServiceInterface;
 use Illuminate\Http\Request;
@@ -32,27 +32,38 @@ class CashFlowController extends Controller
         $from = $request->query('from', Carbon::now()->startOfMonth()->toDateString());
         $to = $request->query('to', Carbon::now()->toDateString());
 
-        // === Pemasukan (Income) dari transaksi PAID ===
-        $incomeQuery = Transaction::query()
+        // === Pemasukan (Income) dari transaksi PAID + CashTransaction type 'in' ===
+        $incomeSales = Transaction::query()
             ->where('status', TransactionStatus::PAID->value)
             ->whereDate('created_at', '>=', $from)
-            ->whereDate('created_at', '<=', $to);
+            ->whereDate('created_at', '<=', $to)
+            ->sum('total');
+            
+        $incomeAdditional = CashTransaction::query()
+            ->where('type', 'in')
+            ->whereDate('date', '>=', $from)
+            ->whereDate('date', '<=', $to)
+            ->sum('amount');
 
-        $totalIncome = (float) (clone $incomeQuery)->sum('total');
-        $totalTransactions = (int) (clone $incomeQuery)->count();
+        $totalIncome = (float) $incomeSales + (float) $incomeAdditional;
+        $totalTransactions = Transaction::query()
+            ->where('status', TransactionStatus::PAID->value)
+            ->whereDate('created_at', '>=', $from)
+            ->whereDate('created_at', '<=', $to)
+            ->count();
 
         // === Pengeluaran (Expenses) ===
-        $expenseQuery = Expense::query()
-            ->whereDate('expense_date', '>=', $from)
-            ->whereDate('expense_date', '<=', $to);
-
-        $totalExpense = (float) (clone $expenseQuery)->sum('amount');
+        $totalExpense = (float) CashTransaction::query()
+            ->where('type', 'out')
+            ->whereDate('date', '>=', $from)
+            ->whereDate('date', '<=', $to)
+            ->sum('amount');
 
         // === Saldo Bersih ===
         $netBalance = $totalIncome - $totalExpense;
 
         // === Detail harian ===
-        $dailyIncome = DB::table('transactions')
+        $dailySales = DB::table('transactions')
             ->select(DB::raw('DATE(created_at) as date'), DB::raw('COALESCE(SUM(total), 0) as amount'))
             ->where('status', TransactionStatus::PAID->value)
             ->whereNull('deleted_at')
@@ -61,12 +72,21 @@ class CashFlowController extends Controller
             ->groupBy(DB::raw('DATE(created_at)'))
             ->pluck('amount', 'date');
 
-        $dailyExpense = DB::table('expenses')
-            ->select(DB::raw('DATE(expense_date) as date'), DB::raw('COALESCE(SUM(amount), 0) as amount'))
-            ->whereDate('expense_date', '>=', $from)
-            ->whereDate('expense_date', '<=', $to)
-            ->groupBy(DB::raw('DATE(expense_date)'))
-            ->pluck('amount', 'date');
+        $dailyIncomes = DB::table('cash_transactions')
+            ->select(DB::raw('DATE(date) as dt'), DB::raw('COALESCE(SUM(amount), 0) as amount'))
+            ->where('type', 'in')
+            ->whereDate('date', '>=', $from)
+            ->whereDate('date', '<=', $to)
+            ->groupBy(DB::raw('DATE(date)'))
+            ->pluck('amount', 'dt');
+
+        $dailyExpense = DB::table('cash_transactions')
+            ->select(DB::raw('DATE(date) as dt'), DB::raw('COALESCE(SUM(amount), 0) as amount'))
+            ->where('type', 'out')
+            ->whereDate('date', '>=', $from)
+            ->whereDate('date', '<=', $to)
+            ->groupBy(DB::raw('DATE(date)'))
+            ->pluck('amount', 'dt');
 
         // Gabungkan semua tanggal
         $allDates = collect();
@@ -74,7 +94,7 @@ class CashFlowController extends Controller
         $end = Carbon::parse($to);
         for ($d = (clone $start); $d->lte($end); $d->addDay()) {
             $key = $d->toDateString();
-            $inc = (float) ($dailyIncome[$key] ?? 0);
+            $inc = (float) ($dailySales[$key] ?? 0) + (float) ($dailyIncomes[$key] ?? 0);
             $exp = (float) ($dailyExpense[$key] ?? 0);
             $allDates->push([
                 'date' => $d->format('d/m/Y'),
@@ -86,14 +106,15 @@ class CashFlowController extends Controller
         }
 
         // === Breakdown pengeluaran per kategori ===
-        $expenseByCategory = DB::table('expenses')
+        $expenseByCategory = DB::table('cash_transactions')
             ->select('category', DB::raw('COALESCE(SUM(amount), 0) as total'))
-            ->whereDate('expense_date', '>=', $from)
-            ->whereDate('expense_date', '<=', $to)
+            ->where('type', 'out')
+            ->whereDate('date', '>=', $from)
+            ->whereDate('date', '<=', $to)
             ->groupBy('category')
             ->get()
             ->map(function ($row) {
-                $enum = ExpenseCategory::tryFrom($row->category);
+                $enum = CashTransactionCategory::tryFrom($row->category);
                 return [
                     'category' => $enum?->label() ?? ucfirst($row->category),
                     'total' => (float) $row->total,
@@ -121,3 +142,4 @@ class CashFlowController extends Controller
         ]);
     }
 }
+
