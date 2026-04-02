@@ -28,7 +28,7 @@ class SecurityHeaders
             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
             // Allow font files from Google Fonts
             "font-src 'self' https://fonts.gstatic.com data:",
-            "connect-src 'self'",
+            "connect-src 'self' https://cdn.jsdelivr.net",
             "frame-src 'none'",
             // Do not allow our pages to be framed by other sites
             "frame-ancestors 'none'",
