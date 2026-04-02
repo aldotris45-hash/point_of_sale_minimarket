@@ -113,7 +113,7 @@
                     <li class="nav-item mt-1">
                         <a class="nav-link d-flex align-items-center gap-2 {{ request()->is('pengeluaran*') ? 'active' : '' }}"
                             href="{{ url('/pengeluaran') }}">
-                            <i class="bi bi-cash-flow"></i><span>Pengeluaran</span>
+                            <i class="bi bi-wallet2"></i><span>Pengeluaran</span>
                         </a>
                     </li>
                     <li class="nav-item mt-1">
