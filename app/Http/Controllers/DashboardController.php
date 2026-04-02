@@ -67,6 +67,7 @@ class DashboardController extends Controller
             ->join('transactions as t', 't.id', '=', 'd.transaction_id')
             ->leftJoin('products as p', 'p.id', '=', 'd.product_id')
             ->whereDate('t.created_at', $today->toDateString())
+            ->whereNull('t.deleted_at')
             ->groupBy('d.product_id', 'p.name')
             ->orderByDesc(DB::raw('SUM(d.quantity)'))
             ->limit(5)

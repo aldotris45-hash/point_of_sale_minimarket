@@ -15,6 +15,7 @@ class ReportService implements ReportServiceInterface
 
         $items = DB::table('transaction_details as d')
             ->join('transactions as t', 't.id', '=', 'd.transaction_id')
+            ->whereNull('t.deleted_at')
             ->when($filters['from'] ?? null, fn($q, $v) => $q->whereDate('t.created_at', '>=', $v))
             ->when($filters['to'] ?? null, fn($q, $v) => $q->whereDate('t.created_at', '<=', $v))
             ->when(!empty($filters['status']), fn($q) => $q->where('t.status', $filters['status']))
@@ -44,6 +45,7 @@ class ReportService implements ReportServiceInterface
 
         $items = DB::table('transaction_details as d')
             ->join('transactions as t', 't.id', '=', 'd.transaction_id')
+            ->whereNull('t.deleted_at')
             ->when($filters['from'] ?? null, fn($q, $v) => $q->whereDate('t.created_at', '>=', $v))
             ->when($filters['to'] ?? null, fn($q, $v) => $q->whereDate('t.created_at', '<=', $v))
             ->when(!empty($filters['status']), fn($q) => $q->where('t.status', $filters['status']))
@@ -71,6 +73,7 @@ class ReportService implements ReportServiceInterface
 
         $items = DB::table('transaction_details as d')
             ->join('transactions as t', 't.id', '=', 'd.transaction_id')
+            ->whereNull('t.deleted_at')
             ->when($filters['from'] ?? null, fn($q, $v) => $q->whereDate('t.created_at', '>=', $v))
             ->when($filters['to'] ?? null, fn($q, $v) => $q->whereDate('t.created_at', '<=', $v))
             ->when(!empty($filters['status']), fn($q) => $q->where('t.status', $filters['status']))
@@ -89,6 +92,7 @@ class ReportService implements ReportServiceInterface
     {
         return DB::table('transaction_details as d')
             ->join('transactions as t', 't.id', '=', 'd.transaction_id')
+            ->whereNull('t.deleted_at')
             ->leftJoin('products as p', 'p.id', '=', 'd.product_id')
             ->when($filters['from'] ?? null, fn($q, $v) => $q->whereDate('t.created_at', '>=', $v))
             ->when($filters['to'] ?? null, fn($q, $v) => $q->whereDate('t.created_at', '<=', $v))
@@ -105,6 +109,7 @@ class ReportService implements ReportServiceInterface
     {
         $sold = DB::table('transaction_details as d')
             ->join('transactions as t', 't.id', '=', 'd.transaction_id')
+            ->whereNull('t.deleted_at')
             ->when($filters['from'] ?? null, fn($q, $v) => $q->whereDate('t.created_at', '>=', $v))
             ->when($filters['to'] ?? null, fn($q, $v) => $q->whereDate('t.created_at', '<=', $v))
             ->when(!empty($filters['status']), fn($q) => $q->where('t.status', $filters['status']))
@@ -124,6 +129,7 @@ class ReportService implements ReportServiceInterface
     {
         return DB::table('transaction_details as d')
             ->join('transactions as t', 't.id', '=', 'd.transaction_id')
+            ->whereNull('t.deleted_at')
             ->leftJoin('products as p', 'p.id', '=', 'd.product_id')
             ->when($filters['from'] ?? null, fn($q, $v) => $q->whereDate('t.created_at', '>=', $v))
             ->when($filters['to'] ?? null, fn($q, $v) => $q->whereDate('t.created_at', '<=', $v))
@@ -138,6 +144,7 @@ class ReportService implements ReportServiceInterface
     private function baseTransactionQuery(array $filters)
     {
         return DB::table('transactions as t')
+            ->whereNull('t.deleted_at')
             ->when($filters['from'] ?? null, fn($q, $v) => $q->whereDate('t.created_at', '>=', $v))
             ->when($filters['to'] ?? null, fn($q, $v) => $q->whereDate('t.created_at', '<=', $v))
             ->when(!empty($filters['status']), fn($q) => $q->where('t.status', $filters['status']))
