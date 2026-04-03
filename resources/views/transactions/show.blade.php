@@ -161,18 +161,7 @@
                             
                             <div class="border rounded p-2 bg-light">
                                 <div class="d-flex align-items-center mb-2 gap-3 small">
-                                    <div class="form-check mb-0">
-                                        <input class="form-check-input" type="checkbox" id="add_signature" value="1">
-                                        <label class="form-check-label user-select-none" for="add_signature">
-                                            + Tanda Tangan
-                                        </label>
-                                    </div>
-                                    <div class="form-check mb-0">
-                                        <input class="form-check-input" type="checkbox" id="add_stamp" value="1">
-                                        <label class="form-check-label user-select-none" for="add_stamp">
-                                            + Stempel
-                                        </label>
-                                    </div>
+                                <!-- Stamp and signature logic automatically applied on backend -->
                                 </div>
                                 <div class="d-flex gap-2">
                                     <a class="btn btn-outline-info flex-fill print-btn" data-base-url="{{ route('transaksi.invoice', $trx) }}"
@@ -216,46 +205,6 @@
 @push('script')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const sigCheck = document.getElementById('add_signature');
-        const stampCheck = document.getElementById('add_stamp');
-        const printBtns = document.querySelectorAll('.print-btn');
-
-        function updatePrintUrls() {
-            if (!sigCheck || !stampCheck) return;
-            const params = new URLSearchParams();
-            if (sigCheck.checked) params.append('signature', '1');
-            if (stampCheck.checked) params.append('stamp', '1');
-            const qs = params.toString() ? '?' + params.toString() : '';
-            
-            printBtns.forEach(btn => {
-                const baseUrl = btn.getAttribute('data-base-url');
-                if (baseUrl) {
-                    btn.setAttribute('href', baseUrl + qs);
-                }
-            });
-
-            // Update WA share links
-            document.querySelectorAll('.wa-print-btn').forEach(btn => {
-                const baseText = btn.getAttribute('data-wa-base-text');
-                const baseUrl = btn.getAttribute('data-base-url');
-                if (baseText && baseUrl) {
-                    const fullUrl = baseUrl + qs;
-                    btn.setAttribute('href', 'https://wa.me/?text=' + baseText + encodeURIComponent(fullUrl));
-                }
-            });
-        }
-
-        if (sigCheck) sigCheck.addEventListener('change', updatePrintUrls);
-        if (stampCheck) stampCheck.addEventListener('change', updatePrintUrls);
-
-        // Run once on page load to set initial URLs
-        updatePrintUrls();
-
-        // Also update when dropdown is opened (Bootstrap 5 event)
-        const dropdown = document.querySelector('.dropdown-toggle');
-        if (dropdown) {
-            dropdown.addEventListener('click', updatePrintUrls);
-        }
 
         const el = document.getElementById('paid_amount');
         if (el) {
