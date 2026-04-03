@@ -203,7 +203,9 @@
                     
                     @if(isset($with_stamp) && $with_stamp && !empty($store_stamp))
                         @if($is_pdf ?? false)
-                            <img src="{{ $pdf_stamp_path }}" alt="Stempel" style="max-width: 110px; max-height: 110px; opacity: 0.55; margin-top: 5px;">
+                            <div style="height: 0; position: absolute; left: 50%; margin-left: -40px; top: 20px; z-index: -1;">
+                                <img src="{{ $pdf_stamp_path }}" alt="Stempel" style="max-width: 110px; opacity: 0.55;">
+                            </div>
                         @else
                             <img class="stamp-overlay" src="{{ asset($store_stamp) }}" alt="Stempel" style="position: absolute; top: -5px; right: -20px; transform: rotate(-12deg); max-width: 130px; max-height: 130px; opacity: 0.55; z-index: 3; pointer-events: none;">
                         @endif
