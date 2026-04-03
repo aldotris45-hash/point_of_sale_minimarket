@@ -369,7 +369,7 @@ class TransactionController extends Controller
         $data = $this->pdfData($transaction, $request, true);
 
         $pdf = Pdf::loadView('transactions.print-invoice', $data)
-            ->setPaper('a4', 'portrait')
+            ->setPaper('a4', 'landscape')
             ->setOption(['isRemoteEnabled' => true]);
 
         return $pdf->download("invoice-{$transaction->invoice_number}.pdf");
@@ -383,7 +383,7 @@ class TransactionController extends Controller
         $data = $this->pdfData($transaction, $request, true);
 
         $pdf = Pdf::loadView('transactions.print-faktur', $data)
-            ->setPaper('a4', 'portrait')
+            ->setPaper('a4', 'landscape')
             ->setOption(['isRemoteEnabled' => true]);
 
         return $pdf->download("faktur-{$transaction->invoice_number}.pdf");
