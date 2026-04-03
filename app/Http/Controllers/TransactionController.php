@@ -267,7 +267,7 @@ class TransactionController extends Controller
     /**
      * Print Invoice (formal invoice document).
      */
-    public function printInvoice(Transaction $transaction): View
+    public function printInvoice(Transaction $transaction, Request $request): View
     {
         $transaction->loadMissing(['details.product', 'user', 'customer']);
 
@@ -282,13 +282,17 @@ class TransactionController extends Controller
             'discount_percent'  => $this->settings->discountPercent(),
             'tax_percent'       => $this->settings->taxPercent(),
             'terbilang'         => Terbilang::rupiah((float) $transaction->total),
+            'with_signature'    => $request->query('signature') == 1,
+            'with_stamp'        => $request->query('stamp') == 1,
+            'store_signature'   => $this->settings->storeSignaturePath(),
+            'store_stamp'       => $this->settings->storeStampPath(),
         ]);
     }
 
     /**
      * Print Faktur Penjualan (sales receipt document).
      */
-    public function printFaktur(Transaction $transaction): View
+    public function printFaktur(Transaction $transaction, Request $request): View
     {
         $transaction->loadMissing(['details.product', 'user', 'customer']);
 
@@ -303,6 +307,10 @@ class TransactionController extends Controller
             'discount_percent'  => $this->settings->discountPercent(),
             'tax_percent'       => $this->settings->taxPercent(),
             'terbilang'         => Terbilang::rupiah((float) $transaction->total),
+            'with_signature'    => $request->query('signature') == 1,
+            'with_stamp'        => $request->query('stamp') == 1,
+            'store_signature'   => $this->settings->storeSignaturePath(),
+            'store_stamp'       => $this->settings->storeStampPath(),
         ]);
     }
 
@@ -311,7 +319,7 @@ class TransactionController extends Controller
     /**
      * Shared helper: gather common receipt/invoice data.
      */
-    private function pdfData(Transaction $transaction, bool $withTerbilang = false): array
+    private function pdfData(Transaction $transaction, Request $request, bool $withTerbilang = false): array
     {
         $transaction->loadMissing(['details.product', 'user', 'customer']);
 
@@ -325,6 +333,10 @@ class TransactionController extends Controller
             'currency'           => $this->settings->currency(),
             'discount_percent'   => $this->settings->discountPercent(),
             'tax_percent'        => $this->settings->taxPercent(),
+            'with_signature'    => $request->query('signature') == 1,
+            'with_stamp'        => $request->query('stamp') == 1,
+            'store_signature'   => $this->settings->storeSignaturePath(),
+            'store_stamp'       => $this->settings->storeStampPath(),
         ];
 
         if ($withTerbilang) {
@@ -337,9 +349,9 @@ class TransactionController extends Controller
     /**
      * Download struk as PDF (80mm thermal receipt width).
      */
-    public function receiptPdf(Transaction $transaction)
+    public function receiptPdf(Transaction $transaction, Request $request)
     {
-        $data = $this->pdfData($transaction);
+        $data = $this->pdfData($transaction, $request);
 
         $pdf = Pdf::loadView('transactions.receipt', $data)
             ->setPaper([0, 0, 226.77, 841.89], 'portrait') // ~80mm x ~297mm
@@ -351,9 +363,9 @@ class TransactionController extends Controller
     /**
      * Download invoice as PDF (A4).
      */
-    public function invoicePdf(Transaction $transaction)
+    public function invoicePdf(Transaction $transaction, Request $request)
     {
-        $data = $this->pdfData($transaction, true);
+        $data = $this->pdfData($transaction, $request, true);
 
         $pdf = Pdf::loadView('transactions.print-invoice', $data)
             ->setPaper('a4', 'portrait')
@@ -365,9 +377,9 @@ class TransactionController extends Controller
     /**
      * Download faktur as PDF (A4).
      */
-    public function fakturPdf(Transaction $transaction)
+    public function fakturPdf(Transaction $transaction, Request $request)
     {
-        $data = $this->pdfData($transaction, true);
+        $data = $this->pdfData($transaction, $request, true);
 
         $pdf = Pdf::loadView('transactions.print-faktur', $data)
             ->setPaper('a4', 'portrait')

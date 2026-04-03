@@ -18,6 +18,8 @@ interface SettingsServiceInterface
     public function storePhone(): string;
     public function storeBankAccount(): string;
     public function storeLogoPath(): ?string;
+    public function storeSignaturePath(): ?string;
+    public function storeStampPath(): ?string;
     public function receiptNumberFormat(): string;
     public function lowStockThreshold(): int;
     public function expiryAlertDays(): int;

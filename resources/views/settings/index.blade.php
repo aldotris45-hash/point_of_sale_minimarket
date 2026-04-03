@@ -152,7 +152,11 @@
                             </div>
 
                             <div class="col-12">
-                                <label for="store_logo" class="form-label">Logo Toko</label>
+                                <label class="form-label d-block fw-bold border-bottom pb-2 mt-2">Gambar Nota & Dokumen</label>
+                            </div>
+
+                            <div class="col-12 col-md-4">
+                                <label for="store_logo" class="form-label">Logo Toko (Struk)</label>
                                 <input class="form-control @error('store_logo') is-invalid @enderror" type="file"
                                     id="store_logo" name="store_logo" accept="image/*">
                                 @error('store_logo')
@@ -162,6 +166,38 @@
                                     <div class="mt-2">
                                         <img src="{{ asset($appStoreLogoPath) }}" alt="Logo saat ini" width="64"
                                             height="64" class="border rounded p-1 bg-white" />
+                                    </div>
+                                @endif
+                            </div>
+
+                            <div class="col-12 col-md-4">
+                                <label for="store_signature" class="form-label">Tanda Tangan (Invoice)</label>
+                                <input class="form-control @error('store_signature') is-invalid @enderror" type="file"
+                                    id="store_signature" name="store_signature" accept="image/*">
+                                <div class="form-text">Gunakan file transparan (.png)</div>
+                                @error('store_signature')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                                @php $sigPath = app(\App\Services\Settings\SettingsServiceInterface::class)->storeSignaturePath(); @endphp
+                                @if (!empty($sigPath))
+                                    <div class="mt-2">
+                                        <img src="{{ asset($sigPath) }}" alt="Tanda Tangan" height="64" class="border rounded p-1 bg-white" />
+                                    </div>
+                                @endif
+                            </div>
+
+                            <div class="col-12 col-md-4">
+                                <label for="store_stamp" class="form-label">Stempel Logo</label>
+                                <input class="form-control @error('store_stamp') is-invalid @enderror" type="file"
+                                    id="store_stamp" name="store_stamp" accept="image/*">
+                                <div class="form-text">Gunakan file transparan (.png)</div>
+                                @error('store_stamp')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                                @php $stampPath = app(\App\Services\Settings\SettingsServiceInterface::class)->storeStampPath(); @endphp
+                                @if (!empty($stampPath))
+                                    <div class="mt-2">
+                                        <img src="{{ asset($stampPath) }}" alt="Stempel" height="64" class="border rounded p-1 bg-white" />
                                     </div>
                                 @endif
                             </div>

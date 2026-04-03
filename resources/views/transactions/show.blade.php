@@ -11,9 +11,9 @@
                     Kembali</a>
                 <a class="btn btn-primary" href="{{ route('transaksi.struk', $trx) }}" target="_blank"
                     rel="noopener noreferrer"><i class="bi bi-printer"></i> Cetak Struk</a>
-                <a class="btn btn-info text-white" href="{{ route('transaksi.invoice', $trx) }}" target="_blank"
+                <a class="btn btn-info text-white print-btn" data-base-url="{{ route('transaksi.invoice', $trx) }}" href="{{ route('transaksi.invoice', $trx) }}" target="_blank"
                     rel="noopener noreferrer"><i class="bi bi-file-earmark-text"></i> Cetak Invoice</a>
-                <a class="btn btn-success" href="{{ route('transaksi.faktur', $trx) }}" target="_blank"
+                <a class="btn btn-success print-btn" data-base-url="{{ route('transaksi.faktur', $trx) }}" href="{{ route('transaksi.faktur', $trx) }}" target="_blank"
                     rel="noopener noreferrer"><i class="bi bi-receipt"></i> Cetak Faktur</a>
                 <div class="btn-group">
                     <button type="button" class="btn btn-outline-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
@@ -158,10 +158,33 @@
                             <a class="btn btn-outline-secondary" href="{{ route('transaksi.struk', $trx) }}"
                                 target="_blank" rel="noopener noreferrer"><i class="bi bi-receipt-cutoff"></i> Lihat
                                 Struk</a>
-                            <a class="btn btn-outline-info" href="{{ route('transaksi.invoice', $trx) }}"
-                                target="_blank" rel="noopener noreferrer"><i class="bi bi-file-earmark-text"></i> Cetak Invoice</a>
-                            <a class="btn btn-outline-success" href="{{ route('transaksi.faktur', $trx) }}"
-                                target="_blank" rel="noopener noreferrer"><i class="bi bi-receipt"></i> Cetak Faktur Penjualan</a>
+                            
+                            <div class="border rounded p-2 bg-light">
+                                <div class="d-flex align-items-center mb-2 gap-3 small">
+                                    <div class="form-check mb-0">
+                                        <input class="form-check-input" type="checkbox" id="add_signature" value="1">
+                                        <label class="form-check-label user-select-none" for="add_signature">
+                                            + Tanda Tangan
+                                        </label>
+                                    </div>
+                                    <div class="form-check mb-0">
+                                        <input class="form-check-input" type="checkbox" id="add_stamp" value="1">
+                                        <label class="form-check-label user-select-none" for="add_stamp">
+                                            + Stempel
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <a class="btn btn-outline-info flex-fill print-btn" data-base-url="{{ route('transaksi.invoice', $trx) }}"
+                                        href="{{ route('transaksi.invoice', $trx) }}" target="_blank" rel="noopener noreferrer">
+                                        <i class="bi bi-file-earmark-text"></i> Cetak Invoice
+                                    </a>
+                                    <a class="btn btn-outline-success flex-fill print-btn" data-base-url="{{ route('transaksi.faktur', $trx) }}"
+                                        href="{{ route('transaksi.faktur', $trx) }}" target="_blank" rel="noopener noreferrer">
+                                        <i class="bi bi-receipt"></i> Cetak Faktur Penjualan
+                                    </a>
+                                </div>
+                            </div>
                         </div>
                         @php
                             $pm = $trx->payment_method->value ?? $trx->payment_method;
@@ -193,6 +216,28 @@
 @push('script')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        const sigCheck = document.getElementById('add_signature');
+        const stampCheck = document.getElementById('add_stamp');
+        const printBtns = document.querySelectorAll('.print-btn');
+
+        function updatePrintUrls() {
+            if (!sigCheck || !stampCheck) return;
+            const params = new URLSearchParams();
+            if (sigCheck.checked) params.append('signature', '1');
+            if (stampCheck.checked) params.append('stamp', '1');
+            const qs = params.toString() ? '?' + params.toString() : '';
+            
+            printBtns.forEach(btn => {
+                const baseUrl = btn.getAttribute('data-base-url');
+                if (baseUrl) {
+                    btn.setAttribute('href', baseUrl + qs);
+                }
+            });
+        }
+
+        if (sigCheck) sigCheck.addEventListener('change', updatePrintUrls);
+        if (stampCheck) stampCheck.addEventListener('change', updatePrintUrls);
+
         const el = document.getElementById('paid_amount');
         if (el) {
             const fmt = (n) => Number(n || 0).toLocaleString('id-ID');

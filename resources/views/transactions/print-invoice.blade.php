@@ -173,9 +173,21 @@
         <!-- Signatures -->
         <div class="footer-section">
             <div style="flex:1;"></div>
-            <div class="signature">
+            <div class="signature" style="position: relative;">
                 <div>Hormat Kami,</div>
-                <div class="line"></div>
+                
+                @if(isset($with_stamp) && $with_stamp && !empty($store_stamp))
+                    <img class="stamp-overlay" src="{{ asset($store_stamp) }}" alt="Stempel" style="position: absolute; top: 10px; left: 50%; transform: translateX(-50%); max-width: 120px; max-height: 120px; opacity: 0.6; z-index: 1; pointer-events: none;">
+                @endif
+                
+                @if(isset($with_signature) && $with_signature && !empty($store_signature))
+                    <div style="min-height: 60px; margin-top: 10px; position: relative; z-index: 2;">
+                        <img src="{{ asset($store_signature) }}" alt="Tanda Tangan" style="max-width: 140px; max-height: 60px;">
+                    </div>
+                    <div class="line" style="margin-top: 5px;"></div>
+                @else
+                    <div class="line"></div>
+                @endif
                 <div class="name">( {{ $store_name }} )</div>
             </div>
             <div class="signature">

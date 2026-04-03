@@ -112,3 +112,8 @@
 ### ✅ 9. Perbaikan Bug Lanjutan (Post-Review)
 - [x] **Bug Kategori Dropdown**: Mencegah histori kategori `penjualan` dan `pelunasan_tempo` dari tampil di form input manual Buku Kas sehingga user tidak keliru melakukan *double input* manual.
 - [x] **Bug Kesalahan String di Catatan Barang Masuk**: Memperbaiki variabel null exception `$data['notes']` pada `IncomingGoodService.php` guna memastikan error ketika string tidak ada tidak terjadi lagi (mengganti strict ternary dengan `!empty`).
+
+### ✅ 10. Opsi Cetak Stempel & Tanda Tangan pada Dokumen
+- [x] Menambahkan slot upload file gambar transparan (`.png`) untuk *Stempel Toko* dan *Tanda Tangan* pada Menu **Pengaturan Sistem**.
+- [x] Menyisipkan opsi kotak-centang (checkbox) praktis `[ ] Tambah Tanda Tangan` dan `[ ] Tambah Stempel` langsung di layar Antarmuka **Detail Transaksi**.
+- [x] Merakit antarmuka cetak dokumen (PDF dan HTML/Web Print) agar stempel dapat muncul melayang (*overlay* transparan) secara realistis menimpa tanda tangan saat dicetak jika opsi tersebut dicentang, baik untuk `Invoice` maupun `Faktur`.

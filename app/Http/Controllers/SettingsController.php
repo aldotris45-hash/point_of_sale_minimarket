@@ -83,6 +83,18 @@ class SettingsController extends Controller
             $path = $file->store('assets/images', 'public');
             $this->settings->set('store.logo_path', 'storage/' . $path, 'store', 'Path Logo Toko');
         }
+        
+        if ($request->hasFile('store_signature')) {
+            $file = $request->file('store_signature');
+            $path = $file->store('assets/images', 'public');
+            $this->settings->set('store.signature_path', 'storage/' . $path, 'store', 'Path Tanda Tangan');
+        }
+        
+        if ($request->hasFile('store_stamp')) {
+            $file = $request->file('store_stamp');
+            $path = $file->store('assets/images', 'public');
+            $this->settings->set('store.stamp_path', 'storage/' . $path, 'store', 'Path Stempel');
+        }
 
         $after = [
             'store_name' => $this->settings->storeName(),

@@ -23,6 +23,8 @@ class UpdateSettingsRequest extends FormRequest
             'store_bank_account' => ['nullable', 'string', 'max:64'],
             'receipt_format' => ['nullable', 'string', 'max:100', 'regex:/^[-_A-Za-z0-9{}:]+$/', 'regex:/^(?=.*\{(YYYY|YY)\}|.*\{MM\}|.*\{DD\}|.*\{SEQ:\d+\}).*$/'],
             'store_logo' => ['nullable', 'image', 'max:2048'],
+            'store_signature' => ['nullable', 'image', 'max:2048'],
+            'store_stamp' => ['nullable', 'image', 'max:2048'],
             'low_stock_threshold' => ['required', 'integer', 'min:1', 'max:1000'],
             'expiry_alert_days' => ['required', 'integer', 'min:1', 'max:365'],
         ];

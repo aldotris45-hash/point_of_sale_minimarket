@@ -103,6 +103,20 @@ class SettingsService implements SettingsServiceInterface
         return is_string($val) ? $val : (string) ($val['value'] ?? null);
     }
 
+    public function storeSignaturePath(): ?string
+    {
+        $val = $this->get('store.signature_path', null);
+        if ($val === null) return null;
+        return is_string($val) ? $val : (string) ($val['value'] ?? null);
+    }
+
+    public function storeStampPath(): ?string
+    {
+        $val = $this->get('store.stamp_path', null);
+        if ($val === null) return null;
+        return is_string($val) ? $val : (string) ($val['value'] ?? null);
+    }
+
     public function receiptNumberFormat(): string
     {
         // Example format: INV-{YYYY}{MM}{DD}-{SEQ:6}
