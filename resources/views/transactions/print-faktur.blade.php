@@ -65,10 +65,12 @@
 </head>
 <body>
     <div class="page">
+        @if(!($is_pdf ?? false))
         <div class="no-print" style="display:flex; gap:8px; justify-content:center;">
             <button onclick="window.print()">🖨️ Cetak Faktur Penjualan</button>
             <x-share-wa :transaction="$transaction" type="faktur" btnClass="btn btn-success" />
         </div>
+        @endif
 
         <!-- Header -->
         <div class="header">

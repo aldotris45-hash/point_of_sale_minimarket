@@ -68,10 +68,12 @@
 </head>
 <body>
     <div class="page">
+        @if(!($is_pdf ?? false))
         <div class="no-print" style="text-align:center; margin-bottom:15px; display:flex; gap:8px; justify-content:center;">
             <button onclick="window.print()" style="padding:8px 24px; font-size:12pt; cursor:pointer; background:#2c3e50; color:#fff; border:none; border-radius:4px;">🖨️ Cetak Invoice</button>
             <x-share-wa :transaction="$transaction" type="invoice" btnClass="btn btn-success" />
         </div>
+        @endif
 
         <!-- Header -->
         <div class="header">

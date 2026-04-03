@@ -337,6 +337,7 @@ class TransactionController extends Controller
             'with_stamp'        => $request->query('stamp') == 1,
             'store_signature'   => $this->settings->storeSignaturePath(),
             'store_stamp'       => $this->settings->storeStampPath(),
+            'is_pdf'            => true,
         ];
 
         if ($withTerbilang) {
