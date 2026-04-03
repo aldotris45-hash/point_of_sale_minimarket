@@ -78,6 +78,38 @@ class IncomingGoodService implements IncomingGoodServiceInterface
         });
     }
 
+    /**
+     * Update tanggal barang masuk + cascade ke data terkait.
+     *
+     * Yang di-update:
+     * - incoming_goods.date
+     * - product_prices.price_date (jika ada record terkait)
+     * - product_price_histories.effective_date (jika ada record terkait)
+     */
+    public function updateDate(IncomingGood $incomingGood, string $newDate): IncomingGood
+    {
+        return DB::transaction(function () use ($incomingGood, $newDate) {
+            $oldDate = $incomingGood->date->toDateString();
+
+            // 1. Update product_prices yang dibuat via barang masuk ini
+            ProductPrice::where('product_id', $incomingGood->product_id)
+                ->where('price_date', $oldDate)
+                ->where('cost_price', $incomingGood->purchase_price)
+                ->update(['price_date' => $newDate]);
+
+            // 2. Update product_price_histories yang dibuat via barang masuk ini
+            ProductPriceHistory::where('product_id', $incomingGood->product_id)
+                ->where('effective_date', $oldDate)
+                ->where('notes', 'LIKE', 'Via Barang Masuk%')
+                ->update(['effective_date' => $newDate]);
+
+            // 3. Update tanggal di incoming_goods sendiri
+            $incomingGood->update(['date' => $newDate]);
+
+            return $incomingGood->fresh();
+        });
+    }
+
     public function delete(IncomingGood $incomingGood): void
     {
         DB::transaction(function () use ($incomingGood) {

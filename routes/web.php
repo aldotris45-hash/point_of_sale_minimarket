@@ -162,6 +162,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/barang-masuk/create', [IncomingGoodController::class, 'create'])->name('barang-masuk.create');
         Route::post('/barang-masuk', [IncomingGoodController::class, 'store'])->name('barang-masuk.store');
         Route::delete('/barang-masuk/{incomingGood}', [IncomingGoodController::class, 'destroy'])->name('barang-masuk.destroy');
+        Route::patch('/barang-masuk/{incomingGood}/update-date', [IncomingGoodController::class, 'updateDate'])->name('barang-masuk.update-date');
 
         // Stok Opname
         Route::get('/stok-opname', [StockOpnameController::class, 'index'])->name('stok-opname.index');

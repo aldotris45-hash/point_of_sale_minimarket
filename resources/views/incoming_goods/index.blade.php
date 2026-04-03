@@ -46,6 +46,36 @@
             </div>
         </div>
     </section>
+
+    {{-- Modal Edit Tanggal --}}
+    <div class="modal fade" id="editDateModal" tabindex="-1" aria-labelledby="editDateModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-sm modal-dialog-centered">
+            <div class="modal-content">
+                <form id="editDateForm" method="POST">
+                    @csrf
+                    @method('PATCH')
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editDateModalLabel">
+                            <i class="bi bi-calendar-event"></i> Ubah Tanggal
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                    </div>
+                    <div class="modal-body">
+                        <label for="editDateInput" class="form-label">Tanggal Baru</label>
+                        <input type="date" class="form-control" id="editDateInput" name="date" required
+                               max="{{ date('Y-m-d') }}">
+                        <small class="text-muted mt-1 d-block">Data harga & riwayat terkait akan otomatis disesuaikan.</small>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-lg"></i> Simpan
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @push('script')
@@ -73,6 +103,20 @@
                 language: {
                     url: '{{ asset('assets/vendor/id.json') }}'
                 }
+            });
+
+            // Edit Date Modal handler
+            const modal = new bootstrap.Modal(document.getElementById('editDateModal'));
+            const form = document.getElementById('editDateForm');
+            const dateInput = document.getElementById('editDateInput');
+
+            document.addEventListener('click', function(e) {
+                const btn = e.target.closest('.btn-edit-date');
+                if (!btn) return;
+
+                form.action = btn.dataset.url;
+                dateInput.value = btn.dataset.date;
+                modal.show();
             });
         });
     </script>

@@ -52,15 +52,24 @@ class IncomingGoodController extends Controller
             ->addColumn('user_name', fn(IncomingGood $ig) => e($ig->user?->name ?? '-'))
             ->addColumn('action', function (IncomingGood $ig) {
                 $deleteUrl = route('barang-masuk.destroy', $ig);
+                $updateDateUrl = route('barang-masuk.update-date', $ig);
                 $csrf = csrf_token();
+                $dateValue = $ig->date->format('Y-m-d');
                 return <<<HTML
-                    <form action="{$deleteUrl}" method="POST" class="d-inline" onsubmit="return confirm('Hapus data barang masuk ini? Stok produk akan dikurangi kembali.');">
-                        <input type="hidden" name="_token" value="{$csrf}">
-                        <input type="hidden" name="_method" value="DELETE">
-                        <button type="submit" class="btn btn-sm btn-outline-danger">
-                            <i class="bi bi-trash"></i>
+                    <div class="d-flex gap-1 justify-content-end">
+                        <button type="button" class="btn btn-sm btn-outline-primary btn-edit-date"
+                            data-url="{$updateDateUrl}" data-date="{$dateValue}" data-id="{$ig->id}"
+                            title="Ubah tanggal">
+                            <i class="bi bi-calendar-event"></i>
                         </button>
-                    </form>
+                        <form action="{$deleteUrl}" method="POST" class="d-inline" onsubmit="return confirm('Hapus data barang masuk ini? Stok produk akan dikurangi kembali.');">
+                            <input type="hidden" name="_token" value="{$csrf}">
+                            <input type="hidden" name="_method" value="DELETE">
+                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </form>
+                    </div>
                 HTML;
             })
             ->rawColumns(['action'])
@@ -99,6 +108,32 @@ class IncomingGoodController extends Controller
         );
 
         return redirect()->route('barang-masuk.index')->with('success', "Barang masuk berhasil dicatat! Stok {$product->name} bertambah {$incomingGood->quantity}.");
+    }
+
+    /**
+     * Update tanggal barang masuk (cascade ke product_prices & history).
+     */
+    public function updateDate(Request $request, IncomingGood $incomingGood): RedirectResponse
+    {
+        $validated = $request->validate([
+            'date' => ['required', 'date', 'before_or_equal:today'],
+        ], [
+            'date.required' => 'Tanggal wajib diisi.',
+            'date.date' => 'Format tanggal tidak valid.',
+            'date.before_or_equal' => 'Tanggal tidak boleh lebih dari hari ini.',
+        ]);
+
+        $oldDate = $incomingGood->date->format('d/m/Y');
+        $incomingGood = $this->service->updateDate($incomingGood, $validated['date']);
+        $newDate = $incomingGood->date->format('d/m/Y');
+
+        $this->logger->log(
+            'Edit Tanggal Barang Masuk',
+            "Mengubah tanggal barang masuk '{$incomingGood->product?->name}' dari {$oldDate} menjadi {$newDate}",
+            ['incoming_good_id' => $incomingGood->id, 'old_date' => $oldDate, 'new_date' => $newDate]
+        );
+
+        return redirect()->route('barang-masuk.index')->with('success', "Tanggal berhasil diubah dari {$oldDate} → {$newDate}. Data harga terkait juga sudah diperbarui.");
     }
 
     public function destroy(IncomingGood $incomingGood): RedirectResponse
