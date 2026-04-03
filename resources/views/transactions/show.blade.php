@@ -248,6 +248,15 @@
         if (sigCheck) sigCheck.addEventListener('change', updatePrintUrls);
         if (stampCheck) stampCheck.addEventListener('change', updatePrintUrls);
 
+        // Run once on page load to set initial URLs
+        updatePrintUrls();
+
+        // Also update when dropdown is opened (Bootstrap 5 event)
+        const dropdown = document.querySelector('.dropdown-toggle');
+        if (dropdown) {
+            dropdown.addEventListener('click', updatePrintUrls);
+        }
+
         const el = document.getElementById('paid_amount');
         if (el) {
             const fmt = (n) => Number(n || 0).toLocaleString('id-ID');
