@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Invoice #{{ $transaction->invoice_number }}</title>
     <style>
-        @page { size: A4 landscape; margin: 10mm 15mm; }
+        @page { size: A4 landscape; margin: 12mm 20mm; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 10pt; color: #333; line-height: 1.4; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 9pt; color: #333; line-height: 1.4; }
 
-        .page { width: 100%; margin: 0 auto; padding: 10px; }
+        .page { width: 100%; margin: 0 auto; padding: 5px; }
 
         /* Layout table (DomPDF-compatible) */
         .layout-table { width: 100%; border-collapse: collapse; }
@@ -17,11 +17,11 @@
 
         /* Header */
         .header { margin-bottom: 12px; border-bottom: 2px solid #333; padding-bottom: 10px; }
-        .store-name { font-size: 18pt; font-weight: bold; color: #1a5c2a; }
+        .store-name { font-size: 16pt; font-weight: bold; color: #1a5c2a; }
         .store-info { font-size: 8pt; color: #555; }
         .header-right { text-align: right; }
-        .header-right .title { font-size: 20pt; font-weight: bold; color: #c0392b; }
-        .header-right .info { font-size: 9pt; margin-top: 2px; }
+        .header-right .title { font-size: 18pt; font-weight: bold; color: #c0392b; }
+        .header-right .info { font-size: 8pt; margin-top: 2px; }
         .header-right .info span { color: #c0392b; font-weight: bold; }
 
         /* Customer & Amount */
@@ -30,8 +30,8 @@
         .customer-box .name { font-size: 11pt; font-weight: bold; }
         .customer-box .detail { font-size: 9pt; color: #555; }
         .amount-box { text-align: right; }
-        .amount-box .label { font-size: 9pt; color: #c0392b; font-weight: bold; }
-        .amount-box .value { font-size: 22pt; font-weight: bold; color: #333; }
+        .amount-box .label { font-size: 8pt; color: #c0392b; font-weight: bold; }
+        .amount-box .value { font-size: 18pt; font-weight: bold; color: #333; }
 
         /* Table */
         table.items { width: 100%; border-collapse: collapse; margin-bottom: 10px; }

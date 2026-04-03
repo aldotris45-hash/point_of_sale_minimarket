@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Faktur #{{ $transaction->invoice_number }}</title>
     <style>
-        @page { size: A4 landscape; margin: 10mm 15mm; }
+        @page { size: A4 landscape; margin: 12mm 20mm; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 10pt; color: #333; line-height: 1.4; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 9pt; color: #333; line-height: 1.4; }
 
-        .page { width: 100%; margin: 0 auto; padding: 10px; }
+        .page { width: 100%; margin: 0 auto; padding: 5px; }
 
         /* Layout table (DomPDF-compatible) */
         .layout-table { width: 100%; border-collapse: collapse; }
@@ -17,10 +17,10 @@
 
         /* Header */
         .header { margin-bottom: 8px; }
-        .store-name { font-size: 18pt; font-weight: bold; color: #1a5c2a; }
+        .store-name { font-size: 16pt; font-weight: bold; color: #1a5c2a; }
         .store-info { font-size: 8pt; color: #555; }
         .header-right { text-align: right; }
-        .header-right .title { font-size: 20pt; font-weight: bold; color: #333; }
+        .header-right .title { font-size: 18pt; font-weight: bold; color: #333; }
 
         /* Meta info */
         .meta-row { border-top: 2px solid #333; border-bottom: 1px solid #ccc; padding: 6px 0; margin-bottom: 12px; }
