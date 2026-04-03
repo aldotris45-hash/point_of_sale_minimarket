@@ -110,6 +110,13 @@
                 </table>
             </div>
         </div>
+
+        <div class="card shadow-sm mt-2">
+            <div class="card-body py-2 d-flex justify-content-between align-items-center">
+                <span class="fw-semibold text-muted"><i class="bi bi-calculator"></i> Total Keseluruhan (Hasil Filter)</span>
+                <span class="fw-bold fs-5 text-primary" id="grandTotalDisplay">Rp 0</span>
+            </div>
+        </div>
     </section>
 @endsection
 
@@ -192,6 +199,13 @@
                     [2, 'desc']
                 ],
                 pageLength: 10,
+                drawCallback: function(settings) {
+                    const json = settings.json;
+                    if (json && json.grand_total !== undefined) {
+                        const fmt = Number(json.grand_total || 0).toLocaleString('id-ID');
+                        $('#grandTotalDisplay').text('Rp ' + fmt);
+                    }
+                },
             });
 
             const initialLen = parseInt($perPage.val() || '10', 10);

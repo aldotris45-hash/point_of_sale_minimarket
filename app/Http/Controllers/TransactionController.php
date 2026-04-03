@@ -106,6 +106,9 @@ class TransactionController extends Controller
             ->orderByDesc('created_at')
             ->select(['id', 'user_id', 'customer_id', 'invoice_number', 'payment_method', 'status', 'total', 'created_at']);
 
+        // Hitung total dari SEMUA data yang terfilter (bukan hanya halaman saat ini)
+        $grandTotal = (clone $query)->sum('total');
+
         return DataTables::of($query)
             ->addIndexColumn()
             ->addColumn('invoice', function (Transaction $t) {
@@ -138,6 +141,7 @@ class TransactionController extends Controller
                 return view('transactions.partials.action', ['t' => $t])->render();
             })
             ->rawColumns(['invoice', 'status_badge', 'due_badge', 'action'])
+            ->with('grand_total', (float) $grandTotal)
             ->toJson();
     }
 
