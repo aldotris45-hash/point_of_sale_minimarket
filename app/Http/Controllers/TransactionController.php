@@ -332,6 +332,38 @@ class TransactionController extends Controller
             return file_exists($absolute) ? $absolute : null;
         };
 
+        $pdfStampPath = $resolvePath($this->settings->storeStampPath());
+        $pdfStampBase64 = null;
+        if ($request->query('stamp') == 1 && $pdfStampPath && function_exists('imagecreatefromstring')) {
+            try {
+                $imgStr = file_get_contents($pdfStampPath);
+                $source = imagecreatefromstring($imgStr);
+                if ($source !== false) {
+                    // Random angle between -25 and 25 degrees
+                    $angle = rand(-25, 25);
+                    
+                    imagealphablending($source, false);
+                    imagesavealpha($source, true);
+                    
+                    $transparent = imagecolorallocatealpha($source, 0, 0, 0, 127);
+                    $rotated = imagerotate($source, $angle, $transparent);
+                    
+                    imagealphablending($rotated, false);
+                    imagesavealpha($rotated, true);
+                    
+                    ob_start();
+                    imagepng($rotated);
+                    $imageData = ob_get_clean();
+                    $pdfStampBase64 = 'data:image/png;base64,' . base64_encode($imageData);
+                    
+                    imagedestroy($source);
+                    imagedestroy($rotated);
+                }
+            } catch (\Exception $e) {
+                // Ignore and use normal path fallback
+            }
+        }
+
         $data = [
             'transaction'        => $transaction,
             'store_name'         => $this->settings->storeName(),
@@ -350,7 +382,11 @@ class TransactionController extends Controller
             // Resolved absolute paths for DomPDF
             'pdf_logo_path'      => $resolvePath($this->settings->storeLogoPath()),
             'pdf_signature_path' => $resolvePath($this->settings->storeSignaturePath()),
-            'pdf_stamp_path'     => $resolvePath($this->settings->storeStampPath()),
+            'pdf_stamp_path'     => $pdfStampPath,
+            'pdf_stamp_base64'   => $pdfStampBase64,
+            // Random offset for organic UI look
+            'stamp_margin_top'   => rand(0, 30) . 'px',
+            'stamp_margin_left'  => rand(-70, -10) . 'px',
         ];
 
         if ($withTerbilang) {
