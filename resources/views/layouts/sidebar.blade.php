@@ -80,12 +80,6 @@
                             <i class="bi bi-box-seam"></i><span>Manajemen Produk</span>
                         </a>
                     </li>
-                    <li class="nav-item mt-1">
-                        <a class="nav-link d-flex align-items-center gap-2 {{ request()->is('harga-produk*') ? 'active' : '' }}"
-                            href="{{ url('/harga-produk') }}">
-                            <i class="bi bi-tag"></i><span>Harga Produk (Sayur)</span>
-                        </a>
-                    </li>
 
                     <!-- Operasional -->
                     <li class="nav-item px-3 pt-3 pb-2 text-muted text-uppercase small">Operasional</li>

@@ -4,6 +4,8 @@ namespace App\Services\IncomingGood;
 
 use App\Models\IncomingGood;
 use App\Models\Product;
+use App\Models\ProductPrice;
+use App\Models\ProductPriceHistory;
 use Illuminate\Support\Facades\DB;
 
 class IncomingGoodService implements IncomingGoodServiceInterface
@@ -12,6 +14,9 @@ class IncomingGoodService implements IncomingGoodServiceInterface
     {
         return DB::transaction(function () use ($data) {
             $purchasePrice = (float) ($data['purchase_price'] ?? 0);
+            $sellingPrice = isset($data['selling_price']) && $data['selling_price'] !== null
+                ? (float) $data['selling_price']
+                : null;
             $quantity = (int) ($data['quantity'] ?? 0);
 
             $incomingGood = IncomingGood::create([
@@ -27,6 +32,47 @@ class IncomingGoodService implements IncomingGoodServiceInterface
 
             // Otomatis tambah stok produk
             Product::where('id', $data['product_id'])->increment('stock', $quantity);
+
+            // Jika selling_price diisi, update harga jual & catat di product_prices
+            if ($sellingPrice !== null && $sellingPrice > 0) {
+                $product = Product::find($data['product_id']);
+
+                // Buat/update record product_prices untuk tanggal ini
+                ProductPrice::updateOrCreate(
+                    [
+                        'product_id' => $data['product_id'],
+                        'price_date' => $data['date'],
+                    ],
+                    [
+                        'cost_price' => $purchasePrice,
+                        'selling_price' => $sellingPrice,
+                        'notes' => $data['notes'] ?? null,
+                    ]
+                );
+
+                // Catat riwayat perubahan harga
+                ProductPriceHistory::create([
+                    'product_id' => $data['product_id'],
+                    'selling_price' => $sellingPrice,
+                    'effective_date' => $data['date'],
+                    'changed_at' => now(),
+                    'notes' => 'Via Barang Masuk' . ($data['notes'] ? ': ' . $data['notes'] : ''),
+                ]);
+
+                // Update harga jual di tabel produk utama
+                $product->update(['price' => $sellingPrice]);
+            } elseif ($purchasePrice > 0) {
+                // Meskipun selling_price tidak diisi, tetap catat cost_price
+                ProductPrice::updateOrCreate(
+                    [
+                        'product_id' => $data['product_id'],
+                        'price_date' => $data['date'],
+                    ],
+                    [
+                        'cost_price' => $purchasePrice,
+                    ]
+                );
+            }
 
             return $incomingGood;
         });

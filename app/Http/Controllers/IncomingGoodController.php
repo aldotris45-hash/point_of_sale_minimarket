@@ -82,6 +82,7 @@ class IncomingGoodController extends Controller
             'supplier_id' => ['nullable', 'exists:suppliers,id'],
             'product_id' => ['required', 'exists:products,id'],
             'purchase_price' => ['required', 'numeric', 'min:0'],
+            'selling_price' => ['nullable', 'numeric', 'min:0'],
             'quantity' => ['required', 'integer', 'min:1'],
             'notes' => ['nullable', 'string', 'max:500'],
         ]);
