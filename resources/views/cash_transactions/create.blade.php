@@ -28,6 +28,12 @@
                         <select name="category" id="category" class="form-select @error('category') is-invalid @enderror" required>
                             <option value="">-- Pilih Kategori --</option>
                             @foreach ($categories as $cat)
+                                @php
+                                    $autoCategories = ['penjualan', 'pelunasan_tempo'];
+                                @endphp
+                                @if(in_array($cat->value, $autoCategories))
+                                    @continue
+                                @endif
                                 @if(
                                     ($type === 'in' && in_array($cat->value, ['tambahan_modal', 'pendapatan_lain'])) ||
                                     ($type === 'out' && !in_array($cat->value, ['tambahan_modal', 'pendapatan_lain']))

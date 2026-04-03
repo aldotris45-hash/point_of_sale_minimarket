@@ -56,7 +56,7 @@ class IncomingGoodService implements IncomingGoodServiceInterface
                     'selling_price' => $sellingPrice,
                     'effective_date' => $data['date'],
                     'changed_at' => now(),
-                    'notes' => 'Via Barang Masuk' . ($data['notes'] ? ': ' . $data['notes'] : ''),
+                    'notes' => 'Via Barang Masuk' . (!empty($data['notes']) ? ': ' . $data['notes'] : ''),
                 ]);
 
                 // Update harga jual di tabel produk utama
