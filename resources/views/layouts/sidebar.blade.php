@@ -111,6 +111,12 @@
                         </a>
                     </li>
                     <li class="nav-item mt-1">
+                        <a class="nav-link d-flex align-items-center gap-2 {{ request()->is('pajak*') ? 'active' : '' }}"
+                            href="{{ url('/pajak') }}">
+                            <i class="bi bi-calculator"></i><span>Laporan Pajak</span>
+                        </a>
+                    </li>
+                    <li class="nav-item mt-1">
                         <a class="nav-link d-flex align-items-center gap-2 {{ request()->is('pengguna*') ? 'active' : '' }}"
                             href="{{ url('/pengguna') }}">
                             <i class="bi bi-people"></i><span>Manajemen Pengguna</span>

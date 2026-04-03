@@ -20,6 +20,7 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\IncomingGoodController;
 use App\Http\Controllers\StockOpnameController;
 use App\Http\Controllers\CashFlowController;
+use App\Http\Controllers\TaxReportController;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 
 // Login
@@ -135,6 +136,11 @@ Route::middleware('auth')->group(function () {
         // Arus Kas
         Route::get('/arus-kas', [CashFlowController::class, 'index'])->name('arus-kas');
         Route::get('/arus-kas/export-pdf', [CashFlowController::class, 'exportPdf'])->name('arus-kas.export-pdf');
+
+        // Pajak
+        Route::get('/pajak', [TaxReportController::class, 'index'])->name('pajak');
+        Route::get('/pajak/export-pdf', [TaxReportController::class, 'exportPdf'])->name('pajak.export-pdf');
+        Route::get('/pajak/export-csv', [TaxReportController::class, 'exportCsv'])->name('pajak.export-csv');
 
         // Supplier
         Route::resource('supplier', SupplierController::class)

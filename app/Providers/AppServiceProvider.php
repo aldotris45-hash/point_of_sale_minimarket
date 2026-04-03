@@ -30,6 +30,8 @@ use App\Services\Pdf\InvoicePdfServiceInterface;
 use App\Services\Pdf\InvoicePdfService;
 use App\Services\Transaction\TransactionServiceInterface;
 use App\Services\Transaction\TransactionService;
+use App\Services\Tax\TaxReportServiceInterface;
+use App\Services\Tax\TaxReportService;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Blade;
@@ -57,6 +59,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(StockOpnameServiceInterface::class, StockOpnameService::class);
         $this->app->bind(InvoicePdfServiceInterface::class, InvoicePdfService::class);
         $this->app->bind(TransactionServiceInterface::class, TransactionService::class);
+        $this->app->bind(TaxReportServiceInterface::class, TaxReportService::class);
     }
 
     /**
