@@ -90,3 +90,21 @@
 - [x] **Model `Transaction.php`**: Menambahkan `created_at` dan `updated_at` ke `$fillable` agar tanggal custom tidak di-ignore oleh mass assignment protection Laravel.
 - [x] **Service `CashierService.php`**: Method `generateInvoiceNumber()` sekarang menerima parameter tanggal opsional dan menggunakan tanggal transaksi (bukan `now()`) untuk bagian `{YYYY}`, `{MM}`, `{DD}` di nomor invoice.
 - [x] **Interface `CashierServiceInterface.php`**: Update signature `generateInvoiceNumber()` agar konsisten dengan implementasi.
+
+### ✅ 6. Penggabungan Harga Produk & Barang Masuk (Optimasi Workflow)
+- [x] Menyatukan "Harga Produk (Sayur)" dengan form "Barang Masuk" untuk menghindari *double input*.
+- [x] Implementasi fitur pencarian (*searchable dropdown*) menggunakan JavaScript kustom di form supaya cepat menemukan produk.
+- [x] Menambahkan kalkulator margin (profit / rugi per unit) secara *real-time* saat menginput harga beli dan harga jual di form.
+- [x] Menghapus menu Harga Produk dari Sidebar untuk menyederhanakan menu Admin.
+
+### ✅ 7. Otomatisasi Buku Kas
+- [x] **Enum Category**: Menambahkan `PENJUALAN` dan `PELUNASAN_TEMPO` ke dalam `CashTransactionCategory`.
+- [x] **Integrasi Penjualan Tunai**: Memodifikasi `CashierService` agar otomatis membuat *record* Pemasukan Buku Kas setiap ada transaksi *Checkout Lunas*.
+- [x] **Integrasi Piutang**: Memodifikasi `TransactionController` agar pelunasan piutang (Tempo) via *Mark as Paid* otomatis masuk ke Buku Kas.
+- [x] **Pencegahan Double-Count**: Memodifikasi `CashFlowController` agar tidak terjadi hitung ganda antara data penjualan/pelunasan otomatis di Buku Kas dan laporan utama Arus Kas.
+
+### ✅ 8. Cetak Laporan (Ekspor PDF) Arus Kas
+- [x] Memisahkan core logika pengambilan data ke method *private* di `CashFlowController` untuk *reusability*.
+- [x] Merancang template bersih (clean, korporat) `resources/views/cash_flow/pdf.blade.php`.
+- [x] Menggunakan *library* DOMPDF untuk merealisasikan eksport dokumen A4 yang merangkum keseluruhan Pemasukan, Operasional, Laba Bersih, dan Break-down Harian.
+- [x] Menambahkan tombol "Ekspor PDF" yang reaktif terhadap input periode tanggal yang sedang difilter pengguna di UI web.
