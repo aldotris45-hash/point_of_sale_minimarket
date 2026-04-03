@@ -26,12 +26,12 @@
                             </a>
                         </li>
                         <li>
-                            <a class="dropdown-item" href="{{ 'https://wa.me/?text=' . rawurlencode("*Invoice*\nNo: {$trx->invoice_number}\nTotal: Rp " . number_format($trx->total, 0, ',', '.') . "\n\nDownload PDF:\n" . route('transaksi.invoice.pdf', $trx)) }}" target="_blank" rel="noopener noreferrer">
+                            <a class="dropdown-item wa-print-btn" data-wa-base-text="{{ rawurlencode("*Invoice*\nNo: {$trx->invoice_number}\nTotal: Rp " . number_format($trx->total, 0, ',', '.') . "\n\nDownload PDF:\n") }}" data-base-url="{{ route('transaksi.invoice.pdf', $trx) }}" href="{{ 'https://wa.me/?text=' . rawurlencode("*Invoice*\nNo: {$trx->invoice_number}\nTotal: Rp " . number_format($trx->total, 0, ',', '.') . "\n\nDownload PDF:\n" . route('transaksi.invoice.pdf', $trx)) }}" target="_blank" rel="noopener noreferrer">
                                 <i class="bi bi-file-earmark-text"></i> Invoice via WA
                             </a>
                         </li>
                         <li>
-                            <a class="dropdown-item" href="{{ 'https://wa.me/?text=' . rawurlencode("*Faktur Penjualan*\nNo: {$trx->invoice_number}\nTotal: Rp " . number_format($trx->total, 0, ',', '.') . "\n\nDownload PDF:\n" . route('transaksi.faktur.pdf', $trx)) }}" target="_blank" rel="noopener noreferrer">
+                            <a class="dropdown-item wa-print-btn" data-wa-base-text="{{ rawurlencode("*Faktur Penjualan*\nNo: {$trx->invoice_number}\nTotal: Rp " . number_format($trx->total, 0, ',', '.') . "\n\nDownload PDF:\n") }}" data-base-url="{{ route('transaksi.faktur.pdf', $trx) }}" href="{{ 'https://wa.me/?text=' . rawurlencode("*Faktur Penjualan*\nNo: {$trx->invoice_number}\nTotal: Rp " . number_format($trx->total, 0, ',', '.') . "\n\nDownload PDF:\n" . route('transaksi.faktur.pdf', $trx)) }}" target="_blank" rel="noopener noreferrer">
                                 <i class="bi bi-receipt"></i> Faktur via WA
                             </a>
                         </li>
@@ -42,12 +42,12 @@
                             </a>
                         </li>
                         <li>
-                            <a class="dropdown-item" href="{{ route('transaksi.invoice.pdf', $trx) }}">
+                            <a class="dropdown-item print-btn" data-base-url="{{ route('transaksi.invoice.pdf', $trx) }}" href="{{ route('transaksi.invoice.pdf', $trx) }}">
                                 <i class="bi bi-file-earmark-pdf"></i> Download Invoice PDF
                             </a>
                         </li>
                         <li>
-                            <a class="dropdown-item" href="{{ route('transaksi.faktur.pdf', $trx) }}">
+                            <a class="dropdown-item print-btn" data-base-url="{{ route('transaksi.faktur.pdf', $trx) }}" href="{{ route('transaksi.faktur.pdf', $trx) }}">
                                 <i class="bi bi-file-earmark-pdf"></i> Download Faktur PDF
                             </a>
                         </li>
@@ -231,6 +231,16 @@
                 const baseUrl = btn.getAttribute('data-base-url');
                 if (baseUrl) {
                     btn.setAttribute('href', baseUrl + qs);
+                }
+            });
+
+            // Update WA share links
+            document.querySelectorAll('.wa-print-btn').forEach(btn => {
+                const baseText = btn.getAttribute('data-wa-base-text');
+                const baseUrl = btn.getAttribute('data-base-url');
+                if (baseText && baseUrl) {
+                    const fullUrl = baseUrl + qs;
+                    btn.setAttribute('href', 'https://wa.me/?text=' + baseText + encodeURIComponent(fullUrl));
                 }
             });
         }

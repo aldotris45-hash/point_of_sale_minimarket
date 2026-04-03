@@ -42,6 +42,8 @@ class UpdateSettingsRequest extends FormRequest
             'store_bank_account' => 'No. Rekening',
             'receipt_format' => 'Format Struk',
             'store_logo' => 'Logo Toko',
+            'store_signature' => 'Tanda Tangan',
+            'store_stamp' => 'Stempel',
             'low_stock_threshold' => 'Batas Stok Rendah',
             'expiry_alert_days' => 'Peringatan Kadaluarsa',
         ];
