@@ -82,7 +82,9 @@
                             @if($store_logo)
                                 <td style="width: 60px; padding-right: 10px;">
                                     @if($is_pdf ?? false)
-                                        <img src="{{ storage_path('app/public/' . str_replace('storage/', '', $store_logo)) }}" alt="Logo" style="max-height: 50px; max-width: 50px;">
+                                        @if(!empty($pdf_logo_path))
+                                            <img src="{{ $pdf_logo_path }}" alt="Logo" style="max-height: 50px; max-width: 50px;">
+                                        @endif
                                     @else
                                         <img src="{{ asset($store_logo) }}" alt="Logo" style="max-height: 50px; max-width: 50px;">
                                     @endif
@@ -201,7 +203,7 @@
                     
                     @if(isset($with_stamp) && $with_stamp && !empty($store_stamp))
                         @if($is_pdf ?? false)
-                            <img src="{{ storage_path('app/public/' . str_replace('storage/', '', $store_stamp)) }}" alt="Stempel" style="max-width: 110px; max-height: 110px; opacity: 0.55; margin-top: 5px;">
+                            <img src="{{ $pdf_stamp_path }}" alt="Stempel" style="max-width: 110px; max-height: 110px; opacity: 0.55; margin-top: 5px;">
                         @else
                             <img class="stamp-overlay" src="{{ asset($store_stamp) }}" alt="Stempel" style="position: absolute; top: -5px; right: -20px; transform: rotate(-12deg); max-width: 130px; max-height: 130px; opacity: 0.55; z-index: 3; pointer-events: none;">
                         @endif
@@ -210,7 +212,7 @@
                     @if(isset($with_signature) && $with_signature && !empty($store_signature))
                         <div style="min-height: 50px; margin-top: 8px;">
                             @if($is_pdf ?? false)
-                                <img src="{{ storage_path('app/public/' . str_replace('storage/', '', $store_signature)) }}" alt="Tanda Tangan" style="max-width: 140px; max-height: 50px;">
+                                <img src="{{ $pdf_signature_path }}" alt="Tanda Tangan" style="max-width: 140px; max-height: 50px;">
                             @else
                                 <img src="{{ asset($store_signature) }}" alt="Tanda Tangan" style="max-width: 140px; max-height: 50px;">
                             @endif

@@ -323,6 +323,15 @@ class TransactionController extends Controller
     {
         $transaction->loadMissing(['details.product', 'user', 'customer']);
 
+        // Resolve absolute file paths for DomPDF (bypasses symlinks)
+        $resolvePath = function (?string $relativePath): ?string {
+            if (empty($relativePath)) return null;
+            // Path stored as 'storage/assets/images/xxx.png' → actual file at 'storage/app/public/assets/images/xxx.png'
+            $stripped = str_replace('storage/', '', $relativePath);
+            $absolute = storage_path('app/public/' . $stripped);
+            return file_exists($absolute) ? $absolute : null;
+        };
+
         $data = [
             'transaction'        => $transaction,
             'store_name'         => $this->settings->storeName(),
@@ -338,6 +347,10 @@ class TransactionController extends Controller
             'store_signature'   => $this->settings->storeSignaturePath(),
             'store_stamp'       => $this->settings->storeStampPath(),
             'is_pdf'            => true,
+            // Resolved absolute paths for DomPDF
+            'pdf_logo_path'      => $resolvePath($this->settings->storeLogoPath()),
+            'pdf_signature_path' => $resolvePath($this->settings->storeSignaturePath()),
+            'pdf_stamp_path'     => $resolvePath($this->settings->storeStampPath()),
         ];
 
         if ($withTerbilang) {
@@ -367,6 +380,17 @@ class TransactionController extends Controller
     public function invoicePdf(Transaction $transaction, Request $request)
     {
         $data = $this->pdfData($transaction, $request, true);
+
+        // Debug log for image paths
+        \Log::info('Invoice PDF paths', [
+            'with_stamp' => $data['with_stamp'],
+            'with_signature' => $data['with_signature'],
+            'store_stamp' => $data['store_stamp'],
+            'store_signature' => $data['store_signature'],
+            'pdf_stamp_path' => $data['pdf_stamp_path'],
+            'pdf_signature_path' => $data['pdf_signature_path'],
+            'pdf_logo_path' => $data['pdf_logo_path'],
+        ]);
 
         $pdf = Pdf::loadView('transactions.print-invoice', $data)
             ->setPaper('a4', 'landscape')
