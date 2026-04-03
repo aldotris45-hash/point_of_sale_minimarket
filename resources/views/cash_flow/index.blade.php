@@ -21,6 +21,9 @@
                 </div>
                 <div class="col-12 col-md-6">
                     <div class="d-flex gap-2 justify-content-md-end">
+                        <a href="{{ route('arus-kas.export-pdf', ['from' => $from, 'to' => $to]) }}" class="btn btn-outline-danger" target="_blank">
+                            <i class="bi bi-file-earmark-pdf"></i> Ekspor PDF
+                        </a>
                         <a href="{{ route('arus-kas') }}" class="btn btn-outline-secondary"><i class="bi bi-x-circle"></i> Reset</a>
                         <button type="submit" class="btn btn-primary"><i class="bi bi-funnel"></i> Terapkan</button>
                     </div>

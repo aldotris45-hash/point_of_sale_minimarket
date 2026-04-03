@@ -28,11 +28,8 @@ class CashFlowController extends Controller
         });
     }
 
-    public function index(Request $request): View
+    private function getCashFlowData(string $from, string $to): array
     {
-        $from = $request->query('from', Carbon::now()->startOfMonth()->toDateString());
-        $to = $request->query('to', Carbon::now()->toDateString());
-
         // === Pemasukan (Income) ===
         $incomeSales = (float) Transaction::query()
             ->where('status', TransactionStatus::PAID->value)
@@ -162,7 +159,7 @@ class CashFlowController extends Controller
         $chartPurchase = $allDates->pluck('purchase')->toArray();
         $chartOperational = $allDates->pluck('operational')->toArray();
 
-        return view('cash_flow.index', [
+        return [
             'from' => $from,
             'to' => $to,
             'incomeSales' => $incomeSales,
@@ -181,6 +178,32 @@ class CashFlowController extends Controller
             'chartPurchase' => $chartPurchase,
             'chartOperational' => $chartOperational,
             'currency' => $this->settings->currency(),
-        ]);
+        ];
+    }
+
+    public function index(Request $request): View
+    {
+        $from = $request->query('from', Carbon::now()->startOfMonth()->toDateString());
+        $to = $request->query('to', Carbon::now()->toDateString());
+
+        $data = $this->getCashFlowData($from, $to);
+
+        return view('cash_flow.index', $data);
+    }
+
+    public function exportPdf(Request $request)
+    {
+        $from = $request->query('from', Carbon::now()->startOfMonth()->toDateString());
+        $to = $request->query('to', Carbon::now()->toDateString());
+
+        $data = $this->getCashFlowData($from, $to);
+        $data['storeName'] = $this->settings->storeName() ?: 'TRIJAYA FRESH';
+        $data['storeAddress'] = $this->settings->storeAddress();
+        $data['storePhone'] = $this->settings->storePhone();
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('cash_flow.pdf', $data);
+        $pdf->setPaper('a4', 'portrait');
+
+        return $pdf->download("Laporan_Arus_Kas_{$from}_sampai_{$to}.pdf");
     }
 }

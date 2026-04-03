@@ -134,6 +134,7 @@ Route::middleware('auth')->group(function () {
 
         // Arus Kas
         Route::get('/arus-kas', [CashFlowController::class, 'index'])->name('arus-kas');
+        Route::get('/arus-kas/export-pdf', [CashFlowController::class, 'exportPdf'])->name('arus-kas.export-pdf');
 
         // Supplier
         Route::resource('supplier', SupplierController::class)
