@@ -177,11 +177,21 @@
                                 <div class="d-flex gap-2">
                                     <a class="btn btn-outline-info flex-fill print-btn" data-base-url="{{ route('transaksi.invoice', $trx) }}"
                                         href="{{ route('transaksi.invoice', $trx) }}" target="_blank" rel="noopener noreferrer">
-                                        <i class="bi bi-file-earmark-text"></i> Cetak Invoice
+                                        <i class="bi bi-printer"></i> Cetak Html
                                     </a>
                                     <a class="btn btn-outline-success flex-fill print-btn" data-base-url="{{ route('transaksi.faktur', $trx) }}"
                                         href="{{ route('transaksi.faktur', $trx) }}" target="_blank" rel="noopener noreferrer">
-                                        <i class="bi bi-receipt"></i> Cetak Faktur Penjualan
+                                        <i class="bi bi-printer"></i> Faktur Html
+                                    </a>
+                                </div>
+                                <div class="d-flex gap-2 mt-2">
+                                    <a class="btn btn-info text-white flex-fill print-btn" data-base-url="{{ route('transaksi.invoice.pdf', $trx) }}"
+                                        href="{{ route('transaksi.invoice.pdf', $trx) }}">
+                                        <i class="bi bi-file-earmark-pdf"></i> Download Invoice PDF
+                                    </a>
+                                    <a class="btn btn-success flex-fill print-btn" data-base-url="{{ route('transaksi.faktur.pdf', $trx) }}"
+                                        href="{{ route('transaksi.faktur.pdf', $trx) }}">
+                                        <i class="bi bi-file-earmark-pdf"></i> Download Faktur PDF
                                     </a>
                                 </div>
                             </div>
