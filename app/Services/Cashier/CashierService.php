@@ -4,7 +4,9 @@ namespace App\Services\Cashier;
 
 use App\Enums\PaymentMethod;
 use App\Enums\TransactionStatus;
+use App\Enums\CashTransactionCategory;
 use App\Models\ActivityLog;
+use App\Models\CashTransaction;
 use App\Models\Product;
 use App\Models\Transaction;
 use App\Models\TransactionDetail;
@@ -129,7 +131,17 @@ class CashierService implements CashierServiceInterface
                 'user_agent' => request()->userAgent(),
             ]);
 
-
+            // Catat ke Buku Kas jika transaksi langsung lunas
+            if ($status === TransactionStatus::PAID && $amountPaid > 0) {
+                CashTransaction::create([
+                    'user_id' => Auth::id(),
+                    'type' => 'in',
+                    'category' => CashTransactionCategory::PENJUALAN->value,
+                    'date' => $transactionDate ?? now()->toDateString(),
+                    'amount' => $total,
+                    'description' => 'Penjualan #' . $trx->invoice_number,
+                ]);
+            }
 
             if ($suspendedFromId && in_array($method, [PaymentMethod::CASH, PaymentMethod::CASH_TEMPO], true)) {
                 $original = Transaction::where('id', $suspendedFromId)

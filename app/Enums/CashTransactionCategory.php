@@ -5,6 +5,8 @@ namespace App\Enums;
 enum CashTransactionCategory: string
 {
     // Pemasukan
+    case PENJUALAN = 'penjualan';
+    case PELUNASAN_TEMPO = 'pelunasan_tempo';
     case TAMBAHAN_MODAL = 'tambahan_modal';
     case PENDAPATAN_LAIN = 'pendapatan_lain';
 
@@ -17,6 +19,8 @@ enum CashTransactionCategory: string
     public function label(): string
     {
         return match ($this) {
+            self::PENJUALAN => 'Penjualan',
+            self::PELUNASAN_TEMPO => 'Pelunasan Tempo',
             self::TAMBAHAN_MODAL => 'Tambahan Modal',
             self::PENDAPATAN_LAIN => 'Pendapatan Lain',
             self::GAJI => 'Gaji Karyawan',

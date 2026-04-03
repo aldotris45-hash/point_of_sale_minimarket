@@ -42,6 +42,7 @@ class CashFlowController extends Controller
 
         $incomeAdditional = (float) CashTransaction::query()
             ->where('type', 'in')
+            ->whereNotIn('category', ['penjualan', 'pelunasan_tempo'])
             ->whereDate('date', '>=', $from)
             ->whereDate('date', '<=', $to)
             ->sum('amount');
@@ -89,6 +90,7 @@ class CashFlowController extends Controller
         $dailyIncomes = DB::table('cash_transactions')
             ->select(DB::raw('DATE(date) as dt'), DB::raw('COALESCE(SUM(amount), 0) as amount'))
             ->where('type', 'in')
+            ->whereNotIn('category', ['penjualan', 'pelunasan_tempo'])
             ->whereDate('date', '>=', $from)
             ->whereDate('date', '<=', $to)
             ->groupBy(DB::raw('DATE(date)'))

@@ -6,6 +6,8 @@ use App\Enums\PaymentMethod;
 use App\Enums\PaymentStatus;
 use App\Enums\RoleStatus;
 use App\Enums\TransactionStatus;
+use App\Enums\CashTransactionCategory;
+use App\Models\CashTransaction;
 use App\Models\Customer;
 use App\Models\Payment;
 use App\Models\Product;
@@ -188,6 +190,16 @@ class TransactionController extends Controller
             'status'         => PaymentStatus::SETTLEMENT,
             'amount'         => $paid,
             'paid_at'        => now(),
+        ]);
+
+        // Catat ke Buku Kas
+        CashTransaction::create([
+            'user_id' => auth()->id(),
+            'type' => 'in',
+            'category' => CashTransactionCategory::PELUNASAN_TEMPO->value,
+            'date' => now()->toDateString(),
+            'amount' => $paid,
+            'description' => 'Pelunasan tempo #' . $transaction->invoice_number,
         ]);
 
         $this->logger->log('Pelunasan Tempo', 'Pembayaran tempo dicatat', [
