@@ -167,7 +167,7 @@
                 <div>Hormat Kami,</div>
                 
                 @if(isset($with_stamp) && $with_stamp && !empty($store_stamp))
-                    <img class="stamp-overlay" src="{{ asset($store_stamp) }}" alt="Stempel" style="position: absolute; top: 10px; left: 50%; transform: translateX(-50%); max-width: 120px; max-height: 120px; opacity: 0.6; z-index: 1; pointer-events: none;">
+                    <img class="stamp-overlay" src="{{ asset($store_stamp) }}" alt="Stempel" style="position: absolute; top: -5px; right: -20px; transform: rotate(-12deg); max-width: 130px; max-height: 130px; opacity: 0.55; z-index: 3; pointer-events: none;">
                 @endif
                 
                 @if(isset($with_signature) && $with_signature && !empty($store_signature))

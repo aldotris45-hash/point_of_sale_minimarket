@@ -63,6 +63,8 @@ class UpdateSettingsRequest extends FormRequest
             'image' => ':attribute harus berupa gambar.',
             'mimes' => ':attribute harus berformat: :values.',
             'regex' => ':attribute mengandung karakter/placeholder yang tidak valid.',
+            'uploaded' => ':attribute gagal diupload. Pastikan ukuran file tidak melebihi batas (maks 2MB).',
+            'max.file' => ':attribute tidak boleh lebih dari :max KB.',
         ];
     }
 }
