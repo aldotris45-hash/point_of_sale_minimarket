@@ -3,8 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Enums\PaymentMethod;
+use App\Enums\PaymentStatus;
 use App\Enums\RoleStatus;
 use App\Enums\TransactionStatus;
+use App\Models\Customer;
+use App\Models\Payment;
 use App\Models\Product;
 use App\Models\Transaction;
 use App\Services\ActivityLog\ActivityLoggerInterface;
@@ -32,6 +35,7 @@ class TransactionController extends Controller
         $method = $request->query('method');
         $due = $request->query('due');
         $cashier = $request->query('cashier');
+        $customerId = $request->query('customer_id');
         $from = $request->query('from');
         $to = $request->query('to');
 
@@ -43,11 +47,13 @@ class TransactionController extends Controller
             'method' => $method,
             'due' => $due,
             'cashier' => $cashier,
+            'customer_id' => $customerId,
             'from' => $from,
             'to' => $to,
             'currency' => $this->settings->currency(),
             'statuses' => $statuses,
             'methods' => PaymentMethod::cases(),
+            'customers' => Customer::orderBy('name')->get(['id', 'name']),
         ]);
     }
 
@@ -58,6 +64,7 @@ class TransactionController extends Controller
         $method = $request->input('method');
         $due = $request->input('due');
         $cashier = $request->input('cashier');
+        $customerId = $request->input('customer_id');
         $from = $request->input('from');
         $to = $request->input('to');
 
@@ -87,6 +94,9 @@ class TransactionController extends Controller
             ->when($cashier && ctype_digit((string) $cashier), function ($w) use ($cashier) {
                 $w->where('user_id', (int) $cashier);
             })
+            ->when($customerId && ctype_digit((string) $customerId), function ($w) use ($customerId) {
+                $w->where('customer_id', (int) $customerId);
+            })
             ->when($from, function ($w) use ($from) {
                 $w->whereDate('created_at', '>=', $from);
             })
@@ -94,7 +104,7 @@ class TransactionController extends Controller
                 $w->whereDate('created_at', '<=', $to);
             })
             ->orderByDesc('created_at')
-            ->select(['id', 'user_id', 'invoice_number', 'payment_method', 'status', 'total', 'created_at']);
+            ->select(['id', 'user_id', 'customer_id', 'invoice_number', 'payment_method', 'status', 'total', 'created_at']);
 
         return DataTables::of($query)
             ->addIndexColumn()
@@ -164,6 +174,23 @@ class TransactionController extends Controller
             $transaction->status = TransactionStatus::PAID;
         }
         $transaction->save();
+
+        // Catat ke tabel payments agar muncul di halaman Pembayaran
+        Payment::create([
+            'transaction_id' => $transaction->id,
+            'method'         => PaymentMethod::CASH_TEMPO,
+            'provider'       => 'manual',
+            'provider_order_id' => $transaction->invoice_number,
+            'status'         => PaymentStatus::SETTLEMENT,
+            'amount'         => $paid,
+            'paid_at'        => now(),
+        ]);
+
+        $this->logger->log('Pelunasan Tempo', 'Pembayaran tempo dicatat', [
+            'transaction_id' => $transaction->id,
+            'invoice' => $transaction->invoice_number,
+            'amount' => $paid,
+        ]);
 
         return back()->with('success', 'Pembayaran dicatat.' .
             ($transaction->change > 0 ? ' Kembalian: ' . number_format($transaction->change, 0, ',', '.') : '') );

@@ -57,6 +57,15 @@
                     </select>
                 </div>
                 <div class="col-6 col-md-2">
+                    <label class="form-label">Pelanggan</label>
+                    <select class="form-select" name="customer_id">
+                        <option value="">Semua</option>
+                        @foreach ($customers as $cust)
+                            <option value="{{ $cust->id }}" {{ ($customer_id == $cust->id) ? 'selected' : '' }}>{{ $cust->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-6 col-md-2">
                     <label class="form-label">Dari</label>
                     <input type="date" class="form-control" name="from" value="{{ $from }}">
                 </div>
