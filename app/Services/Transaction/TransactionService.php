@@ -12,6 +12,8 @@ use App\Models\Product;
 use App\Models\Transaction;
 use Illuminate\Support\Facades\DB;
 
+use Carbon\Carbon;
+
 class TransactionService implements TransactionServiceInterface
 {
     /**
@@ -73,6 +75,37 @@ class TransactionService implements TransactionServiceInterface
 
             // Soft delete — data tetap tersimpan untuk audit trail
             $transaction->delete();
+        });
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function updateDate(Transaction $transaction, string $newDate): Transaction
+    {
+        return DB::transaction(function () use ($transaction, $newDate) {
+            $oldCreatedAt = $transaction->created_at;
+            // Pertahankan jam/menit/detik dari created_at asli, hanya ganti tanggalnya
+            $newDateTime = Carbon::parse($newDate)->setTimeFrom($oldCreatedAt);
+
+            // 1. Update created_at transaksi
+            $transaction->update([
+                'created_at' => $newDateTime,
+                'updated_at' => now(),
+            ]);
+
+            // 2. Cascade ke payments — update paid_at untuk semua payment terkait
+            Payment::where('transaction_id', $transaction->id)
+                ->whereNotNull('paid_at')
+                ->update([
+                    'paid_at' => DB::raw("CONCAT('{$newDate}', ' ', TIME(paid_at))"),
+                ]);
+
+            // 3. Cascade ke cash_transactions — update date yang terkait invoice ini
+            CashTransaction::where('description', 'LIKE', '%' . $transaction->invoice_number . '%')
+                ->update(['date' => $newDate]);
+
+            return $transaction->fresh();
         });
     }
 }

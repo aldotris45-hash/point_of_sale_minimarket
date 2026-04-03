@@ -28,4 +28,15 @@ interface TransactionServiceInterface
      * @return void
      */
     public function deleteWithStockRestore(Transaction $transaction): void;
+
+    /**
+     * Update tanggal transaksi (created_at) + cascade ke records terkait.
+     *
+     * Updates: transactions.created_at, payments.paid_at, cash_transactions.date
+     *
+     * @param  Transaction  $transaction
+     * @param  string  $newDate  Format Y-m-d atau Y-m-d H:i:s
+     * @return Transaction
+     */
+    public function updateDate(Transaction $transaction, string $newDate): Transaction;
 }

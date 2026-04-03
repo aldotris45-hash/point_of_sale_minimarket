@@ -118,6 +118,37 @@
             </div>
         </div>
     </section>
+
+    {{-- Modal Edit Tanggal Transaksi --}}
+    <div class="modal fade" id="editTrxDateModal" tabindex="-1" aria-labelledby="editTrxDateModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-sm modal-dialog-centered">
+            <div class="modal-content">
+                <form id="editTrxDateForm" method="POST">
+                    @csrf
+                    @method('PATCH')
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editTrxDateModalLabel">
+                            <i class="bi bi-calendar-event"></i> Ubah Tanggal
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p class="text-muted small mb-2">Invoice: <strong id="editTrxInvoice"></strong></p>
+                        <label for="editTrxDateInput" class="form-label">Tanggal Baru</label>
+                        <input type="date" class="form-control" id="editTrxDateInput" name="date" required
+                               max="{{ date('Y-m-d') }}">
+                        <small class="text-muted mt-1 d-block">Data pembayaran & buku kas terkait akan otomatis disesuaikan.</small>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-lg"></i> Simpan
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @push('css')
@@ -228,6 +259,22 @@
                 $perPage.val('10');
                 table.page.len(10).draw();
                 table.ajax.reload();
+            });
+
+            // Edit Date Modal handler
+            const trxModal = new bootstrap.Modal(document.getElementById('editTrxDateModal'));
+            const trxForm = document.getElementById('editTrxDateForm');
+            const trxDateInput = document.getElementById('editTrxDateInput');
+            const trxInvoice = document.getElementById('editTrxInvoice');
+
+            document.addEventListener('click', function(e) {
+                const btn = e.target.closest('.btn-edit-trx-date');
+                if (!btn) return;
+
+                trxForm.action = btn.dataset.url;
+                trxDateInput.value = btn.dataset.date;
+                trxInvoice.textContent = btn.dataset.invoice;
+                trxModal.show();
             });
         })();
     </script>

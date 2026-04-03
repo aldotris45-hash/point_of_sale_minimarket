@@ -204,6 +204,38 @@ class TransactionController extends Controller
             ->with('success', "Transaksi {$invoiceNumber} berhasil dihapus dan stok dikembalikan.");
     }
 
+    /**
+     * Update tanggal transaksi (cascade ke payments & cash_transactions).
+     */
+    public function updateDate(Request $request, Transaction $transaction): RedirectResponse
+    {
+        // Hanya admin yang boleh
+        if (!Auth::check() || Auth::user()->role !== RoleStatus::ADMIN->value) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'date' => ['required', 'date', 'before_or_equal:today'],
+        ], [
+            'date.required' => 'Tanggal wajib diisi.',
+            'date.date' => 'Format tanggal tidak valid.',
+            'date.before_or_equal' => 'Tanggal tidak boleh lebih dari hari ini.',
+        ]);
+
+        $oldDate = $transaction->created_at->format('d/m/Y H:i');
+        $transaction = $this->transactionService->updateDate($transaction, $validated['date']);
+        $newDate = $transaction->created_at->format('d/m/Y H:i');
+
+        $this->logger->log(
+            'Edit Tanggal Transaksi',
+            "Mengubah tanggal transaksi {$transaction->invoice_number} dari {$oldDate} menjadi {$newDate}",
+            ['transaction_id' => $transaction->id, 'old_date' => $oldDate, 'new_date' => $newDate]
+        );
+
+        return redirect()->route('transaksi')
+            ->with('success', "Tanggal transaksi {$transaction->invoice_number} berhasil diubah dari {$oldDate} → {$newDate}. Data pembayaran & buku kas juga disesuaikan.");
+    }
+
     public function receipt(Transaction $transaction): View
     {
         $transaction->loadMissing(['details.product', 'user']);

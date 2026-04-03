@@ -70,6 +70,7 @@ Route::middleware('auth')->group(function () {
 
         // Delete transaction (admin only, guarded in controller)
         Route::delete('/transaksi/{transaction}', [TransactionController::class, 'destroy'])->name('transaksi.destroy');
+        Route::patch('/transaksi/{transaction}/update-date', [TransactionController::class, 'updateDate'])->name('transaksi.update-date');
 
     });
 
