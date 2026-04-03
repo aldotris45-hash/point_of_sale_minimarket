@@ -6,6 +6,7 @@ use App\Enums\CashTransactionCategory;
 use App\Enums\RoleStatus;
 use App\Enums\TransactionStatus;
 use App\Models\CashTransaction;
+use App\Models\IncomingGood;
 use App\Models\Transaction;
 use App\Services\Settings\SettingsServiceInterface;
 use Illuminate\Http\Request;
@@ -32,35 +33,48 @@ class CashFlowController extends Controller
         $from = $request->query('from', Carbon::now()->startOfMonth()->toDateString());
         $to = $request->query('to', Carbon::now()->toDateString());
 
-        // === Pemasukan (Income) dari transaksi PAID + CashTransaction type 'in' ===
-        $incomeSales = Transaction::query()
+        // === Pemasukan (Income) ===
+        $incomeSales = (float) Transaction::query()
             ->where('status', TransactionStatus::PAID->value)
             ->whereDate('created_at', '>=', $from)
             ->whereDate('created_at', '<=', $to)
             ->sum('total');
-            
-        $incomeAdditional = CashTransaction::query()
+
+        $incomeAdditional = (float) CashTransaction::query()
             ->where('type', 'in')
             ->whereDate('date', '>=', $from)
             ->whereDate('date', '<=', $to)
             ->sum('amount');
 
-        $totalIncome = (float) $incomeSales + (float) $incomeAdditional;
+        $totalIncome = $incomeSales + $incomeAdditional;
+
         $totalTransactions = Transaction::query()
             ->where('status', TransactionStatus::PAID->value)
             ->whereDate('created_at', '>=', $from)
             ->whereDate('created_at', '<=', $to)
             ->count();
 
-        // === Pengeluaran (Expenses) ===
-        $totalExpense = (float) CashTransaction::query()
+        // === Pembelian Barang (dari Barang Masuk) ===
+        $totalPurchase = (float) IncomingGood::query()
+            ->whereDate('date', '>=', $from)
+            ->whereDate('date', '<=', $to)
+            ->sum('total');
+
+        // === Pengeluaran Operasional (dari Buku Kas) ===
+        $totalOperational = (float) CashTransaction::query()
             ->where('type', 'out')
             ->whereDate('date', '>=', $from)
             ->whereDate('date', '<=', $to)
             ->sum('amount');
 
-        // === Saldo Bersih ===
+        // === Total Pengeluaran = Pembelian + Operasional ===
+        $totalExpense = $totalPurchase + $totalOperational;
+
+        // === Laba Bersih ===
         $netBalance = $totalIncome - $totalExpense;
+
+        // === Margin Laba (%) ===
+        $marginPercent = $totalIncome > 0 ? (($netBalance / $totalIncome) * 100) : 0;
 
         // === Detail harian ===
         $dailySales = DB::table('transactions')
@@ -80,7 +94,14 @@ class CashFlowController extends Controller
             ->groupBy(DB::raw('DATE(date)'))
             ->pluck('amount', 'dt');
 
-        $dailyExpense = DB::table('cash_transactions')
+        $dailyPurchase = DB::table('incoming_goods')
+            ->select(DB::raw('DATE(date) as dt'), DB::raw('COALESCE(SUM(total), 0) as amount'))
+            ->whereDate('date', '>=', $from)
+            ->whereDate('date', '<=', $to)
+            ->groupBy(DB::raw('DATE(date)'))
+            ->pluck('amount', 'dt');
+
+        $dailyOperational = DB::table('cash_transactions')
             ->select(DB::raw('DATE(date) as dt'), DB::raw('COALESCE(SUM(amount), 0) as amount'))
             ->where('type', 'out')
             ->whereDate('date', '>=', $from)
@@ -95,11 +116,15 @@ class CashFlowController extends Controller
         for ($d = (clone $start); $d->lte($end); $d->addDay()) {
             $key = $d->toDateString();
             $inc = (float) ($dailySales[$key] ?? 0) + (float) ($dailyIncomes[$key] ?? 0);
-            $exp = (float) ($dailyExpense[$key] ?? 0);
+            $pur = (float) ($dailyPurchase[$key] ?? 0);
+            $ops = (float) ($dailyOperational[$key] ?? 0);
+            $exp = $pur + $ops;
             $allDates->push([
                 'date' => $d->format('d/m/Y'),
                 'date_raw' => $key,
                 'income' => $inc,
+                'purchase' => $pur,
+                'operational' => $ops,
                 'expense' => $exp,
                 'balance' => $inc - $exp,
             ]);
@@ -121,25 +146,39 @@ class CashFlowController extends Controller
                 ];
             });
 
+        // Tambahkan "Pembelian Barang" ke breakdown
+        if ($totalPurchase > 0) {
+            $expenseByCategory = $expenseByCategory->prepend([
+                'category' => 'Pembelian Barang',
+                'total' => $totalPurchase,
+            ]);
+        }
+
         // === Chart data ===
         $chartLabels = $allDates->pluck('date_raw')->map(fn($d) => Carbon::parse($d)->format('d M'))->toArray();
         $chartIncome = $allDates->pluck('income')->toArray();
-        $chartExpense = $allDates->pluck('expense')->toArray();
+        $chartPurchase = $allDates->pluck('purchase')->toArray();
+        $chartOperational = $allDates->pluck('operational')->toArray();
 
         return view('cash_flow.index', [
             'from' => $from,
             'to' => $to,
+            'incomeSales' => $incomeSales,
+            'incomeAdditional' => $incomeAdditional,
             'totalIncome' => $totalIncome,
-            'totalExpense' => $totalExpense,
             'totalTransactions' => $totalTransactions,
+            'totalPurchase' => $totalPurchase,
+            'totalOperational' => $totalOperational,
+            'totalExpense' => $totalExpense,
             'netBalance' => $netBalance,
+            'marginPercent' => $marginPercent,
             'dailyData' => $allDates,
             'expenseByCategory' => $expenseByCategory,
             'chartLabels' => $chartLabels,
             'chartIncome' => $chartIncome,
-            'chartExpense' => $chartExpense,
+            'chartPurchase' => $chartPurchase,
+            'chartOperational' => $chartOperational,
             'currency' => $this->settings->currency(),
         ]);
     }
 }
-
