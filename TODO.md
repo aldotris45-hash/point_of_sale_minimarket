@@ -108,3 +108,7 @@
 - [x] Merancang template bersih (clean, korporat) `resources/views/cash_flow/pdf.blade.php`.
 - [x] Menggunakan *library* DOMPDF untuk merealisasikan eksport dokumen A4 yang merangkum keseluruhan Pemasukan, Operasional, Laba Bersih, dan Break-down Harian.
 - [x] Menambahkan tombol "Ekspor PDF" yang reaktif terhadap input periode tanggal yang sedang difilter pengguna di UI web.
+
+### ✅ 9. Perbaikan Bug Lanjutan (Post-Review)
+- [x] **Bug Kategori Dropdown**: Mencegah histori kategori `penjualan` dan `pelunasan_tempo` dari tampil di form input manual Buku Kas sehingga user tidak keliru melakukan *double input* manual.
+- [x] **Bug Kesalahan String di Catatan Barang Masuk**: Memperbaiki variabel null exception `$data['notes']` pada `IncomingGoodService.php` guna memastikan error ketika string tidak ada tidak terjadi lagi (mengganti strict ternary dengan `!empty`).
