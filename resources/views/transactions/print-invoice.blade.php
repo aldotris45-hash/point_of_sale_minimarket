@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Invoice #{{ $transaction->invoice_number }}</title>
     <style>
-        @page { margin: 15mm 20mm; }
+        @page { margin: 0; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 9pt; color: #333; line-height: 1.4; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 9pt; color: #333; line-height: 1.4; padding: 15mm 20mm; }
 
-        .page { width: 100%; margin: 0 auto; padding: 5px; }
+        .page { width: 100%; margin: 0 auto; }
 
         /* Layout table (DomPDF-compatible) */
         .layout-table { width: 100%; border-collapse: collapse; }
