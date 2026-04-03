@@ -117,3 +117,10 @@
 - [x] Menambahkan slot upload file gambar transparan (`.png`) untuk *Stempel Toko* dan *Tanda Tangan* pada Menu **Pengaturan Sistem**.
 - [x] Menyisipkan opsi kotak-centang (checkbox) praktis `[ ] Tambah Tanda Tangan` dan `[ ] Tambah Stempel` langsung di layar Antarmuka **Detail Transaksi**.
 - [x] Merakit antarmuka cetak dokumen (PDF dan HTML/Web Print) agar stempel dapat muncul melayang (*overlay* transparan) secara realistis menimpa tanda tangan saat dicetak jika opsi tersebut dicentang, baik untuk `Invoice` maupun `Faktur`.
+
+### ✅ 11. Perbaikan Bug Fitur Stempel & TTD (Post-Review)
+- [x] **Bug Dropdown PDF/WA tidak ikut terupdate**: Link "Download Invoice PDF", "Download Faktur PDF", "Invoice via WA", dan "Faktur via WA" di menu dropdown "Bagikan" kini ikut merespons status checkbox TTD & Stempel.
+- [x] **Label validasi hilang**: Menambahkan label Indonesia `Tanda Tangan` dan `Stempel` di `UpdateSettingsRequest` agar pesan error validasi tidak menampilkan nama field mentah.
+- [x] **Pesan `validation.uploaded` mentah**: Menambahkan terjemahan pesan upload gagal agar tampil berbahasa Indonesia yang informatif.
+- [x] **Override PHP upload limit**: Menambahkan `public/.user.ini` (`upload_max_filesize=5M`, `post_max_size=10M`) agar file stempel/TTD bisa diupload tanpa ditolak PHP. Memerlukan restart `php8.3-fpm` di VPS.
+- [x] **Posisi stempel lebih realistis**: Mengubah posisi stempel dari tengah-rata menjadi miring `-12deg` dan geser kanan atas untuk efek cap tangan sungguhan.
