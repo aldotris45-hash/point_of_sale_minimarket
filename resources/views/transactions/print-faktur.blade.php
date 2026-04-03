@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Faktur #{{ $transaction->invoice_number }}</title>
     <style>
-        @page { size: A4 landscape; margin: 12mm 20mm; }
+        @page { margin: 15mm 20mm; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 9pt; color: #333; line-height: 1.4; }
 
@@ -77,7 +77,13 @@
                     <td style="width: 60%;">
                         <table class="layout-table"><tr>
                             @if($store_logo)
-                                <td style="width: 50px; padding-right: 10px;"><img src="{{ asset($store_logo) }}" alt="Logo" style="max-height: 50px; max-width: 50px;"></td>
+                                <td style="width: 50px; padding-right: 10px;">
+                                    @if($is_pdf ?? false)
+                                        <img src="{{ public_path($store_logo) }}" alt="Logo" style="max-height: 50px; max-width: 50px;">
+                                    @else
+                                        <img src="{{ asset($store_logo) }}" alt="Logo" style="max-height: 50px; max-width: 50px;">
+                                    @endif
+                                </td>
                             @endif
                             <td>
                                 <div class="store-name">{{ $store_name }}</div>
@@ -184,12 +190,20 @@
                     <div>Hormat Kami,</div>
                     
                     @if(isset($with_stamp) && $with_stamp && !empty($store_stamp))
-                        <img class="stamp-overlay" src="{{ asset($store_stamp) }}" alt="Stempel" style="position: absolute; top: -5px; right: -20px; transform: rotate(-12deg); max-width: 130px; max-height: 130px; opacity: 0.55; z-index: 3; pointer-events: none;">
+                        @if($is_pdf ?? false)
+                            <img src="{{ public_path($store_stamp) }}" alt="Stempel" style="max-width: 110px; max-height: 110px; opacity: 0.55; margin-top: 5px;">
+                        @else
+                            <img class="stamp-overlay" src="{{ asset($store_stamp) }}" alt="Stempel" style="position: absolute; top: -5px; right: -20px; transform: rotate(-12deg); max-width: 130px; max-height: 130px; opacity: 0.55; z-index: 3; pointer-events: none;">
+                        @endif
                     @endif
                     
                     @if(isset($with_signature) && $with_signature && !empty($store_signature))
-                        <div style="min-height: 50px; margin-top: 8px; position: relative; z-index: 2;">
-                            <img src="{{ asset($store_signature) }}" alt="Tanda Tangan" style="max-width: 140px; max-height: 50px;">
+                        <div style="min-height: 50px; margin-top: 8px;">
+                            @if($is_pdf ?? false)
+                                <img src="{{ public_path($store_signature) }}" alt="Tanda Tangan" style="max-width: 140px; max-height: 50px;">
+                            @else
+                                <img src="{{ asset($store_signature) }}" alt="Tanda Tangan" style="max-width: 140px; max-height: 50px;">
+                            @endif
                         </div>
                         <div class="line" style="margin-top: 3px;"></div>
                     @else
