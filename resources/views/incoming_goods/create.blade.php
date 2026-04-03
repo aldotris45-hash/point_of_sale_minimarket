@@ -122,16 +122,21 @@
 @endsection
 
 @push('script')
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // === Data produk ===
-            const products = @json($products->map(fn($p) => [
+    @php
+        $productsJson = $products->map(function ($p) {
+            return [
                 'id' => $p->id,
                 'name' => $p->name,
                 'category' => $p->category?->name ?? '-',
                 'price' => (float) $p->price,
                 'stock' => $p->stock,
-            ]));
+            ];
+        })->values();
+    @endphp
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // === Data produk ===
+            const products = @json($productsJson);
 
             const searchInput = document.getElementById('productSearch');
             const hiddenInput = document.getElementById('product_id');
