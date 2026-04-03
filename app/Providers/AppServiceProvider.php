@@ -26,6 +26,10 @@ use App\Services\IncomingGood\IncomingGoodServiceInterface;
 use App\Services\IncomingGood\IncomingGoodService;
 use App\Services\StockOpname\StockOpnameServiceInterface;
 use App\Services\StockOpname\StockOpnameService;
+use App\Services\Pdf\InvoicePdfServiceInterface;
+use App\Services\Pdf\InvoicePdfService;
+use App\Services\Transaction\TransactionServiceInterface;
+use App\Services\Transaction\TransactionService;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Blade;
@@ -51,6 +55,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(CustomerServiceInterface::class, CustomerService::class);
         $this->app->singleton(IncomingGoodServiceInterface::class, IncomingGoodService::class);
         $this->app->singleton(StockOpnameServiceInterface::class, StockOpnameService::class);
+        $this->app->bind(InvoicePdfServiceInterface::class, InvoicePdfService::class);
+        $this->app->bind(TransactionServiceInterface::class, TransactionService::class);
     }
 
     /**

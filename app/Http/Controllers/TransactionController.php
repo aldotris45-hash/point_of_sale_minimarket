@@ -3,23 +3,19 @@
 namespace App\Http\Controllers;
 
 use App\Enums\PaymentMethod;
-use App\Enums\PaymentStatus;
 use App\Enums\RoleStatus;
 use App\Enums\TransactionStatus;
-use App\Enums\CashTransactionCategory;
-use App\Models\CashTransaction;
 use App\Models\Customer;
-use App\Models\Payment;
-use App\Models\Product;
 use App\Models\Transaction;
 use App\Services\ActivityLog\ActivityLoggerInterface;
+use App\Services\Pdf\InvoicePdfServiceInterface;
 use App\Services\Settings\SettingsServiceInterface;
+use App\Services\Transaction\TransactionServiceInterface;
+use App\Http\Requests\Transaction\MarkAsPaidRequest;
+use App\Helpers\Terbilang;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use App\Helpers\Terbilang;
-use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use Yajra\DataTables\Facades\DataTables;
 
@@ -28,6 +24,8 @@ class TransactionController extends Controller
     public function __construct(
         private readonly SettingsServiceInterface $settings,
         private readonly ActivityLoggerInterface $logger,
+        private readonly InvoicePdfServiceInterface $pdfService,
+        private readonly TransactionServiceInterface $transactionService,
     ) {}
 
     public function index(Request $request): View
@@ -159,7 +157,7 @@ class TransactionController extends Controller
     /**
      * Mark a cash_tempo transaction as paid (accepts additional amount).
      */
-    public function markAsPaid(Transaction $transaction)
+    public function markAsPaid(MarkAsPaidRequest $request, Transaction $transaction)
     {
         if (($transaction->payment_method?->value ?? $transaction->payment_method) !== PaymentMethod::CASH_TEMPO->value) {
             abort(400, 'Hanya transaksi tunai tempo yang bisa dilunasi di sini.');
@@ -169,47 +167,18 @@ class TransactionController extends Controller
             return back()->with('error', 'Transaksi sudah lunas.');
         }
 
-        $data = request()->validate([
-            'paid_amount' => ['required','numeric','min:0'],
-        ]);
+        $paid = (float) $request->validated('paid_amount');
 
-        $paid = (float) $data['paid_amount'];
-        $transaction->amount_paid += $paid;
-        $transaction->change = max(0, $transaction->amount_paid - $transaction->total);
-        if ($transaction->amount_paid >= $transaction->total) {
-            $transaction->status = TransactionStatus::PAID;
-        }
-        $transaction->save();
-
-        // Catat ke tabel payments agar muncul di halaman Pembayaran
-        Payment::create([
-            'transaction_id' => $transaction->id,
-            'method'         => PaymentMethod::CASH_TEMPO,
-            'provider'       => 'manual',
-            'provider_order_id' => $transaction->invoice_number,
-            'status'         => PaymentStatus::SETTLEMENT,
-            'amount'         => $paid,
-            'paid_at'        => now(),
-        ]);
-
-        // Catat ke Buku Kas
-        CashTransaction::create([
-            'user_id' => auth()->id(),
-            'type' => 'in',
-            'category' => CashTransactionCategory::PELUNASAN_TEMPO->value,
-            'date' => now()->toDateString(),
-            'amount' => $paid,
-            'description' => 'Pelunasan tempo #' . $transaction->invoice_number,
-        ]);
+        $result = $this->transactionService->markAsPaid($transaction, $paid, auth()->id());
 
         $this->logger->log('Pelunasan Tempo', 'Pembayaran tempo dicatat', [
             'transaction_id' => $transaction->id,
             'invoice' => $transaction->invoice_number,
-            'amount' => $paid,
+            'amount' => $result['paid'],
         ]);
 
         return back()->with('success', 'Pembayaran dicatat.' .
-            ($transaction->change > 0 ? ' Kembalian: ' . number_format($transaction->change, 0, ',', '.') : '') );
+            ($transaction->change > 0 ? ' Kembalian: ' . number_format((float) $transaction->change, 0, ',', '.') : '') );
     }
 
     /**
@@ -224,19 +193,7 @@ class TransactionController extends Controller
 
         $invoiceNumber = $transaction->invoice_number;
 
-        DB::transaction(function () use ($transaction) {
-            // Restore stock for each detail (only if transaction was paid/pending, not suspended)
-            $statusVal = $transaction->status->value ?? $transaction->status;
-            if (in_array($statusVal, ['paid', 'pending'])) {
-                foreach ($transaction->details as $detail) {
-                    Product::whereKey($detail->product_id)
-                        ->increment('stock', (int) $detail->quantity);
-                }
-            }
-
-            // Soft delete — data tetap tersimpan untuk audit trail
-            $transaction->delete();
-        });
+        $this->transactionService->deleteWithStockRestore($transaction);
 
         $this->logger->log('Hapus Transaksi', 'Transaksi dihapus oleh admin (soft delete)', [
             'transaction_id' => $transaction->id,
@@ -314,98 +271,18 @@ class TransactionController extends Controller
         ]);
     }
 
-    // ── PDF Downloads ──────────────────────────────────────────────
-
-    /**
-     * Shared helper: gather common receipt/invoice data.
-     */
-    private function pdfData(Transaction $transaction, Request $request, bool $withTerbilang = false): array
-    {
-        $transaction->loadMissing(['details.product', 'user', 'customer']);
-
-        // Resolve absolute file paths for DomPDF (bypasses symlinks)
-        $resolvePath = function (?string $relativePath): ?string {
-            if (empty($relativePath)) return null;
-            // Path stored as 'storage/assets/images/xxx.png' → actual file at 'storage/app/public/assets/images/xxx.png'
-            $stripped = str_replace('storage/', '', $relativePath);
-            $absolute = storage_path('app/public/' . $stripped);
-            return file_exists($absolute) ? $absolute : null;
-        };
-
-        $pdfStampPath = $resolvePath($this->settings->storeStampPath());
-        $pdfStampBase64 = null;
-        if ($request->query('stamp') == 1 && $pdfStampPath && function_exists('imagecreatefromstring')) {
-            try {
-                $imgStr = file_get_contents($pdfStampPath);
-                $source = imagecreatefromstring($imgStr);
-                if ($source !== false) {
-                    // Random angle between -25 and 25 degrees
-                    $angle = rand(-25, 25);
-                    
-                    imagealphablending($source, false);
-                    imagesavealpha($source, true);
-                    
-                    $transparent = imagecolorallocatealpha($source, 0, 0, 0, 127);
-                    $rotated = imagerotate($source, $angle, $transparent);
-                    
-                    imagealphablending($rotated, false);
-                    imagesavealpha($rotated, true);
-                    
-                    ob_start();
-                    imagepng($rotated);
-                    $imageData = ob_get_clean();
-                    $pdfStampBase64 = 'data:image/png;base64,' . base64_encode($imageData);
-                    
-                    imagedestroy($source);
-                    imagedestroy($rotated);
-                }
-            } catch (\Exception $e) {
-                // Ignore and use normal path fallback
-            }
-        }
-
-        $data = [
-            'transaction'        => $transaction,
-            'store_name'         => $this->settings->storeName(),
-            'store_address'      => $this->settings->storeAddress(),
-            'store_phone'        => $this->settings->storePhone(),
-            'store_bank_account' => $this->settings->storeBankAccount(),
-            'store_logo'         => $this->settings->storeLogoPath(),
-            'currency'           => $this->settings->currency(),
-            'discount_percent'   => $this->settings->discountPercent(),
-            'tax_percent'        => $this->settings->taxPercent(),
-            'with_signature'    => $request->query('signature') == 1,
-            'with_stamp'        => $request->query('stamp') == 1,
-            'store_signature'   => $this->settings->storeSignaturePath(),
-            'store_stamp'       => $this->settings->storeStampPath(),
-            'is_pdf'            => true,
-            // Resolved absolute paths for DomPDF
-            'pdf_logo_path'      => $resolvePath($this->settings->storeLogoPath()),
-            'pdf_signature_path' => $resolvePath($this->settings->storeSignaturePath()),
-            'pdf_stamp_path'     => $pdfStampPath,
-            'pdf_stamp_base64'   => $pdfStampBase64,
-            // Random offset for organic UI look
-            'stamp_margin_top'   => rand(0, 30) . 'px',
-            'stamp_margin_left'  => rand(-70, -10) . 'px',
-        ];
-
-        if ($withTerbilang) {
-            $data['terbilang'] = Terbilang::rupiah((float) $transaction->total);
-        }
-
-        return $data;
-    }
+    // ── PDF Downloads (delegated to InvoicePdfService) ─────────────
 
     /**
      * Download struk as PDF (80mm thermal receipt width).
      */
     public function receiptPdf(Transaction $transaction, Request $request)
     {
-        $data = $this->pdfData($transaction, $request);
-
-        $pdf = Pdf::loadView('transactions.receipt', $data)
-            ->setPaper([0, 0, 226.77, 841.89], 'portrait') // ~80mm x ~297mm
-            ->setOption(['isRemoteEnabled' => true]);
+        $pdf = $this->pdfService->receiptPdf(
+            $transaction,
+            $request->query('stamp') == 1,
+            $request->query('signature') == 1,
+        );
 
         return $pdf->download("struk-{$transaction->invoice_number}.pdf");
     }
@@ -415,22 +292,11 @@ class TransactionController extends Controller
      */
     public function invoicePdf(Transaction $transaction, Request $request)
     {
-        $data = $this->pdfData($transaction, $request, true);
-
-        // Debug log for image paths
-        \Log::info('Invoice PDF paths', [
-            'with_stamp' => $data['with_stamp'],
-            'with_signature' => $data['with_signature'],
-            'store_stamp' => $data['store_stamp'],
-            'store_signature' => $data['store_signature'],
-            'pdf_stamp_path' => $data['pdf_stamp_path'],
-            'pdf_signature_path' => $data['pdf_signature_path'],
-            'pdf_logo_path' => $data['pdf_logo_path'],
-        ]);
-
-        $pdf = Pdf::loadView('transactions.print-invoice', $data)
-            ->setPaper('a4', 'landscape')
-            ->setOption(['isRemoteEnabled' => true]);
+        $pdf = $this->pdfService->invoicePdf(
+            $transaction,
+            $request->query('stamp') == 1,
+            $request->query('signature') == 1,
+        );
 
         return $pdf->download("invoice-{$transaction->invoice_number}.pdf");
     }
@@ -440,11 +306,11 @@ class TransactionController extends Controller
      */
     public function fakturPdf(Transaction $transaction, Request $request)
     {
-        $data = $this->pdfData($transaction, $request, true);
-
-        $pdf = Pdf::loadView('transactions.print-faktur', $data)
-            ->setPaper('a4', 'landscape')
-            ->setOption(['isRemoteEnabled' => true]);
+        $pdf = $this->pdfService->fakturPdf(
+            $transaction,
+            $request->query('stamp') == 1,
+            $request->query('signature') == 1,
+        );
 
         return $pdf->download("faktur-{$transaction->invoice_number}.pdf");
     }

@@ -2,6 +2,8 @@
 
 namespace App\Services\Report;
 
+use App\Models\ProductPrice;
+use App\Models\Transaction;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -149,5 +151,92 @@ class ReportService implements ReportServiceInterface
             ->when($filters['to'] ?? null, fn($q, $v) => $q->whereDate('t.created_at', '<=', $v))
             ->when(!empty($filters['status']), fn($q) => $q->where('t.status', $filters['status']))
             ->when(!empty($filters['method']), fn($q) => $q->where('t.payment_method', $filters['method']));
+    }
+
+    /**
+     * Build detailed per-item transaction records with cost/profit calculations.
+     *
+     * @param  array  $filters  [from, to, status, method, period]
+     * @return array{records: Collection, totals: array}
+     */
+    public function printTransactionsData(array $filters): array
+    {
+        $from   = $filters['from'] ?? null;
+        $to     = $filters['to'] ?? null;
+        $status = $filters['status'] ?? 'paid';
+        $method = $filters['method'] ?? null;
+
+        $transactions = Transaction::query()
+            ->with(['details.product', 'user', 'customer'])
+            ->where('status', '!=', 'suspended')
+            ->when($status, fn($q) => $q->where('status', $status))
+            ->when($method, fn($q) => $q->where('payment_method', $method))
+            ->when($from, fn($q) => $q->whereDate('created_at', '>=', $from))
+            ->when($to, fn($q) => $q->whereDate('created_at', '<=', $to))
+            ->orderBy('created_at', 'asc')
+            ->get();
+
+        // Build cost price cache (latest cost per product)
+        $costPriceCache = [];
+        $productIds = $transactions->pluck('details')->flatten()->pluck('product_id')->unique();
+
+        if ($productIds->isNotEmpty()) {
+            $latestPrices = ProductPrice::query()
+                ->whereIn('product_id', $productIds)
+                ->orderByDesc('price_date')
+                ->get()
+                ->unique('product_id')
+                ->keyBy('product_id');
+
+            foreach ($latestPrices as $pid => $pp) {
+                $costPriceCache[$pid] = (float) $pp->cost_price;
+            }
+        }
+
+        // Build flat records (one row per item)
+        $records = collect();
+        $totals = ['cost' => 0, 'selling' => 0, 'qty' => 0, 'amount' => 0, 'kas_masuk' => 0, 'profit' => 0];
+
+        foreach ($transactions as $trx) {
+            $pm = is_string($trx->payment_method) ? $trx->payment_method : ($trx->payment_method?->value ?? '');
+            $pmLabel = $pm === 'cash_tempo' ? 'Tunai Tempo' : ucfirst($pm);
+
+            foreach ($trx->details as $detail) {
+                $costPrice    = $costPriceCache[$detail->product_id] ?? 0;
+                $sellingPrice = (float) $detail->price;
+                $qty          = (int) $detail->quantity;
+                $amount       = (float) $detail->total;
+                $kasMasuk     = $amount;
+                $profit       = $amount - ($costPrice * $qty);
+
+                $records->push([
+                    'invoice_number' => $trx->invoice_number,
+                    'date'           => $trx->created_at->format('d/M/Y'),
+                    'cashier'        => $trx->user->name ?? '-',
+                    'customer'       => $trx->customer->name ?? '',
+                    'payment_method' => $pmLabel,
+                    'product_name'   => $detail->product->name ?? '-',
+                    'cost_price'     => $costPrice,
+                    'selling_price'  => $sellingPrice,
+                    'qty'            => $qty,
+                    'unit'           => $detail->product->unit ?? 'Pcs',
+                    'amount'         => $amount,
+                    'kas_masuk'      => $kasMasuk,
+                    'profit'         => $profit,
+                ]);
+
+                $totals['cost']      += $costPrice * $qty;
+                $totals['selling']   += $sellingPrice * $qty;
+                $totals['qty']       += $qty;
+                $totals['amount']    += $amount;
+                $totals['kas_masuk'] += $kasMasuk;
+                $totals['profit']    += $profit;
+            }
+        }
+
+        return [
+            'records' => $records,
+            'totals'  => $totals,
+        ];
     }
 }
