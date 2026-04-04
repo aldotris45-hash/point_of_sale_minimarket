@@ -22,9 +22,8 @@ class CatalogController extends Controller
         $search = $request->query('search');
         $categoryId = $request->query('category_id');
 
-        // Only show products with stock > 0 AND price > 0 (harga kosong = tidak dipasarkan)
+        // Only show products with price > 0 (harga kosong = tidak dipasarkan)
         $query = Product::with('category')
-            ->where('stock', '>', 0)
             ->where('price', '>', 0)
             ->orderBy('name');
 
@@ -44,7 +43,7 @@ class CatalogController extends Controller
 
         // For the filter dropdown: only categories that have marketable products
         $categories = Category::whereHas('products', function($q) {
-            $q->where('stock', '>', 0)->where('price', '>', 0);
+            $q->where('price', '>', 0);
         })->orderBy('name')->get();
         
         $storeName = $this->settings->storeName() ?: 'TRIJAYA FRESH';
@@ -59,7 +58,6 @@ class CatalogController extends Controller
         $search = $request->query('search');
 
         $query = Product::with('category')
-            ->where('stock', '>', 0)
             ->where('price', '>', 0)
             ->orderBy('name');
 
