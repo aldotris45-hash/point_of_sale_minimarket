@@ -59,7 +59,7 @@ class ImportManualData extends Command
             ]
         ];
 
-        $defaultCategory = Category::firstOrCreate(['name' => 'Barang (Import Excel)']);
+        $defaultCategory = Category::firstOrCreate(['name' => 'Sayur']);
         $defaultSupplier = Supplier::firstOrCreate(
             ['name' => 'Supplier Legacy'],
             ['contact_name' => 'Sistem Import', 'phone' => '-', 'address' => '-']

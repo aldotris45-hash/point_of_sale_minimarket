@@ -95,8 +95,15 @@ class ProductController extends Controller
         $name = $product->name;
         $id = $product->id;
         $sku = $product->sku;
-        $this->service->delete($product);
-        $this->logger->log('Hapus Produk', "Menghapus produk '{$name}'", ['product_id' => $id, 'sku' => $sku]);
-        return redirect()->route('produk.index')->with('success', 'Produk berhasil dihapus.');
+        try {
+            $this->service->delete($product);
+            $this->logger->log('Hapus Produk', "Menghapus produk '{$name}'", ['product_id' => $id, 'sku' => $sku]);
+            return redirect()->route('produk.index')->with('success', 'Produk berhasil dihapus.');
+        } catch (\Illuminate\Database\QueryException $e) {
+            if ($e->getCode() == 23000) {
+                return redirect()->route('produk.index')->with('error', "Gagal! Produk '{$name}' tidak bisa dihapus karena sudah dipakai dalam riwayat pesanan/transaksi.");
+            }
+            throw $e;
+        }
     }
 }

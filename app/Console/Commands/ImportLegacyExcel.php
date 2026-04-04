@@ -42,7 +42,7 @@ class ImportLegacyExcel extends Command
         CashTransaction::where('description', 'LIKE', '%(Import)%')->delete();
 
         // Reset Stok Produk Import menjadi 0 (jika ada sisa dari crash sebelumnya)
-        $defaultCategory = Category::where('name', 'Barang (Import Excel)')->first();
+        $defaultCategory = Category::where('name', 'Sayur')->first();
         if ($defaultCategory) {
             Product::where('category_id', $defaultCategory->id)->update(['stock' => 0]);
         }
@@ -65,8 +65,8 @@ class ImportLegacyExcel extends Command
 
         // Buat kategori default
         $defaultCategory = Category::firstOrCreate(
-            ['name' => 'Barang (Import Excel)'],
-            ['description' => 'Kategori otomatis untuk barang import dari Excel lama']
+            ['name' => 'Sayur'],
+            ['description' => 'Kategori produk sayuran']
         );
 
         // Buat supplier default
