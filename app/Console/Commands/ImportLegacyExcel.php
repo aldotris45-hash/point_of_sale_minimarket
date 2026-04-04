@@ -41,10 +41,27 @@ class ImportLegacyExcel extends Command
         // Hapus Buku Kas lama
         CashTransaction::where('description', 'LIKE', '%(Import)%')->delete();
 
-        // Reset Stok Produk Import menjadi 0 (jika ada sisa dari crash sebelumnya)
+        // Reset Stok Produk Import menjadi 0 dan hapus produk "salah ketik" yang yatim piatu
         $defaultCategory = Category::where('name', 'Sayur')->first();
         if ($defaultCategory) {
             Product::where('category_id', $defaultCategory->id)->update(['stock' => 0]);
+            
+            // Hapus produk salah ejaan (yang transaksinya sudah terhapus oleh script di atas)
+            $strandedProducts = Product::where('category_id', $defaultCategory->id)
+                ->whereNotIn('id', function($q) {
+                    $q->select('product_id')->from('transaction_details');
+                })
+                ->whereNotIn('id', function($q) {
+                    $q->select('product_id')->from('incoming_goods');
+                })
+                ->get();
+                
+            foreach($strandedProducts as $p) {
+                // Delete price history first to avoid constraint
+                \App\Models\ProductPriceHistory::where('product_id', $p->id)->delete();
+                \App\Models\ProductPrice::where('product_id', $p->id)->delete();
+                $p->delete();
+            }
         }
 
         $path = storage_path('app/legacy_import.json');
@@ -117,7 +134,16 @@ class ImportLegacyExcel extends Command
             $incomingTime = $invoiceDate . ' 08:00:00';
             
             foreach ($validItems as $idx => $itemLine) {
-                $productName = trim($itemLine['name']);
+                $rawName = trim($itemLine['name']);
+                
+                // Normalisasi Pengejaan Excel yang Berantakan
+                $nameLower = strtolower($rawName);
+                $productName = match (true) {
+                    str_contains($nameLower, 'bombai') || str_contains($nameLower, 'bombay') => 'Bawang Bombay',
+                    str_contains($nameLower, 'pree utuh') || str_contains($nameLower, 'prei utuh') => 'Bawang Prei Utuh',
+                    str_contains($nameLower, 'pree') || str_contains($nameLower, 'prei') => 'Bawang Prei',
+                    default => ucwords($nameLower) // Rapihkan kapitalisasinya
+                };
 
                 // Find or Create Product
                 $product = Product::firstOrCreate(
