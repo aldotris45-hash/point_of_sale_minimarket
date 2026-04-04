@@ -22,9 +22,10 @@ class CatalogController extends Controller
         $search = $request->query('search');
         $categoryId = $request->query('category_id');
 
-        // Only show products with stock > 0
+        // Only show products with stock > 0 AND price > 0 (harga kosong = tidak dipasarkan)
         $query = Product::with('category')
             ->where('stock', '>', 0)
+            ->where('price', '>', 0)
             ->orderBy('name');
 
         if ($search) {
@@ -41,9 +42,9 @@ class CatalogController extends Controller
             return $product->category ? $product->category->name : 'Lain-lain';
         });
 
-        // For the filter dropdown: only categories that have products in stock
+        // For the filter dropdown: only categories that have marketable products
         $categories = Category::whereHas('products', function($q) {
-            $q->where('stock', '>', 0);
+            $q->where('stock', '>', 0)->where('price', '>', 0);
         })->orderBy('name')->get();
         
         $storeName = $this->settings->storeName() ?: 'TRIJAYA FRESH';
@@ -59,6 +60,7 @@ class CatalogController extends Controller
 
         $query = Product::with('category')
             ->where('stock', '>', 0)
+            ->where('price', '>', 0)
             ->orderBy('name');
 
         if ($search) {
