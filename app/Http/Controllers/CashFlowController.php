@@ -228,12 +228,13 @@ class CashFlowController extends Controller
         // Fetch based on requested type
         if ($type === 'income') {
             $salesItems = Transaction::query()
+                ->with('customer')
                 ->where('status', TransactionStatus::PAID->value)
                 ->whereDate('created_at', $dateRaw)
                 ->get()
                 ->map(fn($t) => [
                     'label' => 'Transaksi',
-                    'note' => $t->receipt_no . ($t->customer ? ' - ' . $t->customer->name : ''),
+                    'note' => $t->invoice_number . ($t->customer ? ' - ' . $t->customer->name : ''),
                     'amount' => (float)$t->total,
                     'time' => $t->created_at->format('H:i')
                 ]);
@@ -251,11 +252,12 @@ class CashFlowController extends Controller
                 ]);
         } elseif ($type === 'purchase') {
             $purchases = IncomingGood::query()
+                ->with(['supplier', 'product'])
                 ->whereDate('date', $dateRaw)
                 ->get()
                 ->map(fn($p) => [
                     'label' => 'Barang Masuk',
-                    'note' => $p->reference_no . ($p->supplier ? ' - ' . $p->supplier->name : ''),
+                    'note' => ($p->product ? $p->product->name : 'Item') . ' (' . $p->quantity . ')' . ($p->supplier ? ' dr ' . $p->supplier->name : ''),
                     'amount' => (float)$p->total,
                     'time' => Carbon::parse($p->date)->format('H:i')
                 ]);
