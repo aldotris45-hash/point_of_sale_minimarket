@@ -29,7 +29,7 @@ class ImportLegacyExcel extends Command
         $this->info("Membersihkan data import sebelumnya (biar tidak dobel)...");
         
         // Hapus transaksi lama
-        $trxIds = Transaction::withTrashed()->where('note', 'Transaksi Import dari Excel')->pluck('id');
+        $trxIds = Transaction::withTrashed()->where('note', 'LIKE', '%Import%Excel%')->pluck('id');
         Payment::whereIn('transaction_id', $trxIds)->delete();
         TransactionDetail::whereIn('transaction_id', $trxIds)->delete();
         Transaction::withTrashed()->whereIn('id', $trxIds)->forceDelete();
@@ -153,7 +153,7 @@ class ImportLegacyExcel extends Command
             $baseInvoiceNo = $invoice['invoiceNo'] ?: 'INV-LEGACY-' . uniqid();
             $finalInvoiceNo = $baseInvoiceNo;
             $counter = 1;
-            while (Transaction::where('invoice_number', $finalInvoiceNo)->exists()) {
+            while (Transaction::withTrashed()->where('invoice_number', $finalInvoiceNo)->exists()) {
                 $finalInvoiceNo = $baseInvoiceNo . '-' . $counter;
                 $counter++;
             }
