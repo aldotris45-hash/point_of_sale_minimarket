@@ -22,8 +22,9 @@ class CatalogController extends Controller
         $search = $request->query('search');
         $categoryId = $request->query('category_id');
 
-        // Show all products. If price == 0, we handle it in the view (mark as 'Hubungi Kami').
+        // Show all products. If price == 0, we don't show it at all in the catalog.
         $query = Product::with('category')
+            ->where('price', '>', 0)
             ->orderBy('category_id')
             ->orderBy('name');
 
@@ -56,6 +57,7 @@ class CatalogController extends Controller
         $search = $request->query('search');
 
         $query = Product::with('category')
+            ->where('price', '>', 0)
             ->orderBy('category_id')
             ->orderBy('name');
 
