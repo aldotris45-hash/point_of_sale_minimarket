@@ -8,6 +8,7 @@ use App\Models\Product;
 use App\Models\Category;
 use App\Models\Transaction;
 use App\Models\TransactionDetail;
+use App\Models\IncomingGood;
 use App\Models\Payment;
 use App\Models\CashTransaction;
 use App\Models\Supplier;
@@ -25,6 +26,27 @@ class ImportLegacyExcel extends Command
 
     public function handle()
     {
+        $this->info("Membersihkan data import sebelumnya (biar tidak dobel)...");
+        
+        // Hapus transaksi lama
+        $trxIds = Transaction::withTrashed()->where('note', 'Transaksi Import dari Excel')->pluck('id');
+        Payment::whereIn('transaction_id', $trxIds)->delete();
+        TransactionDetail::whereIn('transaction_id', $trxIds)->delete();
+        Transaction::withTrashed()->whereIn('id', $trxIds)->forceDelete();
+
+        // Hapus Barang Masuk lama & riwayat harganya
+        IncomingGood::where('notes', 'Import Modal Excel Legacy')->delete();
+        \App\Models\ProductPriceHistory::where('notes', 'LIKE', 'Via Barang Masuk: Import Modal%')->delete();
+
+        // Hapus Buku Kas lama
+        CashTransaction::where('description', 'LIKE', '%(Import)%')->delete();
+
+        // Reset Stok Produk Import menjadi 0 (jika ada sisa dari crash sebelumnya)
+        $defaultCategory = Category::where('name', 'Barang (Import Excel)')->first();
+        if ($defaultCategory) {
+            Product::where('category_id', $defaultCategory->id)->update(['stock' => 0]);
+        }
+
         $path = storage_path('app/legacy_import.json');
         if (!file_exists($path)) {
             $this->error("File $path tidak ditemukan! Jalankan script node parse_excel.mjs terlebih dahulu.");

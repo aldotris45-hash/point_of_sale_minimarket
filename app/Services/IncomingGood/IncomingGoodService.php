@@ -41,7 +41,7 @@ class IncomingGoodService implements IncomingGoodServiceInterface
                 ProductPrice::updateOrCreate(
                     [
                         'product_id' => $data['product_id'],
-                        'price_date' => $data['date'],
+                        'price_date' => date('Y-m-d', strtotime($data['date'])),
                     ],
                     [
                         'cost_price' => $purchasePrice,
@@ -66,7 +66,7 @@ class IncomingGoodService implements IncomingGoodServiceInterface
                 ProductPrice::updateOrCreate(
                     [
                         'product_id' => $data['product_id'],
-                        'price_date' => $data['date'],
+                        'price_date' => date('Y-m-d', strtotime($data['date'])),
                     ],
                     [
                         'cost_price' => $purchasePrice,
