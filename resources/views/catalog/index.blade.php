@@ -13,6 +13,8 @@
         .card { border: none; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); transition: transform 0.2s; }
         .card:hover { transform: translateY(-3px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         .category-title { border-bottom: 2px solid #0d6efd; display: inline-block; padding-bottom: 5px; margin-bottom: 1.5rem; font-weight: 600;}
+        .transition-hover { transition: all 0.2s ease; }
+        .transition-hover:hover { transform: translateX(5px); box-shadow: 0 4px 15px rgba(0,0,0,0.08) !important; border-color: #0d6efd !important; }
         .price { font-size: 1.1rem; font-weight: 700; color: #198754; }
         .floating-wa { position: fixed; bottom: 20px; right: 20px; background-color: #25d366; color: white; border-radius: 50px; padding: 12px 24px; font-weight: bold; box-shadow: 0 4px 10px rgba(37,211,102,0.4); text-decoration: none; z-index: 1000; transition: transform 0.2s;}
         .floating-wa:hover { color: white; transform: scale(1.05); }
@@ -58,23 +60,20 @@
         <div class="mb-5">
             <h3 class="category-title text-primary"><i class="bi bi-tags"></i> {{ $categoryName }}</h3>
             
-            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            <div class="d-flex flex-column gap-3">
                 @foreach($products as $product)
-                <div class="col">
-                    <div class="card h-100">
-                        <div class="card-body">
-                            <h5 class="card-title fw-bold mb-2">{{ $product->name }}</h5>
-                            <p class="card-text text-muted small mb-3">SKU: {{ $product->sku }}</p>
-                            <div class="d-flex justify-content-between align-items-center">
-                                @if($product->price > 0)
-                                    <h4 class="price mb-0">Rp {{ number_format($product->price, 0, ',', '.') }}</h4>
-                                    <span class="badge bg-success bg-opacity-10 text-success border border-success"><i class="bi bi-check-circle"></i> Tersedia</span>
-                                @else
-                                    <h4 class="price mb-0 text-muted" style="font-size: 1rem;"><i class="bi bi-telephone"></i> Hubungi Admin</h4>
-                                    <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary"><i class="bi bi-dash-circle"></i> Menyesuaikan</span>
-                                @endif
-                            </div>
-                        </div>
+                <div class="d-flex justify-content-between align-items-center p-3 bg-white rounded-4 shadow-sm transition-hover" style="border: 1px solid #f0f0f0;">
+                    <div>
+                        <h5 class="fw-bold mb-0 text-dark" style="font-size: 1.15rem;">{{ $product->name }}</h5>
+                    </div>
+                    <div class="text-end">
+                        @if($product->price > 0)
+                            <h5 class="fw-bolder mb-1" style="color: #198754; font-size: 1.25rem;">Rp {{ number_format($product->price, 0, ',', '.') }}</h5>
+                            <span class="badge rounded-pill bg-success bg-opacity-10 text-success px-2 py-1" style="font-weight: 500; font-size: 0.75rem;"><i class="bi bi-circle-fill small" style="font-size: 0.5rem; margin-right: 4px;"></i> Tersedia</span>
+                        @else
+                            <h6 class="fw-semibold mb-1 text-secondary fst-italic">Hubungi Admin</h6>
+                            <span class="badge rounded-pill bg-secondary bg-opacity-10 text-secondary px-2 py-1" style="font-weight: 500; font-size: 0.75rem;"><i class="bi bi-circle-half small" style="font-size: 0.5rem; margin-right: 4px;"></i> Menyesuaikan</span>
+                        @endif
                     </div>
                 </div>
                 @endforeach
