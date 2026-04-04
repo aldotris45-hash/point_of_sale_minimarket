@@ -103,7 +103,11 @@
                     <td style="text-align: center;">{{ $index + 1 }}</td>
                     <td>{{ $product->sku }}</td>
                     <td>{{ $product->name }}</td>
-                    <td class="price">Rp {{ number_format($product->price, 0, ',', '.') }}</td>
+                    @if($product->price > 0)
+                        <td class="price">Rp {{ number_format($product->price, 0, ',', '.') }}</td>
+                    @else
+                        <td class="price" style="color: #666; font-weight: normal; font-style: italic;">Hubungi Admin</td>
+                    @endif
                 </tr>
                 @endforeach
             </tbody>

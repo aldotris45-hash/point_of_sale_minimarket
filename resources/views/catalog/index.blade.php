@@ -66,8 +66,13 @@
                             <h5 class="card-title fw-bold mb-2">{{ $product->name }}</h5>
                             <p class="card-text text-muted small mb-3">SKU: {{ $product->sku }}</p>
                             <div class="d-flex justify-content-between align-items-center">
-                                <h4 class="price mb-0">Rp {{ number_format($product->price, 0, ',', '.') }}</h4>
-                                <span class="badge bg-success bg-opacity-10 text-success border border-success"><i class="bi bi-check-circle"></i> Tersedia</span>
+                                @if($product->price > 0)
+                                    <h4 class="price mb-0">Rp {{ number_format($product->price, 0, ',', '.') }}</h4>
+                                    <span class="badge bg-success bg-opacity-10 text-success border border-success"><i class="bi bi-check-circle"></i> Tersedia</span>
+                                @else
+                                    <h4 class="price mb-0 text-muted" style="font-size: 1rem;"><i class="bi bi-telephone"></i> Hubungi Admin</h4>
+                                    <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary"><i class="bi bi-dash-circle"></i> Menyesuaikan</span>
+                                @endif
                             </div>
                         </div>
                     </div>

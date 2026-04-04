@@ -22,9 +22,9 @@ class CatalogController extends Controller
         $search = $request->query('search');
         $categoryId = $request->query('category_id');
 
-        // Only show products with price > 0 (harga kosong = tidak dipasarkan)
+        // Show all products. If price == 0, we handle it in the view (mark as 'Hubungi Kami').
         $query = Product::with('category')
-            ->where('price', '>', 0)
+            ->orderBy('category_id')
             ->orderBy('name');
 
         if ($search) {
@@ -41,10 +41,8 @@ class CatalogController extends Controller
             return $product->category ? $product->category->name : 'Lain-lain';
         });
 
-        // For the filter dropdown: only categories that have marketable products
-        $categories = Category::whereHas('products', function($q) {
-            $q->where('price', '>', 0);
-        })->orderBy('name')->get();
+        // All categories
+        $categories = Category::has('products')->orderBy('name')->get();
         
         $storeName = $this->settings->storeName() ?: 'TRIJAYA FRESH';
         $storePhone = $this->settings->storePhone();
@@ -58,7 +56,7 @@ class CatalogController extends Controller
         $search = $request->query('search');
 
         $query = Product::with('category')
-            ->where('price', '>', 0)
+            ->orderBy('category_id')
             ->orderBy('name');
 
         if ($search) {
