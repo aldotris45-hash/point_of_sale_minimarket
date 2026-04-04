@@ -3,7 +3,10 @@ import path from 'path';
 import xlsx from 'xlsx';
 
 const dirPath = 'D:\\BAKOL SAYUR';
-const files = ['Invoice Februari.xlsx', 'Invoice januari - ledokombo.xlsx', 'Invoice januari.xlsx'];
+if (!fs.existsSync(dirPath)) {
+    console.warn(`Directory not found: ${dirPath}`);
+}
+const files = fs.readdirSync(dirPath).filter(f => f.endsWith('.xlsx') && !f.startsWith('~'));
 
 const excelDateToJSDate = (serial) => {
     if (!serial || isNaN(serial)) return null;
@@ -137,7 +140,7 @@ files.forEach(file => {
     });
 });
 
-fs.writeFileSync('D:\\BAKOL SAYUR\\parsed_data.json', JSON.stringify(results, null, 2));
+fs.writeFileSync(path.resolve('./storage/app/legacy_import.json'), JSON.stringify(results, null, 2));
 
 console.log("\n=== SUMMARY BARU (DENGAN HARGA MODAL) ===");
 console.log(`Total Invoices Unik Found: ${results.length}`);
