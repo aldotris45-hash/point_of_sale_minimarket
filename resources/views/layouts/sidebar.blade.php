@@ -80,6 +80,12 @@
                             <i class="bi bi-box-seam"></i><span>Manajemen Produk</span>
                         </a>
                     </li>
+                    <li class="nav-item mt-1">
+                        <a class="nav-link d-flex align-items-center gap-2 {{ request()->is('katalog*') ? 'active' : '' }}"
+                            href="{{ url('/katalog') }}" target="_blank">
+                            <i class="bi bi-megaphone"></i><span>Katalog Harga Klien</span>
+                        </a>
+                    </li>
 
                     <!-- Operasional -->
                     <li class="nav-item px-3 pt-3 pb-2 text-muted text-uppercase small">Operasional</li>
