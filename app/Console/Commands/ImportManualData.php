@@ -104,16 +104,6 @@ class ImportManualData extends Command
                 $totalModal += ($item['costPrice'] * $item['qty']);
             }
 
-            // Buku Kas Modal
-            CashTransaction::create([
-                'user_id'     => 1,
-                'type'        => 'out',
-                'category'    => CashTransactionCategory::OPERASIONAL->value,
-                'date'        => $dateStr,
-                'amount'      => $totalModal,
-                'description' => 'Modal Kulakan Manual - ' . $invoice['customer'],
-            ]);
-
             // 3. JAM SIANG: TRANSAKSI JUAL
             $subtotal = 0;
             foreach ($invoice['items'] as $item) {
