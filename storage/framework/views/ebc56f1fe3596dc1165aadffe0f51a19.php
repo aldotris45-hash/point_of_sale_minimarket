@@ -1,39 +1,37 @@
-@extends('layouts.app')
+<?php $__env->startSection('title', 'Arus Kas'); ?>
 
-@section('title', 'Arus Kas')
-
-@section('content')
+<?php $__env->startSection('content'); ?>
     <section class="container-fluid py-4">
         <div class="d-flex align-items-center justify-content-between mb-3">
             <h1 class="h3 mb-0"><i class="bi bi-arrow-left-right"></i> Arus Kas</h1>
         </div>
 
-        {{-- Filter Tanggal --}}
-        <form id="cashFlowFilter" method="GET" action="{{ route('arus-kas') }}" class="card shadow-sm mb-3">
+        
+        <form id="cashFlowFilter" method="GET" action="<?php echo e(route('arus-kas')); ?>" class="card shadow-sm mb-3">
             <div class="card-body row g-2 align-items-end">
                 <div class="col-6 col-md-3">
                     <label for="filterFrom" class="form-label">Dari Tanggal</label>
-                    <input type="date" id="filterFrom" name="from" class="form-control" value="{{ $from }}">
+                    <input type="date" id="filterFrom" name="from" class="form-control" value="<?php echo e($from); ?>">
                 </div>
                 <div class="col-6 col-md-3">
                     <label for="filterTo" class="form-label">Sampai Tanggal</label>
-                    <input type="date" id="filterTo" name="to" class="form-control" value="{{ $to }}">
+                    <input type="date" id="filterTo" name="to" class="form-control" value="<?php echo e($to); ?>">
                 </div>
                 <div class="col-12 col-md-6">
                     <div class="d-flex gap-2 justify-content-md-end">
-                        <a href="{{ route('arus-kas.export-pdf', ['from' => $from, 'to' => $to]) }}" class="btn btn-outline-danger" target="_blank">
+                        <a href="<?php echo e(route('arus-kas.export-pdf', ['from' => $from, 'to' => $to])); ?>" class="btn btn-outline-danger" target="_blank">
                             <i class="bi bi-file-earmark-pdf"></i> Ekspor PDF
                         </a>
-                        <a href="{{ route('arus-kas') }}" class="btn btn-outline-secondary"><i class="bi bi-x-circle"></i> Reset</a>
+                        <a href="<?php echo e(route('arus-kas')); ?>" class="btn btn-outline-secondary"><i class="bi bi-x-circle"></i> Reset</a>
                         <button type="submit" class="btn btn-primary"><i class="bi bi-funnel"></i> Terapkan</button>
                     </div>
                 </div>
             </div>
         </form>
 
-        {{-- Summary Cards (5 kartu) --}}
+        
         <div class="row g-3 mb-4">
-            {{-- Omset Penjualan --}}
+            
             <div class="col-12 col-md-4 col-xl">
                 <div class="card shadow-sm border-start border-success border-4 h-100">
                     <div class="card-body">
@@ -41,12 +39,17 @@
                             <i class="bi bi-cart-check text-success fs-3 me-2"></i>
                             <p class="text-muted mb-0 small">Omset Penjualan</p>
                         </div>
-                        <h4 class="mb-0 text-success">@money($totalIncome)</h4>
-                        <small class="text-muted">{{ number_format($totalTransactions, 0, ',', '.') }} transaksi</small>
+                        <h4 class="mb-0 text-success"><?php
+                $__cur = app(\App\Services\Settings\SettingsServiceInterface::class)->currency();
+                $__code = is_string($__cur) ? strtoupper($__cur) : 'IDR';
+                $__prefix = $__code === 'IDR' ? 'Rp ' : ($__code . ' ');
+                echo $__prefix . number_format($totalIncome, 0, ',', '.');
+            ?></h4>
+                        <small class="text-muted"><?php echo e(number_format($totalTransactions, 0, ',', '.')); ?> transaksi</small>
                     </div>
                 </div>
             </div>
-            {{-- Pembelian Barang --}}
+            
             <div class="col-12 col-md-4 col-xl">
                 <div class="card shadow-sm border-start border-warning border-4 h-100">
                     <div class="card-body">
@@ -54,12 +57,17 @@
                             <i class="bi bi-box-seam text-warning fs-3 me-2"></i>
                             <p class="text-muted mb-0 small">Pembelian Barang</p>
                         </div>
-                        <h4 class="mb-0 text-warning">@money($totalPurchase)</h4>
+                        <h4 class="mb-0 text-warning"><?php
+                $__cur = app(\App\Services\Settings\SettingsServiceInterface::class)->currency();
+                $__code = is_string($__cur) ? strtoupper($__cur) : 'IDR';
+                $__prefix = $__code === 'IDR' ? 'Rp ' : ($__code . ' ');
+                echo $__prefix . number_format($totalPurchase, 0, ',', '.');
+            ?></h4>
                         <small class="text-muted">Modal barang dagangan</small>
                     </div>
                 </div>
             </div>
-            {{-- Pengeluaran Operasional --}}
+            
             <div class="col-12 col-md-4 col-xl">
                 <div class="card shadow-sm border-start border-danger border-4 h-100">
                     <div class="card-body">
@@ -67,12 +75,17 @@
                             <i class="bi bi-arrow-up-circle text-danger fs-3 me-2"></i>
                             <p class="text-muted mb-0 small">Pengeluaran Ops.</p>
                         </div>
-                        <h4 class="mb-0 text-danger">@money($totalOperational)</h4>
+                        <h4 class="mb-0 text-danger"><?php
+                $__cur = app(\App\Services\Settings\SettingsServiceInterface::class)->currency();
+                $__code = is_string($__cur) ? strtoupper($__cur) : 'IDR';
+                $__prefix = $__code === 'IDR' ? 'Rp ' : ($__code . ' ');
+                echo $__prefix . number_format($totalOperational, 0, ',', '.');
+            ?></h4>
                         <small class="text-muted">Gaji, listrik, dll</small>
                     </div>
                 </div>
             </div>
-            {{-- Total Pengeluaran --}}
+            
             <div class="col-12 col-md-6 col-xl">
                 <div class="card shadow-sm border-start border-secondary border-4 h-100">
                     <div class="card-body">
@@ -80,34 +93,44 @@
                             <i class="bi bi-wallet text-secondary fs-3 me-2"></i>
                             <p class="text-muted mb-0 small">Total Pengeluaran</p>
                         </div>
-                        <h4 class="mb-0 text-secondary">@money($totalExpense)</h4>
+                        <h4 class="mb-0 text-secondary"><?php
+                $__cur = app(\App\Services\Settings\SettingsServiceInterface::class)->currency();
+                $__code = is_string($__cur) ? strtoupper($__cur) : 'IDR';
+                $__prefix = $__code === 'IDR' ? 'Rp ' : ($__code . ' ');
+                echo $__prefix . number_format($totalExpense, 0, ',', '.');
+            ?></h4>
                         <small class="text-muted">Barang + Operasional</small>
                     </div>
                 </div>
             </div>
-            {{-- Laba Bersih --}}
+            
             <div class="col-12 col-md-6 col-xl">
-                <div class="card shadow-sm border-start {{ $netBalance >= 0 ? 'border-primary' : 'border-danger' }} border-4 h-100">
+                <div class="card shadow-sm border-start <?php echo e($netBalance >= 0 ? 'border-primary' : 'border-danger'); ?> border-4 h-100">
                     <div class="card-body">
                         <div class="d-flex align-items-center mb-2">
-                            <i class="bi bi-graph-up-arrow {{ $netBalance >= 0 ? 'text-primary' : 'text-danger' }} fs-3 me-2"></i>
+                            <i class="bi bi-graph-up-arrow <?php echo e($netBalance >= 0 ? 'text-primary' : 'text-danger'); ?> fs-3 me-2"></i>
                             <p class="text-muted mb-0 small">Laba Bersih</p>
                         </div>
-                        <h4 class="mb-0 {{ $netBalance >= 0 ? 'text-primary' : 'text-danger' }}">
-                            {{ $netBalance < 0 ? '-' : '' }}@money(abs($netBalance))
+                        <h4 class="mb-0 <?php echo e($netBalance >= 0 ? 'text-primary' : 'text-danger'); ?>">
+                            <?php echo e($netBalance < 0 ? '-' : ''); ?><?php
+                $__cur = app(\App\Services\Settings\SettingsServiceInterface::class)->currency();
+                $__code = is_string($__cur) ? strtoupper($__cur) : 'IDR';
+                $__prefix = $__code === 'IDR' ? 'Rp ' : ($__code . ' ');
+                echo $__prefix . number_format(abs($netBalance), 0, ',', '.');
+            ?>
                         </h4>
-                        @if ($netBalance < 0)
+                        <?php if($netBalance < 0): ?>
                             <small class="text-danger"><i class="bi bi-exclamation-triangle"></i> Rugi</small>
-                        @else
-                            <small class="text-success"><i class="bi bi-check-circle"></i> Margin {{ number_format($marginPercent, 1) }}%</small>
-                        @endif
+                        <?php else: ?>
+                            <small class="text-success"><i class="bi bi-check-circle"></i> Margin <?php echo e(number_format($marginPercent, 1)); ?>%</small>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
         </div>
 
         <div class="row g-3">
-            {{-- Chart Arus Kas --}}
+            
             <div class="col-12 col-xl-8">
                 <div class="card shadow-sm">
                     <div class="card-header d-flex align-items-center gap-2">
@@ -118,7 +141,7 @@
                     </div>
                 </div>
 
-                {{-- Tabel Rincian Harian --}}
+                
                 <div class="card shadow-sm mt-3">
                     <div class="card-header d-flex align-items-center gap-2">
                         <i class="bi bi-table"></i> <strong>Rincian Harian</strong>
@@ -136,50 +159,66 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach ($dailyData as $day)
+                                    <?php $__currentLoopData = $dailyData; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $day): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                         <tr>
-                                            <td>{{ $day['date'] }}</td>
-                                            <td class="text-end text-success">
-                                                @if($day['income'] > 0)
-                                                <a href="#" class="text-success text-decoration-none border-bottom border-success border-opacity-25 show-detail" data-date="{{ $day['date_raw'] }}" data-type="income">
-                                                    @money($day['income'])
-                                                </a>
-                                                @else
-                                                <span class="text-muted">Rp 0</span>
-                                                @endif
-                                            </td>
-                                            <td class="text-end text-warning">
-                                                @if($day['purchase'] > 0)
-                                                <a href="#" class="text-warning text-decoration-none border-bottom border-warning border-opacity-25 show-detail" data-date="{{ $day['date_raw'] }}" data-type="purchase">
-                                                    @money($day['purchase'])
-                                                </a>
-                                                @else
-                                                <span class="text-muted">Rp 0</span>
-                                                @endif
-                                            </td>
-                                            <td class="text-end text-danger">
-                                                @if($day['operational'] > 0)
-                                                <a href="#" class="text-danger text-decoration-none border-bottom border-danger border-opacity-25 show-detail" data-date="{{ $day['date_raw'] }}" data-type="operational">
-                                                    @money($day['operational'])
-                                                </a>
-                                                @else
-                                                <span class="text-muted">Rp 0</span>
-                                                @endif
-                                            </td>
-                                            <td class="text-end {{ $day['balance'] >= 0 ? 'text-primary' : 'text-danger' }}">
-                                                {{ $day['balance'] >= 0 ? '' : '-' }}@money(abs($day['balance']))
+                                            <td><?php echo e($day['date']); ?></td>
+                                            <td class="text-end text-success"><?php
+                $__cur = app(\App\Services\Settings\SettingsServiceInterface::class)->currency();
+                $__code = is_string($__cur) ? strtoupper($__cur) : 'IDR';
+                $__prefix = $__code === 'IDR' ? 'Rp ' : ($__code . ' ');
+                echo $__prefix . number_format($day['income'], 0, ',', '.');
+            ?></td>
+                                            <td class="text-end text-warning"><?php
+                $__cur = app(\App\Services\Settings\SettingsServiceInterface::class)->currency();
+                $__code = is_string($__cur) ? strtoupper($__cur) : 'IDR';
+                $__prefix = $__code === 'IDR' ? 'Rp ' : ($__code . ' ');
+                echo $__prefix . number_format($day['purchase'], 0, ',', '.');
+            ?></td>
+                                            <td class="text-end text-danger"><?php
+                $__cur = app(\App\Services\Settings\SettingsServiceInterface::class)->currency();
+                $__code = is_string($__cur) ? strtoupper($__cur) : 'IDR';
+                $__prefix = $__code === 'IDR' ? 'Rp ' : ($__code . ' ');
+                echo $__prefix . number_format($day['operational'], 0, ',', '.');
+            ?></td>
+                                            <td class="text-end <?php echo e($day['balance'] >= 0 ? 'text-primary' : 'text-danger'); ?>">
+                                                <?php echo e($day['balance'] >= 0 ? '' : '-'); ?><?php
+                $__cur = app(\App\Services\Settings\SettingsServiceInterface::class)->currency();
+                $__code = is_string($__cur) ? strtoupper($__cur) : 'IDR';
+                $__prefix = $__code === 'IDR' ? 'Rp ' : ($__code . ' ');
+                echo $__prefix . number_format(abs($day['balance']), 0, ',', '.');
+            ?>
                                             </td>
                                         </tr>
-                                    @endforeach
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </tbody>
                                 <tfoot>
                                     <tr class="fw-bold table-light">
                                         <td>TOTAL</td>
-                                        <td class="text-end text-success">@money($totalIncome)</td>
-                                        <td class="text-end text-warning">@money($totalPurchase)</td>
-                                        <td class="text-end text-danger">@money($totalOperational)</td>
-                                        <td class="text-end {{ $netBalance >= 0 ? 'text-primary' : 'text-danger' }}">
-                                            {{ $netBalance >= 0 ? '' : '-' }}@money(abs($netBalance))
+                                        <td class="text-end text-success"><?php
+                $__cur = app(\App\Services\Settings\SettingsServiceInterface::class)->currency();
+                $__code = is_string($__cur) ? strtoupper($__cur) : 'IDR';
+                $__prefix = $__code === 'IDR' ? 'Rp ' : ($__code . ' ');
+                echo $__prefix . number_format($totalIncome, 0, ',', '.');
+            ?></td>
+                                        <td class="text-end text-warning"><?php
+                $__cur = app(\App\Services\Settings\SettingsServiceInterface::class)->currency();
+                $__code = is_string($__cur) ? strtoupper($__cur) : 'IDR';
+                $__prefix = $__code === 'IDR' ? 'Rp ' : ($__code . ' ');
+                echo $__prefix . number_format($totalPurchase, 0, ',', '.');
+            ?></td>
+                                        <td class="text-end text-danger"><?php
+                $__cur = app(\App\Services\Settings\SettingsServiceInterface::class)->currency();
+                $__code = is_string($__cur) ? strtoupper($__cur) : 'IDR';
+                $__prefix = $__code === 'IDR' ? 'Rp ' : ($__code . ' ');
+                echo $__prefix . number_format($totalOperational, 0, ',', '.');
+            ?></td>
+                                        <td class="text-end <?php echo e($netBalance >= 0 ? 'text-primary' : 'text-danger'); ?>">
+                                            <?php echo e($netBalance >= 0 ? '' : '-'); ?><?php
+                $__cur = app(\App\Services\Settings\SettingsServiceInterface::class)->currency();
+                $__code = is_string($__cur) ? strtoupper($__cur) : 'IDR';
+                $__prefix = $__code === 'IDR' ? 'Rp ' : ($__code . ' ');
+                echo $__prefix . number_format(abs($netBalance), 0, ',', '.');
+            ?>
                                         </td>
                                     </tr>
                                 </tfoot>
@@ -189,17 +228,17 @@
                 </div>
             </div>
 
-            {{-- Sidebar --}}
+            
             <div class="col-12 col-xl-4">
-                {{-- Breakdown Pengeluaran per Kategori --}}
+                
                 <div class="card shadow-sm">
                     <div class="card-header d-flex align-items-center gap-2">
                         <i class="bi bi-pie-chart"></i> <strong>Pengeluaran per Kategori</strong>
                     </div>
                     <div class="card-body">
-                        @if ($expenseByCategory->isEmpty())
+                        <?php if($expenseByCategory->isEmpty()): ?>
                             <div class="text-muted text-center py-3">Tidak ada pengeluaran di periode ini.</div>
-                        @else
+                        <?php else: ?>
                             <div class="table-responsive">
                                 <table class="table table-sm align-middle mb-0">
                                     <thead>
@@ -210,140 +249,150 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach ($expenseByCategory as $cat)
-                                            @php
+                                        <?php $__currentLoopData = $expenseByCategory; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $cat): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                            <?php
                                                 $pct = $totalExpense > 0 ? ($cat['total'] / $totalExpense * 100) : 0;
-                                            @endphp
+                                            ?>
                                             <tr>
                                                 <td>
-                                                    @if ($cat['category'] === 'Pembelian Barang')
+                                                    <?php if($cat['category'] === 'Pembelian Barang'): ?>
                                                         <i class="bi bi-box-seam text-warning"></i>
-                                                    @else
+                                                    <?php else: ?>
                                                         <i class="bi bi-dash-circle text-danger"></i>
-                                                    @endif
-                                                    {{ $cat['category'] }}
+                                                    <?php endif; ?>
+                                                    <?php echo e($cat['category']); ?>
+
                                                 </td>
-                                                <td class="text-end">@money($cat['total'])</td>
-                                                <td class="text-end">{{ number_format($pct, 1) }}%</td>
+                                                <td class="text-end"><?php
+                $__cur = app(\App\Services\Settings\SettingsServiceInterface::class)->currency();
+                $__code = is_string($__cur) ? strtoupper($__cur) : 'IDR';
+                $__prefix = $__code === 'IDR' ? 'Rp ' : ($__code . ' ');
+                echo $__prefix . number_format($cat['total'], 0, ',', '.');
+            ?></td>
+                                                <td class="text-end"><?php echo e(number_format($pct, 1)); ?>%</td>
                                             </tr>
-                                        @endforeach
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                     </tbody>
                                     <tfoot>
                                         <tr class="fw-bold table-light">
                                             <td>Total</td>
-                                            <td class="text-end">@money($totalExpense)</td>
+                                            <td class="text-end"><?php
+                $__cur = app(\App\Services\Settings\SettingsServiceInterface::class)->currency();
+                $__code = is_string($__cur) ? strtoupper($__cur) : 'IDR';
+                $__prefix = $__code === 'IDR' ? 'Rp ' : ($__code . ' ');
+                echo $__prefix . number_format($totalExpense, 0, ',', '.');
+            ?></td>
                                             <td class="text-end">100%</td>
                                         </tr>
                                     </tfoot>
                                 </table>
                             </div>
 
-                            {{-- Progress bars --}}
+                            
                             <div class="mt-3">
-                                @foreach ($expenseByCategory as $cat)
-                                    @php
+                                <?php $__currentLoopData = $expenseByCategory; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $cat): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <?php
                                         $pct = $totalExpense > 0 ? ($cat['total'] / $totalExpense * 100) : 0;
                                         $color = $cat['category'] === 'Pembelian Barang' ? 'bg-warning' : (['bg-danger', 'bg-info', 'bg-primary', 'bg-secondary'][$loop->index % 4]);
-                                    @endphp
+                                    ?>
                                     <div class="mb-2">
                                         <div class="d-flex justify-content-between small">
-                                            <span>{{ $cat['category'] }}</span>
-                                            <span>{{ number_format($pct, 1) }}%</span>
+                                            <span><?php echo e($cat['category']); ?></span>
+                                            <span><?php echo e(number_format($pct, 1)); ?>%</span>
                                         </div>
                                         <div class="progress" style="height: 8px;">
-                                            <div class="progress-bar {{ $color }}" style="width: {{ $pct }}%"></div>
+                                            <div class="progress-bar <?php echo e($color); ?>" style="width: <?php echo e($pct); ?>%"></div>
                                         </div>
                                     </div>
-                                @endforeach
+                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </div>
-                        @endif
+                        <?php endif; ?>
                     </div>
                 </div>
 
-                {{-- Ringkasan --}}
+                
                 <div class="card shadow-sm mt-3">
                     <div class="card-header d-flex align-items-center gap-2">
                         <i class="bi bi-calculator"></i> <strong>Ringkasan</strong>
                     </div>
                     <div class="card-body">
-                        @php
+                        <?php
                             $days = max(1, $dailyData->count());
                             $avgIncome = $totalIncome / $days;
                             $avgExpense = $totalExpense / $days;
                             $avgProfit = $netBalance / $days;
-                        @endphp
+                        ?>
                         <ul class="list-group list-group-flush">
                             <li class="list-group-item d-flex justify-content-between">
                                 <span>Rata-rata Omset/Hari</span>
-                                <strong>@money($avgIncome)</strong>
+                                <strong><?php
+                $__cur = app(\App\Services\Settings\SettingsServiceInterface::class)->currency();
+                $__code = is_string($__cur) ? strtoupper($__cur) : 'IDR';
+                $__prefix = $__code === 'IDR' ? 'Rp ' : ($__code . ' ');
+                echo $__prefix . number_format($avgIncome, 0, ',', '.');
+            ?></strong>
                             </li>
                             <li class="list-group-item d-flex justify-content-between">
                                 <span>Rata-rata Pengeluaran/Hari</span>
-                                <strong>@money($avgExpense)</strong>
+                                <strong><?php
+                $__cur = app(\App\Services\Settings\SettingsServiceInterface::class)->currency();
+                $__code = is_string($__cur) ? strtoupper($__cur) : 'IDR';
+                $__prefix = $__code === 'IDR' ? 'Rp ' : ($__code . ' ');
+                echo $__prefix . number_format($avgExpense, 0, ',', '.');
+            ?></strong>
                             </li>
                             <li class="list-group-item d-flex justify-content-between">
                                 <span>Rata-rata Laba/Hari</span>
-                                <strong class="{{ $avgProfit >= 0 ? 'text-success' : 'text-danger' }}">
-                                    {{ $avgProfit < 0 ? '-' : '' }}@money(abs($avgProfit))
+                                <strong class="<?php echo e($avgProfit >= 0 ? 'text-success' : 'text-danger'); ?>">
+                                    <?php echo e($avgProfit < 0 ? '-' : ''); ?><?php
+                $__cur = app(\App\Services\Settings\SettingsServiceInterface::class)->currency();
+                $__code = is_string($__cur) ? strtoupper($__cur) : 'IDR';
+                $__prefix = $__code === 'IDR' ? 'Rp ' : ($__code . ' ');
+                echo $__prefix . number_format(abs($avgProfit), 0, ',', '.');
+            ?>
                                 </strong>
                             </li>
                             <li class="list-group-item d-flex justify-content-between">
                                 <span>Margin Laba</span>
-                                <strong class="{{ $marginPercent >= 0 ? 'text-success' : 'text-danger' }}">
-                                    {{ number_format($marginPercent, 1) }}%
+                                <strong class="<?php echo e($marginPercent >= 0 ? 'text-success' : 'text-danger'); ?>">
+                                    <?php echo e(number_format($marginPercent, 1)); ?>%
                                 </strong>
                             </li>
                             <li class="list-group-item d-flex justify-content-between">
                                 <span>Rasio Pembelian Barang</span>
                                 <strong>
-                                    @if ($totalIncome > 0)
-                                        {{ number_format(($totalPurchase / $totalIncome) * 100, 1) }}%
-                                    @else
+                                    <?php if($totalIncome > 0): ?>
+                                        <?php echo e(number_format(($totalPurchase / $totalIncome) * 100, 1)); ?>%
+                                    <?php else: ?>
                                         -
-                                    @endif
+                                    <?php endif; ?>
                                 </strong>
                             </li>
                             <li class="list-group-item d-flex justify-content-between">
                                 <span>Hari dgn Pendapatan</span>
-                                <strong>{{ $dailyData->where('income', '>', 0)->count() }} / {{ $dailyData->count() }} hari</strong>
+                                <strong><?php echo e($dailyData->where('income', '>', 0)->count()); ?> / <?php echo e($dailyData->count()); ?> hari</strong>
                             </li>
                         </ul>
                     </div>
                 </div>
             </div>
         </div>
-
-        {{-- Modal Detail --}}
-        <div class="modal fade" id="detailModal" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-                <div class="modal-content" id="detailModalContent">
-                    <div class="modal-body text-center py-5">
-                        <div class="spinner-border text-primary" role="status">
-                            <span class="visually-hidden">Loading...</span>
-                        </div>
-                        <p class="mt-2 text-muted">Memuat rincian...</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
     </section>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@push('script')
+<?php $__env->startPush('script'); ?>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // ... existing chart code ...
             const ctx = document.getElementById('cashFlowChart').getContext('2d');
             new Chart(ctx, {
                 type: 'bar',
                 data: {
-                    labels: @json($chartLabels),
+                    labels: <?php echo json_encode($chartLabels, 15, 512) ?>,
                     datasets: [
                         {
                             label: 'Pemasukan',
-                            data: @json($chartIncome),
+                            data: <?php echo json_encode($chartIncome, 15, 512) ?>,
                             backgroundColor: 'rgba(25, 135, 84, 0.7)',
                             borderColor: 'rgba(25, 135, 84, 1)',
                             borderWidth: 1,
@@ -351,7 +400,7 @@
                         },
                         {
                             label: 'Pembelian Barang',
-                            data: @json($chartPurchase),
+                            data: <?php echo json_encode($chartPurchase, 15, 512) ?>,
                             backgroundColor: 'rgba(255, 193, 7, 0.7)',
                             borderColor: 'rgba(255, 193, 7, 1)',
                             borderWidth: 1,
@@ -359,7 +408,7 @@
                         },
                         {
                             label: 'Pengeluaran Ops',
-                            data: @json($chartOperational),
+                            data: <?php echo json_encode($chartOperational, 15, 512) ?>,
                             backgroundColor: 'rgba(220, 53, 69, 0.7)',
                             borderColor: 'rgba(220, 53, 69, 1)',
                             borderWidth: 1,
@@ -404,50 +453,12 @@
                     ordering: false,
                     info: false,
                     language: {
-                        url: @json(asset('assets/vendor/id.json'))
+                        url: <?php echo json_encode(asset('assets/vendor/id.json'), 15, 512) ?>
                     }
                 });
             }
-
-            // Handler untuk klik pop-up riwayat rincian
-            const detailModal = new bootstrap.Modal(document.getElementById('detailModal'));
-            const detailModalContent = document.getElementById('detailModalContent');
-
-            // Attach event listener using event delegation because of DataTable pagination
-            document.getElementById('dailyTable').addEventListener('click', function(e) {
-                const target = e.target.closest('.show-detail');
-                if (!target) return;
-                
-                e.preventDefault();
-                const date = target.dataset.date;
-                const type = target.dataset.type;
-
-                // Show loading spinner
-                detailModalContent.innerHTML = `
-                    <div class="modal-body text-center py-5">
-                        <div class="spinner-border text-primary" role="status"></div>
-                        <p class="mt-2 text-muted">Mencari data...</p>
-                    </div>`;
-                detailModal.show();
-
-                // Fetch details
-                fetch(`{{ route('arus-kas.detail') }}?date=${date}&type=${type}`)
-                    .then(response => {
-                        if (!response.ok) throw new Error('Terjadi kesalahan jaringan.');
-                        return response.text();
-                    })
-                    .then(html => {
-                        detailModalContent.innerHTML = html;
-                    })
-                    .catch(error => {
-                        detailModalContent.innerHTML = `
-                            <div class="modal-body text-center py-5 text-danger">
-                                <i class="bi bi-exclamation-circle fs-1"></i>
-                                <p class="mt-2">Gagal memuat rincian.</p>
-                            </div>
-                            <div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button></div>`;
-                    });
-            });
         });
     </script>
-@endpush
+<?php $__env->stopPush(); ?>
+
+<?php echo $__env->make('layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\Users\nwlen\Documents\point_of_sale_minimarket.worktrees\copilot-worktree-2026-03-10T06-54-12\resources\views/cash_flow/index.blade.php ENDPATH**/ ?>

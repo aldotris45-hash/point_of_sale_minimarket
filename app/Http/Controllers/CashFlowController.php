@@ -206,4 +206,72 @@ class CashFlowController extends Controller
 
         return $pdf->download("Laporan_Arus_Kas_{$from}_sampai_{$to}.pdf");
     }
+
+    public function dailyDetail(Request $request)
+    {
+        $dateRaw = $request->query('date');
+        $type = $request->query('type'); // 'income', 'purchase', 'operational'
+        
+        if (!$dateRaw) {
+            abort(400, 'Tanggal diperlukan.');
+        }
+
+        $date = Carbon::parse($dateRaw)->format('d F Y');
+        $currency = $this->settings->currency();
+
+        // Initialize variables
+        $salesItems = collect();
+        $otherIncomes = collect();
+        $purchases = collect();
+        $operationals = collect();
+
+        // Fetch based on requested type
+        if ($type === 'income') {
+            $salesItems = Transaction::query()
+                ->where('status', TransactionStatus::PAID->value)
+                ->whereDate('created_at', $dateRaw)
+                ->get()
+                ->map(fn($t) => [
+                    'label' => 'Transaksi',
+                    'note' => $t->receipt_no . ($t->customer ? ' - ' . $t->customer->name : ''),
+                    'amount' => (float)$t->total,
+                    'time' => $t->created_at->format('H:i')
+                ]);
+
+            $otherIncomes = CashTransaction::query()
+                ->where('type', 'in')
+                ->whereNotIn('category', ['penjualan', 'pelunasan_tempo'])
+                ->whereDate('date', $dateRaw)
+                ->get()
+                ->map(fn($c) => [
+                    'label' => 'Kas Masuk (' . $c->category . ')',
+                    'note' => $c->description ?: '-',
+                    'amount' => (float)$c->amount,
+                    'time' => Carbon::parse($c->date)->format('H:i')
+                ]);
+        } elseif ($type === 'purchase') {
+            $purchases = IncomingGood::query()
+                ->whereDate('date', $dateRaw)
+                ->get()
+                ->map(fn($p) => [
+                    'label' => 'Barang Masuk',
+                    'note' => $p->reference_no . ($p->supplier ? ' - ' . $p->supplier->name : ''),
+                    'amount' => (float)$p->total,
+                    'time' => Carbon::parse($p->date)->format('H:i')
+                ]);
+        } elseif ($type === 'operational') {
+            $operationals = CashTransaction::query()
+                ->where('type', 'out')
+                ->whereDate('date', $dateRaw)
+                ->get()
+                ->map(fn($c) => [
+                    'label' => 'Pengeluaran (' . $c->category . ')',
+                    'note' => $c->description ?: '-',
+                    'amount' => (float)$c->amount,
+                    'time' => Carbon::parse($c->date)->format('H:i')
+                ]);
+        }
+
+        return view('cash_flow._detail_modal', compact('date', 'type', 'salesItems', 'otherIncomes', 'purchases', 'operationals', 'currency'));
+    }
 }

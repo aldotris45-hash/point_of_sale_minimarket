@@ -141,6 +141,7 @@ Route::middleware('auth')->group(function () {
 
         // Arus Kas
         Route::get('/arus-kas', [CashFlowController::class, 'index'])->name('arus-kas');
+        Route::get('/arus-kas/detail', [CashFlowController::class, 'dailyDetail'])->name('arus-kas.detail');
         Route::get('/arus-kas/export-pdf', [CashFlowController::class, 'exportPdf'])->name('arus-kas.export-pdf');
 
         // Pajak

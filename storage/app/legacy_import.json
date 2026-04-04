@@ -377,9 +377,9 @@
     "invoiceNo": "001/10022026",
     "date": "2026-02-10",
     "totalItems": 2,
-    "totalCost": 832000,
+    "totalCost": 664000,
     "totalSales": 1112000,
-    "profit": 280000,
+    "profit": 448000,
     "items": [
       {
         "name": "Bawang Bombay",
@@ -393,7 +393,7 @@
         "name": "Labu Siam",
         "unit": "Kilogram",
         "sell_price": 8000,
-        "cost_price": 6000,
+        "cost_price": 4600,
         "qty": 120,
         "subtotal": 960000
       }
