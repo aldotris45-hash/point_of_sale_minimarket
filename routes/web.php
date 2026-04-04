@@ -21,7 +21,12 @@ use App\Http\Controllers\IncomingGoodController;
 use App\Http\Controllers\StockOpnameController;
 use App\Http\Controllers\CashFlowController;
 use App\Http\Controllers\TaxReportController;
+use App\Http\Controllers\CatalogController;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
+
+// Public Catalog
+Route::get('/katalog', [CatalogController::class, 'index'])->name('catalog.index');
+Route::get('/katalog/pdf', [CatalogController::class, 'exportPdf'])->name('catalog.export-pdf');
 
 // Login
 Route::middleware('guest')->group(function () {
