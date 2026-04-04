@@ -48,7 +48,7 @@
 
 <div class="container mb-5 pb-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <p class="text-muted mb-0">Diperbarui pada: {{ \Carbon\Carbon::now()->format('d M Y') }}</p>
+        <p class="text-muted mb-0">Diperbarui pada: {{ \Carbon\Carbon::now()->format('d M Y') }} | <span class="badge bg-secondary">System DB Check: {{ \App\Models\Product::count() }} Master Products</span></p>
         <a href="{{ route('catalog.export-pdf', request()->query()) }}" class="btn btn-outline-danger">
             <i class="bi bi-file-earmark-pdf"></i> Cetak Katalog PDF
         </a>
