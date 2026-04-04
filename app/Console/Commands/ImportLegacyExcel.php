@@ -42,12 +42,14 @@ class ImportLegacyExcel extends Command
         CashTransaction::where('description', 'LIKE', '%(Import)%')->delete();
 
         // Reset Stok Produk Import menjadi 0 dan hapus produk "salah ketik" yang yatim piatu
-        $defaultCategory = Category::where('name', 'Sayur')->first();
-        if ($defaultCategory) {
-            Product::where('category_id', $defaultCategory->id)->update(['stock' => 0]);
+        // Cari kategori lama dan baru
+        $categoriesToClean = Category::whereIn('name', ['Sayur', 'Barang (Import Excel)'])->pluck('id');
+        
+        if ($categoriesToClean->isNotEmpty()) {
+            Product::whereIn('category_id', $categoriesToClean)->update(['stock' => 0]);
             
-            // Hapus produk salah ejaan (yang transaksinya sudah terhapus oleh script di atas)
-            $strandedProducts = Product::where('category_id', $defaultCategory->id)
+            // Hapus produk salah ejaan/lama (yang transaksinya sudah terhapus oleh script di atas)
+            $strandedProducts = Product::whereIn('category_id', $categoriesToClean)
                 ->whereNotIn('id', function($q) {
                     $q->select('product_id')->from('transaction_details');
                 })
