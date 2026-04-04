@@ -12,6 +12,7 @@ use App\Models\TransactionDetail;
 use App\Models\IncomingGood;
 use App\Models\Payment;
 use App\Models\CashTransaction;
+use App\Enums\CashTransactionCategory;
 use App\Services\IncomingGood\IncomingGoodService;
 use Illuminate\Support\Str;
 
@@ -22,6 +23,16 @@ class ImportManualData extends Command
 
     public function handle(IncomingGoodService $incomingGoodService)
     {
+        $this->info("Membersihkan test run sebelumnya...");
+        
+        $trxIds = Transaction::withTrashed()->where('note', 'Transaksi Manual Godmode')->pluck('id');
+        Payment::whereIn('transaction_id', $trxIds)->delete();
+        TransactionDetail::whereIn('transaction_id', $trxIds)->delete();
+        Transaction::withTrashed()->whereIn('id', $trxIds)->forceDelete();
+
+        IncomingGood::where('notes', 'Import Manual Godmode')->delete();
+        CashTransaction::where('description', 'LIKE', 'Modal Kulakan Manual%')->orWhere('description', 'LIKE', 'Pendapatan Transaksi INV-MANUAL%')->delete();
+
         $this->info("Menyisipkan data invoice manual...");
 
         $invoices = [
@@ -95,11 +106,12 @@ class ImportManualData extends Command
 
             // Buku Kas Modal
             CashTransaction::create([
-                'transaction_date' => $dateStr . ' 08:30:00',
-                'type' => 'expense',
-                'amount' => $totalModal,
+                'user_id'     => 1,
+                'type'        => 'out',
+                'category'    => CashTransactionCategory::OPERASIONAL->value,
+                'date'        => $dateStr,
+                'amount'      => $totalModal,
                 'description' => 'Modal Kulakan Manual - ' . $invoice['customer'],
-                'user_id' => 1,
             ]);
 
             // 3. JAM SIANG: TRANSAKSI JUAL
@@ -163,11 +175,12 @@ class ImportManualData extends Command
             ]);
 
             CashTransaction::create([
-                'transaction_date' => $transactionTime,
-                'type' => 'income',
-                'amount' => $subtotal,
+                'user_id'     => 1,
+                'type'        => 'in',
+                'category'    => CashTransactionCategory::PENJUALAN->value,
+                'date'        => $dateStr,
+                'amount'      => $subtotal,
                 'description' => 'Pendapatan Transaksi ' . $finalInvoiceNo . ' (' . $invoice['customer'] . ')',
-                'user_id' => 1,
             ]);
 
             $this->line("- Berhasil insert transaksi: " . $invoice['customer']);
