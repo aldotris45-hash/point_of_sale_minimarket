@@ -33,12 +33,25 @@ class ProductController extends Controller
 
     public function data()
     {
-        $query = Product::query()->with('category')->select(['id', 'category_id', 'name', 'sku', 'price', 'stock', 'created_at']);
+        $query = Product::query()
+            ->leftJoin('categories', 'categories.id', '=', 'products.category_id')
+            ->with('category')
+            ->select([
+                'products.id',
+                'products.category_id',
+                'products.name',
+                'products.sku',
+                'products.price',
+                'products.stock',
+                'products.created_at',
+                'categories.name as category_name',
+            ]);
 
         return DataTables::of($query)
             ->addIndexColumn()
             ->addColumn('category', fn(Product $p) => $p->category?->name)
             ->editColumn('price', fn(Product $p) => number_format((float) $p->price, 2, ',', '.'))
+            ->orderColumn('category', 'categories.name $1')
             ->addColumn('action', function (Product $p) {
                 $editUrl = route('produk.edit', $p);
                 $deleteUrl = route('produk.destroy', $p);
