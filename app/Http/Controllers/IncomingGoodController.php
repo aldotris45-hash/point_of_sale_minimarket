@@ -99,6 +99,7 @@ class IncomingGoodController extends Controller
         $validated['user_id'] = Auth::id();
 
         $incomingGood = $this->service->create($validated);
+        $incomingGood->loadMissing('product');
         $product = $incomingGood->product;
 
         $this->logger->log(

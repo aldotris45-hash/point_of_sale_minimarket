@@ -13,7 +13,7 @@
 
         <div class="card shadow-sm">
             <div class="card-body">
-                <form action="{{ route('barang-masuk.store') }}" method="POST" novalidate>
+                <form action="{{ route('barang-masuk.store') }}" method="POST" novalidate id="incomingGoodForm">
                     @csrf
 
                     <div class="row g-3 mb-3">
@@ -42,9 +42,10 @@
                             <input type="hidden" name="product_id" id="product_id" value="{{ old('product_id') }}">
                             <div class="position-relative">
                                 <input type="text" id="productSearch" class="form-control @error('product_id') is-invalid @enderror"
-                                    placeholder="Ketik nama produk..." autocomplete="off" required>
+                                    placeholder="Ketik nama produk..." autocomplete="off">
                                 <div id="productDropdown" class="dropdown-menu w-100 shadow" style="max-height:250px; overflow-y:auto;"></div>
                             </div>
+                            <div id="productSearchError" class="invalid-feedback d-none">Pilih produk dari daftar terlebih dahulu.</div>
                             @error('product_id')
                                 <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
@@ -169,11 +170,30 @@
                 dropdown.classList.add('show');
             }
 
+            // === Validasi submit: pastikan product sudah dipilih ===
+            document.getElementById('incomingGoodForm').addEventListener('submit', function(e) {
+                const productId = hiddenInput.value;
+                const errorEl = document.getElementById('productSearchError');
+                if (!productId) {
+                    e.preventDefault();
+                    searchInput.classList.add('is-invalid');
+                    errorEl.classList.remove('d-none');
+                    searchInput.focus();
+                    searchInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                } else {
+                    searchInput.classList.remove('is-invalid');
+                    errorEl.classList.add('d-none');
+                }
+            });
+
+            // Reset error saat user memilih produk
             function selectProduct(p) {
                 hiddenInput.value = p.id;
                 searchInput.value = p.name;
                 sellingInput.value = p.price > 0 ? p.price : '';
                 dropdown.classList.remove('show');
+                searchInput.classList.remove('is-invalid');
+                document.getElementById('productSearchError').classList.add('d-none');
                 updateTotal();
                 updateMargin();
             }
@@ -183,6 +203,9 @@
                 if (q.length === 0) {
                     dropdown.classList.remove('show');
                     hiddenInput.value = '';
+                    // Reset visual error saat field dikosongkan
+                    searchInput.classList.remove('is-invalid');
+                    document.getElementById('productSearchError').classList.add('d-none');
                     return;
                 }
                 const filtered = products.filter(p =>

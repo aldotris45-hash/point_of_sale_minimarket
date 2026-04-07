@@ -245,7 +245,7 @@ class CashFlowController extends Controller
                 ->whereDate('date', $dateRaw)
                 ->get()
                 ->map(fn($c) => [
-                    'label' => 'Kas Masuk (' . $c->category . ')',
+                    'label' => 'Kas Masuk: ' . (CashTransactionCategory::tryFrom($c->category)?->label() ?? ucfirst($c->category)),
                     'note' => $c->description ?: '-',
                     'amount' => (float)$c->amount,
                     'time' => Carbon::parse($c->date)->format('H:i')
@@ -267,7 +267,7 @@ class CashFlowController extends Controller
                 ->whereDate('date', $dateRaw)
                 ->get()
                 ->map(fn($c) => [
-                    'label' => 'Pengeluaran (' . $c->category . ')',
+                    'label' => 'Pengeluaran: ' . (CashTransactionCategory::tryFrom($c->category)?->label() ?? ucfirst($c->category)),
                     'note' => $c->description ?: '-',
                     'amount' => (float)$c->amount,
                     'time' => Carbon::parse($c->date)->format('H:i')
