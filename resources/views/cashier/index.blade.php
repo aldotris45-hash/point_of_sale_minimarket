@@ -49,7 +49,8 @@
                             <a id="btnPrintReceipt" class="btn btn-primary" target="_blank"
                                 href="{{ route('transaksi.struk', ['transaction' => session('printed_transaction_id'), 'print' => 1]) }}"><i
                                     class="bi bi-printer"></i> Cetak Struk</a>
-                            <a class="btn btn-outline-primary" href="{{ route('transaksi.struk.pdf', session('printed_transaction_id')) }}">
+                            <a class="btn btn-outline-primary"
+                                href="{{ route('transaksi.struk.pdf', session('printed_transaction_id')) }}">
                                 <i class="bi bi-file-earmark-pdf"></i> PDF
                             </a>
                             @php
@@ -184,13 +185,14 @@
 
                             <fieldset class="mb-3">
                                 <label for="note" class="form-label">Catatan</label>
-                                <input type="text" name="note" id="note" class="form-control"
-                                    maxlength="255" placeholder="Catatan tambahan (opsional)">
+                                <input type="text" name="note" id="note" class="form-control" maxlength="255"
+                                    placeholder="Catatan tambahan (opsional)">
                             </fieldset>
 
                             <fieldset class="mb-3">
                                 <label for="transaction_date" class="form-label">Ubah Tanggal Transaksi</label>
-                                <input type="datetime-local" name="transaction_date" id="transaction_date" class="form-control" title="Kosongkan jika ingin memakai tanggal & jam saat ini.">
+                                <input type="datetime-local" name="transaction_date" id="transaction_date"
+                                    class="form-control" title="Kosongkan jika ingin memakai tanggal & jam saat ini.">
                                 <div class="form-text small text-muted">Abaikan jika transaksi baru (hari ini).</div>
                             </fieldset>
                             <input type="hidden" name="suspended_from_id" id="suspended_from_id" />
@@ -230,7 +232,7 @@
     <script src="{{ asset('assets/vendor/jquery-3.7.0.min.js') }}"></script>
 
     <script>
-        (function() {
+        (function () {
             const fmt = (n) => Number(n || 0).toLocaleString('id-ID');
             const $q = $('#q');
             const $cartBody = $('#cartBody');
@@ -268,23 +270,18 @@
                     const disabled = p.stock <= 0 ? 'disabled' : '';
                     const stockInfo = p.stock <= 0 ? '<span class="badge bg-secondary">Habis</span>' :
                         `<span class="badge bg-success">Stok: ${p.stock}</span>`;
-                    const ep = Number(p.effective_price || p.price);
-                    const isPromo = ep < Number(p.price);
-                    const priceHtml = isPromo
-                        ? `<del class="text-muted">Rp ${fmt(p.price)}</del> <span class="text-danger fw-bold">Rp ${fmt(ep)}</span> <span class="badge bg-danger">PROMO</span>`
-                        : `Rp ${fmt(p.price)}`;
                     return `
-                    <div class="d-flex justify-content-between align-items-center border rounded p-2 mb-2${isPromo ? ' border-danger' : ''}">
-                        <div class="me-2" style="min-width:0;">
-                            <div class="fw-semibold text-truncate" title="${p.name}">${p.name}</div>
-                            <div class="small text-muted">SKU: ${p.sku} • ${priceHtml} ${stockInfo}</div>
+                        <div class="d-flex justify-content-between align-items-center border rounded p-2 mb-2">
+                            <div class="me-2" style="min-width:0;">
+                                <div class="fw-semibold text-truncate" title="${p.name}">${p.name}</div>
+                                <div class="small text-muted">SKU: ${p.sku} • Rp ${fmt(p.price)} ${stockInfo}</div>
+                            </div>
+                            <div class="d-flex gap-2 align-items-center">
+                                <input type="number" class="form-control form-control-sm" style="width: 70px" min="1" value="1" id="qty_${p.id}" ${disabled}>
+                                <button class="btn btn-sm btn-primary" data-add="${p.id}" ${disabled} title="Tambah ke keranjang"><i class="bi bi-cart-plus"></i></button>
+                            </div>
                         </div>
-                        <div class="d-flex gap-2 align-items-center">
-                            <input type="number" class="form-control form-control-sm" style="width: 70px" min="1" value="1" id="qty_${p.id}" ${disabled}>
-                            <button class="btn btn-sm btn-primary" data-add="${p.id}" ${disabled} title="Tambah ke keranjang"><i class="bi bi-cart-plus"></i></button>
-                        </div>
-                    </div>
-                `;
+                    `;
                 }).join('');
                 $inlineDropResults.html(rows);
             }
@@ -294,14 +291,10 @@
                 if (idx >= 0) {
                     cart[idx].qty = Math.min((cart[idx].qty + qty), product.stock);
                 } else {
-                    // Pakai effective_price (harga promo jika ada)
-                    const ep = Number(product.effective_price || product.price);
                     cart.push({
                         product_id: product.id,
                         name: product.name,
-                        price: ep,
-                        original_price: Number(product.price),
-                        is_promo: ep < Number(product.price),
+                        price: Number(product.price),
                         qty: Math.min(qty, product.stock),
                         stock: product.stock
                     });
@@ -319,29 +312,27 @@
                 }
                 const rows = cart.map((it, i) => {
                     const line = Number(it.price) * Number(it.qty);
-                    const promoTag = it.is_promo ? '<span class="badge bg-danger ms-1">PROMO</span>' : '';
-                    const origPrice = it.is_promo ? `<del class="text-muted small">Rp ${fmt(it.original_price)}</del> ` : '';
                     return `
-                    <tr>
-                        <td>
-                            <div class="fw-semibold">${it.name} ${promoTag}</div>
-                            <div class="small text-muted">ID: ${it.product_id}</div>
-                        </td>
-                        <td class="text-end">${origPrice}<span class="${it.is_promo ? 'text-danger fw-bold' : ''}">Rp ${fmt(it.price)}</span></td>
-                        <td class="text-center">
-                            <div class="input-group input-group-sm justify-content-center" style="max-width: 140px;">
-                                <button class="btn btn-outline-secondary" data-dec="${i}" ${it.qty <= 1 ? 'disabled':''}>-</button>
-                                <input type="number" class="form-control text-center" min="1" max="${it.stock}" value="${it.qty}" data-qty="${i}">
-                                <button class="btn btn-outline-secondary" data-inc="${i}" ${it.qty >= it.stock ? 'disabled':''}>+</button>
-                            </div>
-                            <div class="small text-muted mt-1">Stok: ${it.stock}</div>
-                        </td>
-                        <td class="text-end">Rp ${fmt(line)}</td>
-                        <td class="text-end">
-                            <button class="btn btn-sm btn-outline-danger" data-del="${i}"><i class="bi bi-trash"></i></button>
-                        </td>
-                    </tr>
-                `;
+                        <tr>
+                            <td>
+                                <div class="fw-semibold">${it.name}</div>
+                                <div class="small text-muted">ID: ${it.product_id}</div>
+                            </td>
+                            <td class="text-end">Rp ${fmt(it.price)}</td>
+                            <td class="text-center">
+                                <div class="input-group input-group-sm justify-content-center" style="max-width: 140px;">
+                                    <button class="btn btn-outline-secondary" data-dec="${i}" ${it.qty <= 1 ? 'disabled' : ''}>-</button>
+                                    <input type="number" class="form-control text-center" min="1" max="${it.stock}" value="${it.qty}" data-qty="${i}">
+                                    <button class="btn btn-outline-secondary" data-inc="${i}" ${it.qty >= it.stock ? 'disabled' : ''}>+</button>
+                                </div>
+                                <div class="small text-muted mt-1">Stok: ${it.stock}</div>
+                            </td>
+                            <td class="text-end">Rp ${fmt(line)}</td>
+                            <td class="text-end">
+                                <button class="btn btn-sm btn-outline-danger" data-del="${i}"><i class="bi bi-trash"></i></button>
+                            </td>
+                        </tr>
+                    `;
                 }).join('');
                 $cartBody.html(rows);
                 calcSummary();
@@ -401,7 +392,7 @@
                 if (dropdownReq && typeof dropdownReq.abort === 'function') {
                     try {
                         dropdownReq.abort();
-                    } catch (e) {}
+                    } catch (e) { }
                 }
 
                 dropdownReq = $.get(@json(route('kasir.products')), params)
@@ -442,14 +433,14 @@
 
 
 
-            $('#btnSearch').on('click', function() {
+            $('#btnSearch').on('click', function () {
                 const q = ($q.val() || '').trim();
                 showInlineMenu();
                 searchInline(q);
                 $q.trigger('focus');
             });
 
-            $q.on('keypress', function(e) {
+            $q.on('keypress', function (e) {
                 if (e.which === 13) {
                     e.preventDefault();
                     const code = ($q.val() || '').trim();
@@ -481,7 +472,7 @@
                 }
             });
 
-            $inlineDropResults.on('click', '[data-add]', function() {
+            $inlineDropResults.on('click', '[data-add]', function () {
                 const id = Number($(this).data('add'));
                 const qty = Number($('#qty_' + id).val() || 1);
                 $.get(@json(route('kasir.products')), {
@@ -493,7 +484,7 @@
                 });
             });
 
-            $q.on('focus', function() {
+            $q.on('focus', function () {
                 showInlineMenu();
                 if (!$inlineDropResults.children().length) {
                     searchInline('');
@@ -501,7 +492,7 @@
             });
 
             // ESC to hide
-            $q.on('keydown', function(e) {
+            $q.on('keydown', function (e) {
                 if (e.key === 'Escape') {
                     e.stopPropagation();
                     hideInlineMenu();
@@ -509,7 +500,7 @@
             });
 
             // ESC to hide
-            $inlineDropMenu.on('keydown', function(e) {
+            $inlineDropMenu.on('keydown', function (e) {
                 if (e.key === 'Escape') {
                     e.stopPropagation();
                     hideInlineMenu();
@@ -518,46 +509,46 @@
             });
 
             // Hide when clicking outside
-            $(document).on('click', function(e) {
+            $(document).on('click', function (e) {
                 const el = $searchDropdown[0];
                 if (el && !el.contains(e.target)) {
                     hideInlineMenu();
                     if (dropdownReq && typeof dropdownReq.abort === 'function') {
                         try {
                             dropdownReq.abort();
-                        } catch (err) {}
+                        } catch (err) { }
                         dropdownReq = null;
                     }
                 }
             });
 
             // Live filtering with debounce on the main input
-            $q.on('input', function() {
+            $q.on('input', function () {
                 const q = ($q.val() || '').trim();
                 showInlineMenu();
                 if (dropDebounce) clearTimeout(dropDebounce);
                 dropDebounce = setTimeout(() => searchInline(q), 250);
             });
 
-            $('#cartTable').on('click', '[data-del]', function() {
+            $('#cartTable').on('click', '[data-del]', function () {
                 const i = Number($(this).data('del'));
                 cart.splice(i, 1);
                 renderCart();
             });
 
-            $('#cartTable').on('click', '[data-inc]', function() {
+            $('#cartTable').on('click', '[data-inc]', function () {
                 const i = Number($(this).data('inc'));
                 cart[i].qty = Math.min(cart[i].qty + 1, cart[i].stock);
                 renderCart();
             });
 
-            $('#cartTable').on('click', '[data-dec]', function() {
+            $('#cartTable').on('click', '[data-dec]', function () {
                 const i = Number($(this).data('dec'));
                 cart[i].qty = Math.max(cart[i].qty - 1, 1);
                 renderCart();
             });
 
-            $('#cartTable').on('input', '[data-qty]', function() {
+            $('#cartTable').on('input', '[data-qty]', function () {
                 const i = Number($(this).data('qty'));
                 let v = Number($(this).val() || 1);
                 v = Math.min(Math.max(v, 1), cart[i].stock);
@@ -565,7 +556,7 @@
                 renderCart();
             });
 
-            $btnClearCart.on('click', function() {
+            $btnClearCart.on('click', function () {
                 cart = [];
                 renderCart();
                 $('#suspended_from_id').val('');
@@ -574,7 +565,7 @@
             });
 
             // Create Hold
-            $btnHold.on('click', function() {
+            $btnHold.on('click', function () {
                 if (!cart.length) return;
                 const payload = {
                     _token: @json(csrf_token()),
@@ -618,17 +609,17 @@
                         const badge = isCurrent ?
                             '<span class="badge bg-info ms-2">Sedang dimuat</span>' : '';
                         return `
-                        <div class="list-group-item d-flex justify-content-between align-items-center">
-                            <div>
-                                <div class="fw-semibold">${h.invoice_number} ${badge}</div>
-                                <div class="text-muted">Pelanggan/Catatan: <span class="fw-semibold">${(h.note||'-')}</span></div>
-                                <div class="small text-muted">${new Date(h.created_at).toLocaleString('id-ID')} • Total Rp ${fmt(h.total)}</div>
-                            </div>
-                            <div class="d-flex gap-2">
-                                <button class="btn btn-sm btn-primary" data-resume="${h.id}"><i class="bi bi-download"></i> Muat</button>
-                                <button class="btn btn-sm btn-outline-danger" data-delete="${h.id}"><i class="bi bi-trash"></i></button>
-                            </div>
-                        </div>`;
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <div class="fw-semibold">${h.invoice_number} ${badge}</div>
+                                    <div class="text-muted">Pelanggan/Catatan: <span class="fw-semibold">${(h.note || '-')}</span></div>
+                                    <div class="small text-muted">${new Date(h.created_at).toLocaleString('id-ID')} • Total Rp ${fmt(h.total)}</div>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-sm btn-primary" data-resume="${h.id}"><i class="bi bi-download"></i> Muat</button>
+                                    <button class="btn btn-sm btn-outline-danger" data-delete="${h.id}"><i class="bi bi-trash"></i></button>
+                                </div>
+                            </div>`;
                     }).join('');
                     $('#holdsList').html(rows);
                 }).fail(() => {
@@ -636,13 +627,13 @@
                 });
             }
 
-            $btnShowHolds.on('click', function() {
+            $btnShowHolds.on('click', function () {
                 const el = document.getElementById('holdsModal');
                 if (!el) return;
                 const m = new bootstrap.Modal(el);
                 m.show();
                 loadHolds();
-                $('#holdsList').off('click').on('click', '[data-resume]', function() {
+                $('#holdsList').off('click').on('click', '[data-resume]', function () {
                     const id = $(this).data('resume');
                     $.post(@json(route('kasir.holds.resume', ['transaction' => '__ID__'])).replace('__ID__', id), {
                         _token: @json(csrf_token())
@@ -678,22 +669,22 @@
                             });
                         }
                     }).fail(() => alert('Gagal memuat transaksi.'));
-                }).on('click', '[data-delete]', function() {
+                }).on('click', '[data-delete]', function () {
                     const id = $(this).data('delete');
                     if (!confirm('Hapus transaksi tertunda ini?')) return;
                     $.ajax({
-                            url: @json(route('kasir.holds.destroy', ['transaction' => '__ID__'])).replace('__ID__', id),
-                            method: 'DELETE',
-                            data: {
-                                _token: @json(csrf_token())
-                            }
-                        })
+                        url: @json(route('kasir.holds.destroy', ['transaction' => '__ID__'])).replace('__ID__', id),
+                        method: 'DELETE',
+                        data: {
+                            _token: @json(csrf_token())
+                        }
+                    })
                         .done(() => loadHolds())
                         .fail(() => alert('Gagal menghapus.'));
                 });
             });
 
-            $('#checkoutForm [data-method]').on('click', function() {
+            $('#checkoutForm [data-method]').on('click', function () {
                 $('#checkoutForm [data-method]').removeClass('active');
                 $(this).addClass('active');
                 const method = $(this).data('method');
@@ -711,18 +702,18 @@
                 updatePaidState();
             });
 
-            $paidAmount.on('input', function() {
+            $paidAmount.on('input', function () {
                 const caretEnd = this.selectionEnd;
                 const rawNum = parseMoneyToInt($(this).val());
                 const formatted = formatMoney(rawNum);
                 $(this).val(formatted);
                 try {
                     this.setSelectionRange(formatted.length, formatted.length);
-                } catch (e) {}
+                } catch (e) { }
                 updatePaidState();
             });
 
-            $('#checkoutForm').on('submit', function(e) {
+            $('#checkoutForm').on('submit', function (e) {
                 e.preventDefault();
                 if (!cart.length) {
                     alert('Keranjang kosong.');
@@ -757,15 +748,15 @@
                         m.show();
                         const btn = document.getElementById('btnPrintReceipt');
                         if (btn) {
-                            btn.addEventListener('click', function() {
+                            btn.addEventListener('click', function () {
                                 cart = [];
                                 renderCart();
                                 $('#suspended_from_id').val('');
                             });
                         }
                     }
-                } catch (e) {}
+                } catch (e) { }
             @endif
-        })();
+            })();
     </script>
 @endpush
