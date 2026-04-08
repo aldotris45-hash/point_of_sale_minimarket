@@ -128,10 +128,7 @@
     @push('script')
         <script>
             (function() {
-                const priceDisplay = document.getElementById('price_display');
-                const priceHidden = document.getElementById('price');
-                if (!priceDisplay || !priceHidden) return;
-
+                // ── Helper functions ─────────────────────────────
                 function normalizeToNumber(str) {
                     if (!str) return '';
                     str = String(str).replace(/[^0-9,]/g, '');
@@ -155,69 +152,83 @@
                     return decPart ? (intPart + ',' + decPart) : intPart;
                 }
 
-                function syncHidden() {
-                    priceHidden.value = normalizeToNumber(priceDisplay.value);
-                }
+                // ── Harga utama ──────────────────────────────────
+                const priceDisplay = document.getElementById('price_display');
+                const priceHidden  = document.getElementById('price');
 
-                function onInput() {
-                    const pos = priceDisplay.selectionStart;
-                    const beforeLen = priceDisplay.value.length;
-                    priceDisplay.value = formatRupiahDisplay(priceDisplay.value);
-                    const afterLen = priceDisplay.value.length;
-                    const delta = afterLen - beforeLen;
-                    priceDisplay.setSelectionRange(pos + delta, pos + delta);
-                    syncHidden();
-                }
+                if (priceDisplay && priceHidden) {
+                    function syncHidden() {
+                        priceHidden.value = normalizeToNumber(priceDisplay.value);
+                    }
 
-                if (priceHidden.value && !priceDisplay.value) {
-                    const normalized = String(priceHidden.value).replace(/\./g, ',');
-                    priceDisplay.value = formatRupiahDisplay(normalized);
-                } else {
-                    syncHidden();
-                }
-
-                priceDisplay.addEventListener('input', onInput);
-
-                const form = priceDisplay.closest('form');
-                if (form) {
-                    form.addEventListener('submit', function() {
+                    function onInput() {
+                        const pos = priceDisplay.selectionStart;
+                        const beforeLen = priceDisplay.value.length;
+                        priceDisplay.value = formatRupiahDisplay(priceDisplay.value);
+                        const afterLen = priceDisplay.value.length;
+                        const delta = afterLen - beforeLen;
+                        priceDisplay.setSelectionRange(pos + delta, pos + delta);
                         syncHidden();
+                    }
+
+                    if (priceHidden.value && !priceDisplay.value) {
+                        const normalized = String(priceHidden.value).replace(/\./g, ',');
+                        priceDisplay.value = formatRupiahDisplay(normalized);
+                    } else {
+                        syncHidden();
+                    }
+
+                    priceDisplay.addEventListener('input', onInput);
+
+                    const form = priceDisplay.closest('form');
+                    if (form) {
+                        form.addEventListener('submit', function() {
+                            syncHidden();
+                        });
+                    }
+                }
+
+                // ── Promo toggle ─────────────────────────────────
+                const promoToggle      = document.getElementById('promo_toggle');
+                const promoFields      = document.getElementById('promo_fields');
+                const promoPriceDisplay = document.getElementById('promo_price_display');
+                const promoPriceHidden  = document.getElementById('promo_price');
+
+                if (promoToggle && promoFields) {
+                    promoToggle.addEventListener('change', function () {
+                        promoFields.style.display = this.checked ? '' : 'none';
+                        if (!this.checked) {
+                            if (promoPriceDisplay) promoPriceDisplay.value = '';
+                            if (promoPriceHidden)  promoPriceHidden.value  = '';
+                        }
                     });
                 }
-            })();
 
-            // ── Promo toggle ──────────────────────────────────
-            const promoToggle = document.getElementById('promo_toggle');
-            const promoFields = document.getElementById('promo_fields');
-            const promoPriceDisplay = document.getElementById('promo_price_display');
-            const promoPriceHidden  = document.getElementById('promo_price');
-
-            if (promoToggle && promoFields) {
-                promoToggle.addEventListener('change', function () {
-                    promoFields.style.display = this.checked ? '' : 'none';
-                    if (!this.checked) {
-                        promoPriceDisplay.value = '';
-                        promoPriceHidden.value  = '';
+                if (promoPriceDisplay && promoPriceHidden) {
+                    function syncPromo() {
+                        promoPriceHidden.value = normalizeToNumber(promoPriceDisplay.value);
                     }
-                });
-            }
 
-            if (promoPriceDisplay && promoPriceHidden) {
-                function syncPromo() {
-                    promoPriceHidden.value = normalizeToNumber(promoPriceDisplay.value);
+                    // Init: format nilai awal dari DB
+                    if (promoPriceHidden.value && !promoPriceDisplay.value) {
+                        const normalized = String(promoPriceHidden.value).replace(/\./g, ',');
+                        promoPriceDisplay.value = formatRupiahDisplay(normalized);
+                    }
+
+                    promoPriceDisplay.addEventListener('input', function () {
+                        const pos    = this.selectionStart;
+                        const before = this.value.length;
+                        this.value   = formatRupiahDisplay(this.value);
+                        const delta  = this.value.length - before;
+                        this.setSelectionRange(pos + delta, pos + delta);
+                        syncPromo();
+                    });
+
+                    const form2 = promoPriceDisplay.closest('form');
+                    if (form2) {
+                        form2.addEventListener('submit', syncPromo);
+                    }
                 }
-                promoPriceDisplay.addEventListener('input', function () {
-                    const pos   = this.selectionStart;
-                    const before = this.value.length;
-                    this.value  = formatRupiahDisplay(this.value);
-                    const delta = this.value.length - before;
-                    this.setSelectionRange(pos + delta, pos + delta);
-                    syncPromo();
-                });
-                const form2 = promoPriceDisplay.closest('form');
-                if (form2) {
-                    form2.addEventListener('submit', syncPromo);
-                }
-            }
+            })();
         </script>
     @endpush
