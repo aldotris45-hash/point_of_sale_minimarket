@@ -47,15 +47,18 @@ class CashierService implements CashierServiceInterface
                 }
 
                 // Gunakan harga promo jika ada, fallback ke harga normal
+                $isPromo   = $product->isOnPromo();
                 $unitPrice = $product->effectivePrice();
                 $line      = $unitPrice * $qty;
                 $subtotal += $line;
                 $built[] = [
-                    'product_id' => $product->id,
-                    'price'      => $unitPrice,
-                    'quantity'   => $qty,
-                    'total'      => $line,
-                    '_product'   => $product,
+                    'product_id'     => $product->id,
+                    'price'          => $unitPrice,
+                    'is_promo'       => $isPromo,
+                    'original_price' => $isPromo ? (float) $product->price : null,
+                    'quantity'       => $qty,
+                    'total'          => $line,
+                    '_product'       => $product,
                 ];
             }
 
@@ -176,14 +179,17 @@ class CashierService implements CashierServiceInterface
                 }
 
                 $product = Product::findOrFail($pid);
+                $isPromo   = $product->isOnPromo();
                 $unitPrice = $product->effectivePrice();
                 $line      = $unitPrice * $qty;
                 $subtotal += $line;
                 $built[] = [
-                    'product_id' => $product->id,
-                    'price'      => $unitPrice,
-                    'quantity'   => $qty,
-                    'total'      => $line,
+                    'product_id'     => $product->id,
+                    'price'          => $unitPrice,
+                    'is_promo'       => $isPromo,
+                    'original_price' => $isPromo ? (float) $product->price : null,
+                    'quantity'       => $qty,
+                    'total'          => $line,
                 ];
             }
 

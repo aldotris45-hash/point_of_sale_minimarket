@@ -126,22 +126,17 @@
             </thead>
             <tbody class="small">
                 @foreach ($transaction->details as $d)
-                    @php
-                        $isPromo = $d->product
-                            && $d->product->isOnPromo()
-                            && (float) $d->price < (float) $d->product->price;
-                    @endphp
                     <tr>
                         <td>
                             {{ $d->product->name ?? '#' . $d->product_id }}
-                            @if ($isPromo)
+                            @if ($d->is_promo)
                                 <span class="badge-promo">PROMO</span>
                             @endif
                         </td>
                         <td class="text-end">{{ (int) $d->quantity }}</td>
                         <td class="text-end">
-                            @if ($isPromo)
-                                <span class="price-original">{{ $fmt($d->product->price) }}</span>
+                            @if ($d->is_promo && $d->original_price)
+                                <span class="price-original">{{ $fmt($d->original_price) }}</span>
                             @endif
                             {{ $fmt($d->price) }}
                         </td>

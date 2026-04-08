@@ -15,12 +15,16 @@ class TransactionDetail extends Model
         'product_id',
         'quantity',
         'price',
+        'is_promo',
+        'original_price',
         'total',
     ];
 
     protected $casts = [
-        'price' => 'decimal:2',
-        'total' => 'decimal:2',
+        'price'          => 'decimal:2',
+        'original_price' => 'decimal:2',
+        'total'          => 'decimal:2',
+        'is_promo'       => 'boolean',
     ];
 
     public function transaction(): BelongsTo
