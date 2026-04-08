@@ -248,6 +248,113 @@
             .category-banner h3 { font-size: 1.2rem; }
         }
 
+        /* ───── PROMO POPUP MODAL ───── */
+        .promo-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.65);
+            backdrop-filter: blur(4px);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .promo-overlay.visible { opacity: 1; }
+        .promo-overlay.hidden  { opacity: 0; pointer-events: none; }
+
+        @keyframes popIn {
+            0%   { transform: scale(0.85) translateY(30px); opacity: 0; }
+            100% { transform: scale(1)    translateY(0);    opacity: 1; }
+        }
+        .promo-modal {
+            background: white;
+            border-radius: 1.5rem;
+            overflow: hidden;
+            max-width: 580px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+        }
+        .promo-modal-header {
+            background: linear-gradient(120deg, #7f1d1d 0%, #dc2626 45%, #f97316 100%);
+            padding: 1.5rem 1.8rem 1.2rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .promo-modal-header .bg-fx {
+            position: absolute; inset: 0;
+            font-size: 5rem;
+            opacity: 0.12;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 1rem;
+            pointer-events: none;
+            letter-spacing: 0.5rem;
+        }
+        .promo-modal-header h2 {
+            color: white;
+            font-size: 1.6rem;
+            font-weight: 800;
+            margin: 0 0 0.2rem;
+            text-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+        .promo-modal-header p {
+            color: rgba(255,255,255,0.85);
+            margin: 0;
+            font-size: 0.88rem;
+        }
+        .promo-modal-close {
+            position: absolute;
+            top: 14px; right: 16px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            font-size: 1.4rem;
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: background 0.2s;
+            line-height: 1;
+        }
+        .promo-modal-close:hover { background: rgba(255,255,255,0.35); }
+        .promo-modal-body {
+            padding: 1.25rem;
+            background: #fff5f5;
+            max-height: 55vh;
+            overflow-y: auto;
+        }
+        .promo-modal-card {
+            background: white;
+            border-radius: 10px;
+            border: 2px solid #fca5a5;
+            padding: 0.85rem 1rem;
+            position: relative;
+            transition: transform 0.15s, box-shadow 0.15s;
+        }
+        .promo-modal-card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(220,38,38,0.18); }
+        .promo-modal-card .pill {
+            position: absolute; top: -1px; right: -1px;
+            background: linear-gradient(135deg, #dc2626, #f97316);
+            color: white; font-size: 0.63rem; font-weight: 800;
+            padding: 3px 9px; border-radius: 0 8px 0 8px;
+            text-transform: uppercase; letter-spacing: 0.05em;
+        }
+        .promo-modal-card .pname { font-weight: 700; font-size: 0.88rem; color: #1a1a1a; margin-bottom: 4px; padding-right: 0.5rem; }
+        .promo-modal-card .pold  { font-size: 0.75rem; color: #9ca3af; text-decoration: line-through; }
+        .promo-modal-card .pnew  { font-size: 1rem; font-weight: 800; color: #dc2626; }
+        .promo-modal-card .psave { font-size: 0.7rem; color: #16a34a; font-weight: 700; }
+        .promo-modal-footer {
+            padding: 1rem 1.25rem;
+            background: white;
+            display: flex;
+            gap: 0.75rem;
+            border-top: 1px solid #fee2e2;
+        }
+
         /* ───── PROMO SECTION ───── */
         @keyframes promoPulse {
             0%, 100% { box-shadow: 0 4px 20px rgba(220,38,38,0.4); }
@@ -563,6 +670,98 @@
 <a href="{{ $waLink }}" target="_blank" rel="noopener" class="floating-wa">
     <i class="bi bi-whatsapp fs-5"></i> Pesan Sekarang
 </a>
+
+{{-- ══════════ PROMO POPUP MODAL ══════════ --}}
+@if($promoProducts->isNotEmpty() && !$categoryId && !$search)
+<div class="promo-overlay" id="promoOverlay" role="dialog" aria-modal="true" aria-labelledby="promoModalTitle">
+    <div class="promo-modal">
+
+        <!-- Header -->
+        <div class="promo-modal-header">
+            <div class="bg-fx" aria-hidden="true">🔥 ⚡ 💥 🎉</div>
+            <button class="promo-modal-close" id="promoClose" aria-label="Tutup">&times;</button>
+            <h2 id="promoModalTitle">🔥 PROMO HARI INI!</h2>
+            <p>Harga spesial untuk {{ $promoProducts->count() }} produk — jangan sampai kehabisan!</p>
+        </div>
+
+        <!-- Body: promo cards -->
+        <div class="promo-modal-body">
+            <div class="row row-cols-2 g-3">
+                @foreach($promoProducts as $p)
+                @php
+                    $hemat = (float)$p->price - (float)$p->promo_price;
+                    $pct   = $p->price > 0 ? round($hemat / $p->price * 100) : 0;
+                    $label = $p->promo_label ?: "HEMAT {$pct}%";
+                @endphp
+                <div class="col">
+                    <div class="promo-modal-card">
+                        <span class="pill">{{ $label }}</span>
+                        <p class="pname">{{ $p->name }}</p>
+                        <div class="pold">Rp {{ number_format((float)$p->price, 0, ',', '.') }}</div>
+                        <div class="pnew">Rp {{ number_format((float)$p->promo_price, 0, ',', '.') }}</div>
+                        <div class="psave">💚 Hemat Rp {{ number_format($hemat, 0, ',', '.') }}</div>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="promo-modal-footer">
+            <a href="{{ $waLink }}" target="_blank" rel="noopener"
+               class="btn btn-success flex-grow-1 fw-bold">
+                <i class="bi bi-whatsapp"></i> Pesan Sekarang!
+            </a>
+            <button id="promoCloseBtnBottom" class="btn btn-outline-secondary">
+                Lihat Katalog
+            </button>
+        </div>
+
+    </div>
+</div>
+
+<script>
+(function () {
+    const STORAGE_KEY = 'promo_popup_seen_{{ md5($promoProducts->pluck("id")->sort()->implode(",")) }}';
+    const overlay  = document.getElementById('promoOverlay');
+    const closeBtn = document.getElementById('promoClose');
+    const closeBottom = document.getElementById('promoCloseBtnBottom');
+
+    function openModal() {
+        overlay.classList.add('visible');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+        overlay.classList.remove('visible');
+        overlay.classList.add('hidden');
+        document.body.style.overflow = '';
+        // Simpan ke sessionStorage — popup tidak muncul lagi dalam satu sesi
+        sessionStorage.setItem(STORAGE_KEY, '1');
+    }
+
+    // Auto-open setelah 600ms jika belum pernah lihat di sesi ini
+    if (!sessionStorage.getItem(STORAGE_KEY)) {
+        setTimeout(openModal, 600);
+    } else {
+        overlay.classList.add('hidden');
+    }
+
+    closeBtn.addEventListener('click', closeModal);
+    closeBottom.addEventListener('click', closeModal);
+
+    // Klik di luar modal untuk menutup
+    overlay.addEventListener('click', function (e) {
+        if (e.target === overlay) closeModal();
+    });
+
+    // ESC untuk menutup
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') closeModal();
+    });
+})();
+</script>
+@endif
 
 <script src="{{ asset('assets/vendor/bootstrap.bundle.min.js') }}"></script>
 </body>
