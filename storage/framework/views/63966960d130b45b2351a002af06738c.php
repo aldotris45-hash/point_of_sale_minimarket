@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Katalog Harga - {{ $storeName }}</title>
-    <meta name="description" content="Daftar harga grosir sayur dan buah segar dari {{ $storeName }}. Cek harga terbaru dan pesan sekarang!">
+    <title>Katalog Harga - <?php echo e($storeName); ?></title>
+    <meta name="description" content="Daftar harga grosir sayur dan buah segar dari <?php echo e($storeName); ?>. Cek harga terbaru dan pesan sekarang!">
     <!-- Bootstrap CSS -->
-    <link href="{{ asset('assets/vendor/bootstrap.min.css') }}" rel="stylesheet" />
-    <link href="{{ asset('assets/vendor/bootstrap-icons-1.13.1/bootstrap-icons.min.css') }}" rel="stylesheet" />
+    <link href="<?php echo e(asset('assets/vendor/bootstrap.min.css')); ?>" rel="stylesheet" />
+    <link href="<?php echo e(asset('assets/vendor/bootstrap-icons-1.13.1/bootstrap-icons.min.css')); ?>" rel="stylesheet" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -247,114 +247,11 @@
             .category-banner .bg-emojis { font-size: 3.5rem; }
             .category-banner h3 { font-size: 1.2rem; }
         }
-
-        /* ───── PROMO SECTION ───── */
-        @keyframes promoPulse {
-            0%, 100% { box-shadow: 0 4px 20px rgba(220,38,38,0.4); }
-            50%       { box-shadow: 0 4px 32px rgba(249,115,22,0.7); }
-        }
-        .promo-section {
-            border-radius: 1.25rem;
-            overflow: hidden;
-            margin-bottom: 2.5rem;
-            animation: fadeSlideUp 0.3s ease both, promoPulse 2.4s ease-in-out infinite;
-        }
-        .promo-banner {
-            background: linear-gradient(120deg, #7f1d1d 0%, #dc2626 45%, #f97316 100%);
-            padding: 1.2rem 1.8rem;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            position: relative;
-            overflow: hidden;
-        }
-        .promo-banner .bg-emojis {
-            position: absolute;
-            right: -10px; top: 50%;
-            transform: translateY(-50%);
-            font-size: 4.5rem;
-            opacity: 0.15;
-            letter-spacing: 0.5rem;
-            pointer-events: none;
-            white-space: nowrap;
-        }
-        .promo-banner .promo-fire { font-size: 2.2rem; flex-shrink: 0; }
-        .promo-banner .promo-title {
-            margin: 0;
-            font-size: 1.45rem;
-            font-weight: 800;
-            color: white;
-            text-shadow: 0 1px 4px rgba(0,0,0,0.25);
-        }
-        .promo-banner .promo-sub {
-            margin: 0;
-            font-size: 0.82rem;
-            color: rgba(255,255,255,0.85);
-        }
-        .promo-banner .promo-badge {
-            margin-left: auto;
-            flex-shrink: 0;
-            background: #fbbf24;
-            color: #7c2d12;
-            font-weight: 800;
-            font-size: 0.8rem;
-            padding: 6px 14px;
-            border-radius: 50px;
-            white-space: nowrap;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-        }
-        .promo-body {
-            background: #fff5f5;
-            padding: 1.25rem;
-        }
-        /* Promo product card */
-        .promo-card {
-            background: white;
-            border-radius: 10px;
-            border: 2px solid #fca5a5;
-            padding: 0.9rem 1rem;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            position: relative;
-            transition: transform 0.18s, box-shadow 0.18s;
-        }
-        .promo-card:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(220,38,38,0.2); }
-        .promo-card .promo-pill {
-            position: absolute;
-            top: -1px; right: -1px;
-            background: linear-gradient(135deg, #dc2626, #f97316);
-            color: white;
-            font-size: 0.68rem;
-            font-weight: 800;
-            padding: 3px 10px;
-            border-radius: 0 8px 0 8px;
-            letter-spacing: 0.05em;
-            text-transform: uppercase;
-        }
-        .promo-card .product-name { font-weight: 700; font-size: 0.88rem; color: #1a1a1a; margin-bottom: 0.6rem; line-height: 1.4; padding-right: 0.5rem; }
-        .promo-card .price-original { font-size: 0.78rem; color: #9ca3af; text-decoration: line-through; }
-        .promo-card .price-promo { font-size: 1.05rem; font-weight: 800; color: #dc2626; }
-        .promo-card .price-hemat { font-size: 0.72rem; color: #16a34a; font-weight: 700; margin-top: 2px; }
-        /* Badge promo kecil di card kategori */
-        .promo-mini-badge {
-            display: inline-block;
-            background: linear-gradient(135deg, #dc2626, #f97316);
-            color: white;
-            font-size: 0.62rem;
-            font-weight: 800;
-            padding: 1px 7px;
-            border-radius: 50px;
-            margin-bottom: 4px;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
     </style>
 </head>
 <body>
 
-@php
+<?php
     $waNumber = preg_replace('/[^0-9]/', '', $storePhone);
     if(substr($waNumber, 0, 1) === '0') {
         $waNumber = '62' . substr($waNumber, 1);
@@ -432,22 +329,22 @@
         }
         return $default;
     }
-@endphp
+?>
 
 <!-- HERO -->
 <div class="hero text-center">
-    <h1 class="display-6 fw-bold mb-2"><i class="bi bi-shop-window"></i> {{ $storeName }}</h1>
+    <h1 class="display-6 fw-bold mb-2"><i class="bi bi-shop-window"></i> <?php echo e($storeName); ?></h1>
     <p class="lead mb-4">Daftar Harga Grosir Sayur &amp; Buah Segar</p>
 
     <div class="container" style="max-width: 620px;">
-        <form action="{{ route('catalog.index') }}" method="GET" class="d-flex gap-2">
+        <form action="<?php echo e(route('catalog.index')); ?>" method="GET" class="d-flex gap-2">
             <select name="category_id" class="form-select form-select-lg shadow-sm" style="max-width: 210px;">
                 <option value="">Semua Kategori</option>
-                @foreach($categories as $cat)
-                    <option value="{{ $cat->id }}" {{ $categoryId == $cat->id ? 'selected' : '' }}>{{ $cat->name }}</option>
-                @endforeach
+                <?php $__currentLoopData = $categories; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $cat): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                    <option value="<?php echo e($cat->id); ?>" <?php echo e($categoryId == $cat->id ? 'selected' : ''); ?>><?php echo e($cat->name); ?></option>
+                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </select>
-            <input type="text" name="search" class="form-control form-control-lg shadow-sm" placeholder="Cari produk..." value="{{ $search }}">
+            <input type="text" name="search" class="form-control form-control-lg shadow-sm" placeholder="Cari produk..." value="<?php echo e($search); ?>">
             <button type="submit" class="btn btn-warning btn-lg shadow-sm px-3"><i class="bi bi-search"></i></button>
         </form>
     </div>
@@ -460,110 +357,69 @@
     <div class="top-bar">
         <p class="text-muted mb-0">
             <i class="bi bi-clock text-success"></i>
-            Diperbarui: {{ \Carbon\Carbon::now()->locale('id')->isoFormat('D MMM YYYY') }}
+            Diperbarui: <?php echo e(\Carbon\Carbon::now()->locale('id')->isoFormat('D MMM YYYY')); ?>
+
         </p>
-        <a href="{{ route('catalog.export-pdf', request()->query()) }}" class="btn btn-outline-danger btn-sm">
+        <a href="<?php echo e(route('catalog.export-pdf', request()->query())); ?>" class="btn btn-outline-danger btn-sm">
             <i class="bi bi-file-earmark-pdf"></i> Cetak PDF
         </a>
     </div>
 
-    {{-- ══════════ PROMO SECTION ══════════ --}}
-    @if($promoProducts->isNotEmpty() && !$categoryId && !$search)
-    <div class="promo-section">
-        <div class="promo-banner">
-            <span class="bg-emojis" aria-hidden="true">🔥 ⚡ 🎉 💥 🔥 ⚡ 🎉 💥</span>
-            <span class="promo-fire">🔥</span>
-            <div>
-                <h2 class="promo-title">PROMO HARI INI!</h2>
-                <p class="promo-sub">Dapatkan harga spesial sebelum kehabisan &bull; {{ $promoProducts->count() }} produk promo</p>
-            </div>
-            <div class="promo-badge">HEMAT SEKARANG!</div>
-        </div>
-        <div class="promo-body">
-            <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3">
-                @foreach($promoProducts as $p)
-                @php
-                    $hemat = (float)$p->price - (float)$p->promo_price;
-                    $pct   = $p->price > 0 ? round($hemat / $p->price * 100) : 0;
-                    $label = $p->promo_label ?: "HEMAT {$pct}%";
-                @endphp
-                <div class="col">
-                    <div class="promo-card">
-                        <span class="promo-pill">{{ $label }}</span>
-                        <p class="product-name">{{ $p->name }}</p>
-                        <div>
-                            <div class="price-original">Rp {{ number_format((float)$p->price, 0, ',', '.') }}</div>
-                            <div class="price-promo">Rp {{ number_format((float)$p->promo_price, 0, ',', '.') }}</div>
-                            <div class="price-hemat">💚 Hemat Rp {{ number_format($hemat, 0, ',', '.') }}</div>
-                        </div>
-                    </div>
-                </div>
-                @endforeach
-            </div>
-        </div>
-    </div>
-    @endif
-
-    @forelse($groupedProducts as $categoryName => $products)
-        @php
+    <?php $__empty_1 = true; $__currentLoopData = $groupedProducts; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $categoryName => $products): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+        <?php
             $theme = getCategoryTheme($categoryName, $categoryThemes, $defaultTheme);
-        @endphp
+        ?>
 
-        <div class="category-section {{ $theme['class'] }}">
+        <div class="category-section <?php echo e($theme['class']); ?>">
 
             <!-- Banner Kategori -->
             <div class="category-banner">
-                <span class="bg-emojis" aria-hidden="true">{{ $theme['bgEmoji'] }} {{ $theme['bgEmoji'] }}</span>
-                <span class="banner-icon">{{ $theme['icon'] }}</span>
+                <span class="bg-emojis" aria-hidden="true"><?php echo e($theme['bgEmoji']); ?> <?php echo e($theme['bgEmoji']); ?></span>
+                <span class="banner-icon"><?php echo e($theme['icon']); ?></span>
                 <div>
-                    <h3>{{ $categoryName }}</h3>
-                    <p class="banner-sub">{{ $theme['sub'] }} &bull; {{ $products->count() }} produk</p>
+                    <h3><?php echo e($categoryName); ?></h3>
+                    <p class="banner-sub"><?php echo e($theme['sub']); ?> &bull; <?php echo e($products->count()); ?> produk</p>
                 </div>
             </div>
 
             <!-- Grid Produk -->
             <div class="category-body">
                 <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-3">
-                    @foreach($products as $product)
+                    <?php $__currentLoopData = $products; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $product): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                     <div class="col">
                         <div class="product-card">
-                            @if($product->isOnPromo())
-                                <span class="promo-mini-badge">🔥 Promo</span>
-                            @endif
-                            <p class="product-name">{{ $product->name }}</p>
+                            <p class="product-name"><?php echo e($product->name); ?></p>
                             <div>
-                                @if($product->isOnPromo())
-                                    <div style="font-size:0.78rem;color:#9ca3af;text-decoration:line-through;">Rp {{ number_format((float)$product->price, 0, ',', '.') }}</div>
-                                    <div class="product-price" style="color:#dc2626;">Rp {{ number_format((float)$product->promo_price, 0, ',', '.') }}</div>
-                                @elseif($product->price > 0)
-                                    <div class="product-price">Rp {{ number_format($product->price, 0, ',', '.') }}</div>
-                                @else
+                                <?php if($product->price > 0): ?>
+                                    <div class="product-price">Rp <?php echo e(number_format($product->price, 0, ',', '.')); ?></div>
+                                <?php else: ?>
                                     <div class="product-price-call">Hubungi Admin</div>
-                                @endif
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
-                    @endforeach
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 </div>
             </div>
 
         </div>
-    @empty
+    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
         <div class="empty-state">
             <div class="empty-icon">🔍</div>
             <h4>Produk tidak ditemukan</h4>
             <p>Coba kata kunci lain atau pilih kategori yang berbeda.</p>
-            <a href="{{ route('catalog.index') }}" class="btn btn-outline-success mt-2">Tampilkan Semua</a>
+            <a href="<?php echo e(route('catalog.index')); ?>" class="btn btn-outline-success mt-2">Tampilkan Semua</a>
         </div>
-    @endforelse
+    <?php endif; ?>
 
 </div>
 
 <!-- WhatsApp Float -->
-<a href="{{ $waLink }}" target="_blank" rel="noopener" class="floating-wa">
+<a href="<?php echo e($waLink); ?>" target="_blank" rel="noopener" class="floating-wa">
     <i class="bi bi-whatsapp fs-5"></i> Pesan Sekarang
 </a>
 
-<script src="{{ asset('assets/vendor/bootstrap.bundle.min.js') }}"></script>
+<script src="<?php echo e(asset('assets/vendor/bootstrap.bundle.min.js')); ?>"></script>
 </body>
 </html>
+<?php /**PATH C:\Users\nwlen\Documents\point_of_sale_minimarket.worktrees\copilot-worktree-2026-03-10T06-54-12\resources\views/catalog/index.blade.php ENDPATH**/ ?>

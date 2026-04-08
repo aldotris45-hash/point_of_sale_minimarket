@@ -10,11 +10,13 @@ class ProductService implements ProductServiceInterface
     {
         return Product::create([
             'category_id' => $data['category_id'],
-            'name' => $data['name'],
-            'sku' => $data['sku'],
-            'price' => $data['price'],
-            'stock' => $data['stock'] ?? 0,
-            'min_stock' => $data['min_stock'] ?? 0,
+            'name'        => $data['name'],
+            'sku'         => $data['sku'],
+            'price'       => $data['price'],
+            'promo_price' => $data['promo_price'] ?? null,
+            'promo_label' => $data['promo_label'] ?? null,
+            'stock'       => $data['stock'] ?? 0,
+            'min_stock'   => $data['min_stock'] ?? 0,
             'expiry_date' => $data['expiry_date'] ?? null,
         ]);
     }
@@ -23,11 +25,13 @@ class ProductService implements ProductServiceInterface
     {
         $product->update([
             'category_id' => $data['category_id'],
-            'name' => $data['name'],
-            'sku' => $data['sku'],
-            'price' => $data['price'],
-            'stock' => $data['stock'] ?? 0,
-            'min_stock' => $data['min_stock'] ?? 0,
+            'name'        => $data['name'],
+            'sku'         => $data['sku'],
+            'price'       => $data['price'],
+            'promo_price' => $data['promo_price'] ?? null,
+            'promo_label' => $data['promo_label'] ?? null,
+            'stock'       => $data['stock'] ?? 0,
+            'min_stock'   => $data['min_stock'] ?? 0,
             'expiry_date' => $data['expiry_date'] ?? null,
         ]);
 

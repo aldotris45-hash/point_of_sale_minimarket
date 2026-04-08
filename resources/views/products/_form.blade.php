@@ -78,6 +78,53 @@
         </div>
     </div>
 
+    {{-- ══════════════════════════════════════ --}}
+    {{-- SECTION PROMO                          --}}
+    {{-- ══════════════════════════════════════ --}}
+    <div class="col-12">
+        <hr class="my-2">
+        <div class="d-flex align-items-center gap-3 mb-3">
+            <div class="form-check form-switch mb-0">
+                <input class="form-check-input" type="checkbox" role="switch"
+                    id="promo_toggle"
+                    {{ old('promo_price', $product->promo_price ?? null) ? 'checked' : '' }}>
+                <label class="form-check-label fw-semibold" for="promo_toggle">
+                    🔥 Tandai sebagai Promo
+                </label>
+            </div>
+        </div>
+
+        <div id="promo_fields" class="row g-3" style="{{ old('promo_price', $product->promo_price ?? null) ? '' : 'display:none;' }}">
+            <div class="col-12 col-md-4">
+                <label for="promo_price_display" class="form-label">Harga Promo <span class="text-danger">*</span></label>
+                <div class="input-group">
+                    <span class="input-group-text bg-danger text-white">Rp</span>
+                    <input id="promo_price_display" type="text" inputmode="decimal"
+                        class="form-control @error('promo_price') is-invalid @enderror"
+                        value="{{ old('promo_price', $product->promo_price ?? '') ? number_format((float) old('promo_price', $product->promo_price ?? 0), 0, ',', '.') : '' }}"
+                        placeholder="Harga setelah diskon" autocomplete="off">
+                    <input id="promo_price" name="promo_price" type="hidden"
+                        value="{{ old('promo_price', $product->promo_price ?? '') }}">
+                    @error('promo_price')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+                <div class="form-text">Harga normal (Rp {{ number_format((float) old('price', $product->price ?? 0), 0, ',', '.') }}) akan jadi harga coret di katalog.</div>
+            </div>
+            <div class="col-12 col-md-4">
+                <label for="promo_label" class="form-label">Label Promo <span class="text-muted">(opsional)</span></label>
+                <input id="promo_label" name="promo_label" type="text"
+                    class="form-control @error('promo_label') is-invalid @enderror"
+                    value="{{ old('promo_label', $product->promo_label ?? '') }}"
+                    placeholder="e.g. Flash Sale, Hemat 30%" maxlength="50">
+                @error('promo_label')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+                <div class="form-text">Kosongkan untuk label otomatis "PROMO".</div>
+            </div>
+        </div>
+    </div>
+
     @push('script')
         <script>
             (function() {
@@ -138,5 +185,39 @@
                     });
                 }
             })();
+
+            // ── Promo toggle ──────────────────────────────────
+            const promoToggle = document.getElementById('promo_toggle');
+            const promoFields = document.getElementById('promo_fields');
+            const promoPriceDisplay = document.getElementById('promo_price_display');
+            const promoPriceHidden  = document.getElementById('promo_price');
+
+            if (promoToggle && promoFields) {
+                promoToggle.addEventListener('change', function () {
+                    promoFields.style.display = this.checked ? '' : 'none';
+                    if (!this.checked) {
+                        promoPriceDisplay.value = '';
+                        promoPriceHidden.value  = '';
+                    }
+                });
+            }
+
+            if (promoPriceDisplay && promoPriceHidden) {
+                function syncPromo() {
+                    promoPriceHidden.value = normalizeToNumber(promoPriceDisplay.value);
+                }
+                promoPriceDisplay.addEventListener('input', function () {
+                    const pos   = this.selectionStart;
+                    const before = this.value.length;
+                    this.value  = formatRupiahDisplay(this.value);
+                    const delta = this.value.length - before;
+                    this.setSelectionRange(pos + delta, pos + delta);
+                    syncPromo();
+                });
+                const form2 = promoPriceDisplay.closest('form');
+                if (form2) {
+                    form2.addEventListener('submit', syncPromo);
+                }
+            }
         </script>
     @endpush

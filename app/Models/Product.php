@@ -16,15 +16,30 @@ class Product extends Model
         'name',
         'sku',
         'price',
+        'promo_price',
+        'promo_label',
         'stock',
         'min_stock',
         'expiry_date',
     ];
 
     protected $casts = [
-        'price' => 'decimal:2',
+        'price'       => 'decimal:2',
+        'promo_price' => 'decimal:2',
         'expiry_date' => 'date',
     ];
+
+    /** Apakah produk sedang promo */
+    public function isOnPromo(): bool
+    {
+        return $this->promo_price !== null && $this->promo_price > 0;
+    }
+
+    /** Harga efektif (promo jika ada, fallback ke price) */
+    public function effectivePrice(): float
+    {
+        return $this->isOnPromo() ? (float) $this->promo_price : (float) $this->price;
+    }
 
     public function category(): BelongsTo
     {

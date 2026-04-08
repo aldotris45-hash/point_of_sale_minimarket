@@ -42,13 +42,21 @@ class CatalogController extends Controller
             return $product->category ? $product->category->name : 'Lain-lain';
         });
 
+        // Promo products — shown in the special promo banner
+        $promoProducts = Product::with('category')
+            ->whereNotNull('promo_price')
+            ->where('promo_price', '>', 0)
+            ->where('price', '>', 0)
+            ->orderBy('name')
+            ->get();
+
         // All categories
         $categories = Category::has('products')->orderBy('name')->get();
-        
-        $storeName = $this->settings->storeName() ?: 'TRIJAYA FRESH';
+
+        $storeName  = $this->settings->storeName() ?: 'TRIJAYA FRESH';
         $storePhone = $this->settings->storePhone();
 
-        return view('catalog.index', compact('groupedProducts', 'categories', 'search', 'categoryId', 'storeName', 'storePhone'));
+        return view('catalog.index', compact('groupedProducts', 'categories', 'search', 'categoryId', 'storeName', 'storePhone', 'promoProducts'));
     }
 
     public function exportPdf(Request $request)
