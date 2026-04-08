@@ -46,14 +46,16 @@ class CashierService implements CashierServiceInterface
                     throw new InvalidArgumentException("Stok tidak mencukupi untuk {$product->name}.");
                 }
 
-                $line = (float) $product->price * $qty;
+                // Gunakan harga promo jika ada, fallback ke harga normal
+                $unitPrice = $product->effectivePrice();
+                $line      = $unitPrice * $qty;
                 $subtotal += $line;
                 $built[] = [
                     'product_id' => $product->id,
-                    'price' => (float) $product->price,
-                    'quantity' => $qty,
-                    'total' => $line,
-                    '_product' => $product, // simpan instance untuk dipakai nanti
+                    'price'      => $unitPrice,
+                    'quantity'   => $qty,
+                    'total'      => $line,
+                    '_product'   => $product,
                 ];
             }
 
@@ -173,14 +175,15 @@ class CashierService implements CashierServiceInterface
                     throw new InvalidArgumentException('Item keranjang tidak valid.');
                 }
 
-                $product = Product::findOrFail($pid); // No lock/stock decrement for hold
-                $line = (float) $product->price * $qty;
+                $product = Product::findOrFail($pid);
+                $unitPrice = $product->effectivePrice();
+                $line      = $unitPrice * $qty;
                 $subtotal += $line;
                 $built[] = [
                     'product_id' => $product->id,
-                    'price' => (float) $product->price,
-                    'quantity' => $qty,
-                    'total' => $line,
+                    'price'      => $unitPrice,
+                    'quantity'   => $qty,
+                    'total'      => $line,
                 ];
             }
 

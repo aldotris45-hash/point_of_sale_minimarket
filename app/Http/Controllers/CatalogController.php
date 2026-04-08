@@ -43,10 +43,12 @@ class CatalogController extends Controller
         });
 
         // Promo products — shown in the special promo banner
+        // Guard: only show promos where promo_price is actually lower than regular price
         $promoProducts = Product::with('category')
             ->whereNotNull('promo_price')
             ->where('promo_price', '>', 0)
             ->where('price', '>', 0)
+            ->whereColumn('promo_price', '<', 'price')
             ->orderBy('name')
             ->get();
 

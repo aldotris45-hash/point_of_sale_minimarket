@@ -124,3 +124,27 @@
 - [x] **Pesan `validation.uploaded` mentah**: Menambahkan terjemahan pesan upload gagal agar tampil berbahasa Indonesia yang informatif.
 - [x] **Override PHP upload limit**: Menambahkan `public/.user.ini` (`upload_max_filesize=5M`, `post_max_size=10M`) agar file stempel/TTD bisa diupload tanpa ditolak PHP. Memerlukan restart `php8.3-fpm` di VPS.
 - [x] **Posisi stempel lebih realistis**: Mengubah posisi stempel dari tengah-rata menjadi miring `-12deg` dan geser kanan atas untuk efek cap tangan sungguhan.
+
+## Update Pekerjaan (08 April 2026) -> Selesai ✅
+
+### ✅ 12. Visual Upgrade Halaman Katalog Publik
+- [x] **Hero section**: Diubah menjadi gradien hijau gelap yang segar sebagai ganti biru polos.
+- [x] **Tema per kategori**: Setiap section kategori kini punya identitas warna sendiri — Sayur (hijau), Buah (oranye-merah), Bumbu (coklat), Daging (merah), default (biru).
+- [x] **Banner kategori**: Header section berupa banner gradient dengan emoji floating tipis di background (opacity 15-20%).
+- [x] **Card produk**: Tiap card punya border aksen kiri berwarna sesuai kategori + hover glow tematik.
+- [x] **Animasi**: Fade-slide-up per section saat halaman dibuka.
+- [x] **Font**: Upgrade ke Plus Jakarta Sans (Google Fonts).
+
+### ✅ 13. Fitur Promo Produk di Katalog & Kasir
+- [x] **Migration**: Tambah kolom `promo_price` (decimal, nullable) dan `promo_label` (string, nullable) ke tabel `products`.
+- [x] **Model Product**: Tambah `isOnPromo()` dan `effectivePrice()` helper methods.
+- [x] **Admin Form Produk**: Toggle switch 🔥 "Tandai sebagai Promo" + input harga promo + label promo opsional dengan format rupiah otomatis.
+- [x] **Katalog Publik**: Banner promo merah-oranye berdenyut + grid kartu promo (harga coret + hemat) + badge 🔥 di kartu kategori.
+- [x] **Popup Promo**: Modal popup otomatis muncul 0.6 detik setelah halaman dibuka, tampil sekali per sesi (sessionStorage), bisa ditutup via ×, klik luar, atau ESC.
+- [x] **Kasir**: `CashierService` kini menggunakan `effectivePrice()` sehingga harga promo otomatis berlaku di kasir saat checkout dan hold.
+
+### ✅ 14. Perbaikan Bug (Post-Review 08 April 2026)
+- [x] **Bug Stok Desimal**: Kolom `stock` dan `min_stock` sudah diubah ke decimal di migration sebelumnya (untuk sayur/kg), tapi validasi FormRequest masih `integer`. Diubah ke `numeric` + `step="any"` di input form.
+- [x] **Bug JS Scope Promo**: Fungsi `normalizeToNumber` dan `formatRupiahDisplay` tidak bisa diakses kode promo karena scope IIFE. Seluruh kode JS form produk digabung ke dalam satu IIFE.
+- [x] **Bug Promo Empty String**: `$data['promo_price'] ?? null` tidak menangkap empty string `''`. Diganti ke `?: null` di `ProductService::create()` dan `update()`.
+- [x] **Bug Hemat Negatif**: Query promo di `CatalogController` tidak memfilter `promo_price >= price`, sehingga bisa tampil "Hemat -Rp X". Ditambah `whereColumn('promo_price', '<', 'price')`.
