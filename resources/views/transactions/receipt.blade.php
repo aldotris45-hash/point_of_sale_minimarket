@@ -34,6 +34,28 @@
             font-size: 12px;
         }
 
+        .badge-promo {
+            display: inline-block;
+            background: #dc3545;
+            color: #fff;
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: .4px;
+            padding: 1px 4px;
+            border-radius: 3px;
+            vertical-align: middle;
+            margin-left: 3px;
+            line-height: 1.4;
+        }
+
+        .price-original {
+            text-decoration: line-through;
+            color: #adb5bd;
+            font-size: 10px;
+            display: block;
+            text-align: right;
+        }
+
         .text-end {
             text-align: right;
         }
@@ -104,10 +126,25 @@
             </thead>
             <tbody class="small">
                 @foreach ($transaction->details as $d)
+                    @php
+                        $isPromo = $d->product
+                            && $d->product->isOnPromo()
+                            && (float) $d->price < (float) $d->product->price;
+                    @endphp
                     <tr>
-                        <td>{{ $d->product->name ?? '#' . $d->product_id }}</td>
+                        <td>
+                            {{ $d->product->name ?? '#' . $d->product_id }}
+                            @if ($isPromo)
+                                <span class="badge-promo">PROMO</span>
+                            @endif
+                        </td>
                         <td class="text-end">{{ (int) $d->quantity }}</td>
-                        <td class="text-end">{{ $fmt($d->price) }}</td>
+                        <td class="text-end">
+                            @if ($isPromo)
+                                <span class="price-original">{{ $fmt($d->product->price) }}</span>
+                            @endif
+                            {{ $fmt($d->price) }}
+                        </td>
                         <td class="text-end">{{ $fmt($d->total) }}</td>
                     </tr>
                 @endforeach
