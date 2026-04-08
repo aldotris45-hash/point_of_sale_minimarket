@@ -40,7 +40,7 @@ class CashierController extends Controller
         $q = trim((string) request('q', ''));
         $limit = max(1, min(20, (int) request('limit', 10)));
 
-        $query = Product::query()->select(['id', 'sku', 'name', 'price', 'stock']);
+        $query = Product::query()->select(['id', 'sku', 'name', 'price', 'promo_price', 'promo_label', 'stock']);
         if ($q !== '') {
             if (ctype_digit($q) && (int) $q > 0) {
                 $query->where('id', (int) $q);
@@ -53,6 +53,11 @@ class CashierController extends Controller
             }
         }
         $products = $query->orderBy('name')->limit($limit)->get();
+
+        // Append effective_price (promo jika ada, fallback ke price)
+        $products->each(function ($p) {
+            $p->effective_price = $p->effectivePrice();
+        });
 
         return response()->json($products);
     }

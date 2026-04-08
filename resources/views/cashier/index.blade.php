@@ -268,11 +268,16 @@
                     const disabled = p.stock <= 0 ? 'disabled' : '';
                     const stockInfo = p.stock <= 0 ? '<span class="badge bg-secondary">Habis</span>' :
                         `<span class="badge bg-success">Stok: ${p.stock}</span>`;
+                    const ep = Number(p.effective_price || p.price);
+                    const isPromo = ep < Number(p.price);
+                    const priceHtml = isPromo
+                        ? `<del class="text-muted">Rp ${fmt(p.price)}</del> <span class="text-danger fw-bold">Rp ${fmt(ep)}</span> <span class="badge bg-danger">PROMO</span>`
+                        : `Rp ${fmt(p.price)}`;
                     return `
-                    <div class="d-flex justify-content-between align-items-center border rounded p-2 mb-2">
+                    <div class="d-flex justify-content-between align-items-center border rounded p-2 mb-2${isPromo ? ' border-danger' : ''}">
                         <div class="me-2" style="min-width:0;">
                             <div class="fw-semibold text-truncate" title="${p.name}">${p.name}</div>
-                            <div class="small text-muted">SKU: ${p.sku} • Rp ${fmt(p.price)} ${stockInfo}</div>
+                            <div class="small text-muted">SKU: ${p.sku} • ${priceHtml} ${stockInfo}</div>
                         </div>
                         <div class="d-flex gap-2 align-items-center">
                             <input type="number" class="form-control form-control-sm" style="width: 70px" min="1" value="1" id="qty_${p.id}" ${disabled}>
@@ -289,10 +294,14 @@
                 if (idx >= 0) {
                     cart[idx].qty = Math.min((cart[idx].qty + qty), product.stock);
                 } else {
+                    // Pakai effective_price (harga promo jika ada)
+                    const ep = Number(product.effective_price || product.price);
                     cart.push({
                         product_id: product.id,
                         name: product.name,
-                        price: Number(product.price),
+                        price: ep,
+                        original_price: Number(product.price),
+                        is_promo: ep < Number(product.price),
                         qty: Math.min(qty, product.stock),
                         stock: product.stock
                     });
@@ -310,13 +319,15 @@
                 }
                 const rows = cart.map((it, i) => {
                     const line = Number(it.price) * Number(it.qty);
+                    const promoTag = it.is_promo ? '<span class="badge bg-danger ms-1">PROMO</span>' : '';
+                    const origPrice = it.is_promo ? `<del class="text-muted small">Rp ${fmt(it.original_price)}</del> ` : '';
                     return `
                     <tr>
                         <td>
-                            <div class="fw-semibold">${it.name}</div>
+                            <div class="fw-semibold">${it.name} ${promoTag}</div>
                             <div class="small text-muted">ID: ${it.product_id}</div>
                         </td>
-                        <td class="text-end">Rp ${fmt(it.price)}</td>
+                        <td class="text-end">${origPrice}<span class="${it.is_promo ? 'text-danger fw-bold' : ''}">Rp ${fmt(it.price)}</span></td>
                         <td class="text-center">
                             <div class="input-group input-group-sm justify-content-center" style="max-width: 140px;">
                                 <button class="btn btn-outline-secondary" data-dec="${i}" ${it.qty <= 1 ? 'disabled':''}>-</button>
