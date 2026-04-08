@@ -48,7 +48,7 @@
 
     <div class="col-12 col-md-3">
         <label for="stock" class="form-label">Stok</label>
-        <input id="stock" name="stock" type="number" min="0"
+        <input id="stock" name="stock" type="number" min="0" step="any"
             class="form-control @error('stock') is-invalid @enderror" value="{{ old('stock', $product->stock ?? 0) }}">
         @error('stock')
             <div class="invalid-feedback">{{ $message }}</div>
@@ -57,7 +57,7 @@
 
     <div class="col-12 col-md-3">
         <label for="min_stock" class="form-label">Stok Minimal</label>
-        <input id="min_stock" name="min_stock" type="number" min="0"
+        <input id="min_stock" name="min_stock" type="number" min="0" step="any"
             class="form-control @error('min_stock') is-invalid @enderror"
             value="{{ old('min_stock', $product->min_stock ?? 0) }}">
         @error('min_stock')

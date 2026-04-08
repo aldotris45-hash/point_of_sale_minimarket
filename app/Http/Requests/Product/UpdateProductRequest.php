@@ -23,8 +23,8 @@ class UpdateProductRequest extends FormRequest
             'price' => ['required', 'numeric', 'min:0'],
             'promo_price' => ['nullable', 'numeric', 'min:0'],
             'promo_label' => ['nullable', 'string', 'max:50'],
-            'stock' => ['nullable', 'integer', 'min:0'],
-            'min_stock' => ['nullable', 'integer', 'min:0'],
+            'stock' => ['nullable', 'numeric', 'min:0'],
+            'min_stock' => ['nullable', 'numeric', 'min:0'],
             'expiry_date' => ['nullable', 'date'],
         ];
     }
@@ -41,10 +41,10 @@ class UpdateProductRequest extends FormRequest
             'price.required' => 'Harga wajib diisi.',
             'price.numeric' => 'Harga harus berupa angka.',
             'price.min' => 'Harga minimal :min.',
-            'stock.integer' => 'Stok harus berupa angka bulat.',
-            'stock.min' => 'Stok minimal :min.',
-            'min_stock.integer' => 'Stok minimal harus berupa angka bulat.',
-            'min_stock.min' => 'Stok minimal :min.',
+            'stock.numeric' => 'Stok harus berupa angka.',
+            'stock.min' => 'Stok tidak boleh negatif.',
+            'min_stock.numeric' => 'Stok minimal harus berupa angka.',
+            'min_stock.min' => 'Stok minimal tidak boleh negatif.',
             'expiry_date.date' => 'Tanggal kadaluarsa tidak valid.',
         ];
     }
