@@ -100,6 +100,7 @@
                             <th>Tanggal</th>
                             <th>Kasir</th>
                             <th>Metode</th>
+                            <th>Item Pembelian</th>
                             <th>Piutang</th>
                             <th>Status</th>
                             <th class="text-end">Total</th>
@@ -200,6 +201,12 @@
                     {
                         data: 'method',
                         name: 'payment_method'
+                    },
+                    {
+                        data: 'items',
+                        name: 'items',
+                        orderable: false,
+                        searchable: false
                     },
                     {
                         data: 'due_badge',

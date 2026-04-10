@@ -69,12 +69,15 @@ class TransactionController extends Controller
         $to = $request->input('to');
 
         $query = Transaction::query()
-            ->with(['user'])
+            ->with(['user', 'details.product'])
             ->where('status', '!=', TransactionStatus::SUSPENDED->value)
             ->when($q !== '', function ($w) use ($q) {
                 $w->where(function ($qq) use ($q) {
                     $qq->where('invoice_number', 'like', "%{$q}%")
-                        ->orWhere('note', 'like', "%{$q}%");
+                        ->orWhere('note', 'like', "%{$q}%")
+                        ->orWhereHas('details.product', function ($q_prod) use ($q) {
+                            $q_prod->where('name', 'like', "%{$q}%");
+                        });
                 });
             })
             ->when($status && in_array($status, array_column(TransactionStatus::cases(), 'value'), true), function ($w) use ($status) {
@@ -128,6 +131,9 @@ class TransactionController extends Controller
                 }
                 return strtoupper($m);
             })
+            ->addColumn('items', function (Transaction $t) {
+                return view('transactions.partials.items', ['t' => $t])->render();
+            })
             ->addColumn('due_badge', function (Transaction $t) {
                 return view('transactions.partials.due-badge', ['t' => $t])->render();
             })
@@ -140,7 +146,7 @@ class TransactionController extends Controller
             ->addColumn('action', function (Transaction $t) {
                 return view('transactions.partials.action', ['t' => $t])->render();
             })
-            ->rawColumns(['invoice', 'status_badge', 'due_badge', 'action'])
+            ->rawColumns(['invoice', 'status_badge', 'due_badge', 'action', 'items'])
             ->with('grand_total', (float) $grandTotal)
             ->toJson();
     }
