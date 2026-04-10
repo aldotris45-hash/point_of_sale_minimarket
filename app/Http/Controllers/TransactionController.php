@@ -68,15 +68,19 @@ class TransactionController extends Controller
         $from = $request->input('from');
         $to = $request->input('to');
 
+        // Gabungkan filter custom (q) dan search bawaan DataTables (search[value])
+        $dtSearch = trim((string) $request->input('search.value', ''));
+        $searchTerm = $q !== '' ? $q : $dtSearch;
+
         $query = Transaction::query()
             ->with(['user', 'details.product'])
             ->where('status', '!=', TransactionStatus::SUSPENDED->value)
-            ->when($q !== '', function ($w) use ($q) {
-                $w->where(function ($qq) use ($q) {
-                    $qq->where('invoice_number', 'like', "%{$q}%")
-                        ->orWhere('note', 'like', "%{$q}%")
-                        ->orWhereHas('details.product', function ($q_prod) use ($q) {
-                            $q_prod->where('name', 'like', "%{$q}%");
+            ->when($searchTerm !== '', function ($w) use ($searchTerm) {
+                $w->where(function ($qq) use ($searchTerm) {
+                    $qq->where('invoice_number', 'like', "%{$searchTerm}%")
+                        ->orWhere('note', 'like', "%{$searchTerm}%")
+                        ->orWhereHas('details.product', function ($q_prod) use ($searchTerm) {
+                            $q_prod->where('name', 'like', "%{$searchTerm}%");
                         });
                 });
             })
@@ -113,6 +117,10 @@ class TransactionController extends Controller
         $grandTotal = (clone $query)->sum('total');
 
         return DataTables::of($query)
+            ->filter(function () {
+                // Search sudah ditangani di query builder di atas (termasuk pencarian nama produk)
+                // Disable filter bawaan DataTables agar tidak conflict
+            })
             ->addIndexColumn()
             ->addColumn('invoice', function (Transaction $t) {
                 $url = route('transaksi.show', $t);
