@@ -21,7 +21,7 @@ class ProductService implements ProductServiceInterface
             'bulk_conversion'  => $data['bulk_conversion'] ?: null,
             'price_per_unit'   => $data['price_per_unit'] ?: $data['price'],
             'price_per_bulk'   => $data['price_per_bulk'] ?: null,
-            'krat_weight_kg'   => $data['krat_weight_kg'] ?: null,
+            'krat_weight_kg'   => $data['krat_weight_kg'] ?: 0,
             // Promo
             'promo_price'      => $data['promo_price'] ?: null,
             'promo_label'      => $data['promo_label'] ?: null,
@@ -46,7 +46,7 @@ class ProductService implements ProductServiceInterface
             'bulk_conversion'  => $data['bulk_conversion'] ?: null,
             'price_per_unit'   => $data['price_per_unit'] ?: $data['price'],
             'price_per_bulk'   => $data['price_per_bulk'] ?: null,
-            'krat_weight_kg'   => $data['krat_weight_kg'] ?: null,
+            'krat_weight_kg'   => $data['krat_weight_kg'] ?: 0,
             // Promo
             'promo_price'      => $data['promo_price'] ?: null,
             'promo_label'      => $data['promo_label'] ?: null,
