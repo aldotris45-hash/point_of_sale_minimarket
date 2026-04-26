@@ -79,11 +79,15 @@
         </thead>
         <tbody>
             @foreach($transaction->details as $index => $detail)
+                @php
+                    $saleUnit = $detail->sale_unit ?? $detail->product->unit ?? 'pcs';
+                    $qtyFmt = $detail->product?->isWeightBased() ? number_format((float)$detail->quantity, 2, ',', '.') : number_format($detail->quantity, 0, ',', '.');
+                @endphp
                 <tr>
                     <td>{{ $index + 1 }}</td>
                     <td>{{ $detail->product->name }}</td>
-                    <td style="text-align: right;">{{ number_format($detail->quantity, 0, ',', '.') }} {{ $detail->product->unit ?? '' }}</td>
-                    <td style="text-align: right;">{{ $currency }} {{ number_format($detail->price, 0, ',', '.') }}</td>
+                    <td style="text-align: right;">{{ $qtyFmt }} {{ $saleUnit }}</td>
+                    <td style="text-align: right;">{{ $currency }} {{ number_format($detail->price, 0, ',', '.') }}/{{ $saleUnit }}</td>
                     <td style="text-align: right; font-weight: bold;">{{ $currency }} {{ number_format($detail->total, 0, ',', '.') }}</td>
                 </tr>
             @endforeach

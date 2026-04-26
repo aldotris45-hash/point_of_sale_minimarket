@@ -125,10 +125,14 @@
                                 </thead>
                                 <tbody>
                                     @foreach ($trx->details as $d)
+                                        @php
+                                            $saleUnit = $d->sale_unit ?? $d->product->unit ?? 'pcs';
+                                            $qtyFmt = $d->product?->isWeightBased() ? number_format((float)$d->quantity, 2, ',', '.') : (int) $d->quantity;
+                                        @endphp
                                         <tr>
                                             <td>{{ $d->product->name ?? '#' . $d->product_id }}</td>
-                                            <td class="text-end">{{ (int) $d->quantity }}</td>
-                                            <td class="text-end">Rp {{ number_format($d->price, 0, ',', '.') }}</td>
+                                            <td class="text-end">{{ $qtyFmt }} {{ $saleUnit }}</td>
+                                            <td class="text-end">Rp {{ number_format($d->price, 0, ',', '.') }}/{{ $saleUnit }}</td>
                                             <td class="text-end">Rp {{ number_format($d->total, 0, ',', '.') }}</td>
                                         </tr>
                                     @endforeach

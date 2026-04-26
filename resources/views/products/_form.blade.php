@@ -79,6 +79,119 @@
     </div>
 
     {{-- ══════════════════════════════════════ --}}
+    {{-- SECTION MULTI-UNIT                     --}}
+    {{-- ══════════════════════════════════════ --}}
+    <div class="col-12">
+        <hr class="my-2">
+        <h6 class="fw-semibold mb-3"><i class="bi bi-boxes"></i> Pengaturan Satuan & Harga</h6>
+
+        <div class="d-flex align-items-center gap-3 mb-3">
+            <div class="form-check form-switch mb-0">
+                <input type="hidden" name="has_retail" value="0">
+                <input class="form-check-input" type="checkbox" role="switch"
+                    id="has_retail_toggle" name="has_retail" value="1"
+                    {{ old('has_retail', $product->has_retail ?? true) ? 'checked' : '' }}>
+                <label class="form-check-label fw-semibold text-primary" for="has_retail_toggle">
+                    Bisa Dijual Eceran? (Ada harga kg/pcs)
+                </label>
+            </div>
+        </div>
+
+        <div class="row g-3">
+            <div class="col-12 col-md-3 retail-field">
+                <label for="product_type" class="form-label">Tipe Produk <span class="text-danger">*</span></label>
+                <select id="product_type" name="product_type" class="form-select @error('product_type') is-invalid @enderror">
+                    <option value="weight" @selected(old('product_type', $product->product_type ?? 'weight') === 'weight')>⚖️ Timbangan (kg)</option>
+                    <option value="count" @selected(old('product_type', $product->product_type ?? '') === 'count')>📦 Hitungan (pcs/botol)</option>
+                </select>
+                @error('product_type')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+                <div class="form-text">Timbangan = dijual per kg. Hitungan = dijual per pcs/botol.</div>
+            </div>
+
+            <div class="col-12 col-md-3 retail-field">
+                <label for="unit" class="form-label">Satuan Eceran <span class="text-danger">*</span></label>
+                <input id="unit" name="unit" type="text" class="form-control @error('unit') is-invalid @enderror"
+                    value="{{ old('unit', $product->unit ?? 'kg') }}" placeholder="kg, pcs, botol, bungkus">
+                @error('unit')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <div class="col-12 col-md-3">
+                <label for="bulk_unit" class="form-label">Satuan <span class="bulk-label-text">Grosir</span> <small class="text-muted">(opsional)</small></label>
+                <input id="bulk_unit" name="bulk_unit" type="text" class="form-control @error('bulk_unit') is-invalid @enderror"
+                    value="{{ old('bulk_unit', $product->bulk_unit ?? '') }}" placeholder="krat, karton, kardus">
+                @error('bulk_unit')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+                <div class="form-text non-retail-hint text-warning" style="display:none;"><i class="bi bi-info-circle"></i> Jika tidak diecer, ini jadi satuan utama.</div>
+            </div>
+
+            <div class="col-12 col-md-3" id="bulkConversionDiv">
+                <label for="bulk_conversion" class="form-label">
+                    <span id="bulkConvLabel2">Isi</span> per <span id="bulkConvLabel">krat</span>
+                    <span class="text-danger">*</span>
+                </label>
+                <input id="bulk_conversion" name="bulk_conversion" type="number" step="0.001" min="0"
+                    class="form-control @error('bulk_conversion') is-invalid @enderror"
+                    value="{{ old('bulk_conversion', $product->bulk_conversion ?? '') }}" placeholder="Contoh: 6">
+                @error('bulk_conversion')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+                <div class="form-text">1 <span class="bulk-unit-text">krat</span> = berapa <span class="base-unit-text">kg</span>?</div>
+            </div>
+        </div>
+
+        <div class="row g-3 mt-1">
+            <div class="col-12 col-md-4 retail-field">
+                <label for="price_per_unit_display" class="form-label">Harga Jual Eceran (per <span class="base-unit-text2">kg</span>) <span class="text-danger">*</span></label>
+                <div class="input-group">
+                    <span class="input-group-text">Rp</span>
+                    <input id="price_per_unit_display" type="text" inputmode="decimal"
+                        class="form-control @error('price_per_unit') is-invalid @enderror"
+                        value="{{ (float) old('price_per_unit', $product->price_per_unit ?? $product->price ?? 0) == 0 ? '0' : number_format((float) old('price_per_unit', $product->price_per_unit ?? $product->price ?? 0), 0, ',', '.') }}"
+                        placeholder="0" autocomplete="off">
+                    <input id="price_per_unit" name="price_per_unit" type="hidden"
+                        value="{{ old('price_per_unit', $product->price_per_unit ?? $product->price ?? 0) }}">
+                    @error('price_per_unit')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+            </div>
+
+            <div class="col-12 col-md-4" id="bulkPriceDiv">
+                <label for="price_per_bulk_display" class="form-label">Harga Jual Grosir (per <span class="bulk-unit-text2">krat</span>)</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-warning text-dark">Rp</span>
+                    <input id="price_per_bulk_display" type="text" inputmode="decimal"
+                        class="form-control @error('price_per_bulk') is-invalid @enderror"
+                        value="{{ (float) old('price_per_bulk', $product->price_per_bulk ?? 0) == 0 ? '' : number_format((float) old('price_per_bulk', $product->price_per_bulk ?? 0), 0, ',', '.') }}"
+                        placeholder="Kosongkan = otomatis dari eceran" autocomplete="off">
+                    <input id="price_per_bulk" name="price_per_bulk" type="hidden"
+                        value="{{ old('price_per_bulk', $product->price_per_bulk ?? '') }}">
+                    @error('price_per_bulk')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+                <div class="form-text">Kosongkan = harga eceran × isi per <span class="bulk-unit-text3">krat</span>.</div>
+            </div>
+
+            <div class="col-12 col-md-4" id="kratWeightDiv">
+                <label for="krat_weight_kg" class="form-label">Berat Krat Kosong (kg)</label>
+                <input id="krat_weight_kg" name="krat_weight_kg" type="number" step="0.001" min="0"
+                    class="form-control @error('krat_weight_kg') is-invalid @enderror"
+                    value="{{ old('krat_weight_kg', $product->krat_weight_kg ?? '') }}" placeholder="Contoh: 0.5">
+                @error('krat_weight_kg')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+                <div class="form-text">Untuk menghitung berat bersih saat barang masuk.</div>
+            </div>
+        </div>
+    </div>
+
+    {{-- ══════════════════════════════════════ --}}
     {{-- SECTION PROMO                          --}}
     {{-- ══════════════════════════════════════ --}}
     <div class="col-12">
@@ -152,41 +265,137 @@
                     return decPart ? (intPart + ',' + decPart) : intPart;
                 }
 
-                // ── Harga utama ──────────────────────────────────
-                const priceDisplay = document.getElementById('price_display');
-                const priceHidden  = document.getElementById('price');
-
-                if (priceDisplay && priceHidden) {
-                    function syncHidden() {
-                        priceHidden.value = normalizeToNumber(priceDisplay.value);
-                    }
-
+                function setupRupiahInput(displayEl, hiddenEl) {
+                    if (!displayEl || !hiddenEl) return;
+                    function sync() { hiddenEl.value = normalizeToNumber(displayEl.value); }
                     function onInput() {
-                        const pos = priceDisplay.selectionStart;
-                        const beforeLen = priceDisplay.value.length;
-                        priceDisplay.value = formatRupiahDisplay(priceDisplay.value);
-                        const afterLen = priceDisplay.value.length;
-                        const delta = afterLen - beforeLen;
-                        priceDisplay.setSelectionRange(pos + delta, pos + delta);
-                        syncHidden();
+                        const pos = displayEl.selectionStart;
+                        const before = displayEl.value.length;
+                        displayEl.value = formatRupiahDisplay(displayEl.value);
+                        const delta = displayEl.value.length - before;
+                        try { displayEl.setSelectionRange(pos + delta, pos + delta); } catch(e) {}
+                        sync();
                     }
+                    if (hiddenEl.value && !displayEl.value) {
+                        displayEl.value = formatRupiahDisplay(String(hiddenEl.value).replace(/\./g, ','));
+                    } else { sync(); }
+                    displayEl.addEventListener('input', onInput);
+                    const form = displayEl.closest('form');
+                    if (form) form.addEventListener('submit', sync);
+                }
 
-                    if (priceHidden.value && !priceDisplay.value) {
-                        const normalized = String(priceHidden.value).replace(/\./g, ',');
-                        priceDisplay.value = formatRupiahDisplay(normalized);
+                // ── Harga utama (legacy) ─────────────────────────
+                setupRupiahInput(
+                    document.getElementById('price_display'),
+                    document.getElementById('price')
+                );
+
+                // ── Harga Eceran (price_per_unit) ────────────────
+                setupRupiahInput(
+                    document.getElementById('price_per_unit_display'),
+                    document.getElementById('price_per_unit')
+                );
+
+                // ── Harga Grosir (price_per_bulk) ────────────────
+                setupRupiahInput(
+                    document.getElementById('price_per_bulk_display'),
+                    document.getElementById('price_per_bulk')
+                );
+
+                // ── Sync price_per_unit ke price (legacy) saat submit ──
+                const mainForm = document.querySelector('form');
+                if (mainForm) {
+                    mainForm.addEventListener('submit', function() {
+                        const ppu = document.getElementById('price_per_unit');
+                        const ppb = document.getElementById('price_per_bulk');
+                        const ph  = document.getElementById('price');
+                        const isRetail = document.getElementById('has_retail_toggle').checked;
+                        
+                        if (ph) {
+                            if (isRetail) {
+                                ph.value = ppu ? ppu.value : 0;
+                            } else {
+                                ph.value = ppb ? ppb.value : 0;
+                            }
+                        }
+                    });
+                }
+
+                // ── Multi-unit: Dynamic labels & visibility ────────
+                const unitInput     = document.getElementById('unit');
+                const bulkUnitInput = document.getElementById('bulk_unit');
+                const productType   = document.getElementById('product_type');
+                
+                const $hasRetailToggle = $('#has_retail_toggle');
+                const $retailFields = $('.retail-field');
+                const $bulkConversionDiv = $('#bulkConversionDiv');
+                const $bulkPriceDiv = $('#bulkPriceDiv');
+                const $kratWeightDiv = $('#kratWeightDiv');
+
+                function updateVisibility() {
+                    const isRetail = $hasRetailToggle.is(':checked');
+                    const type = productType?.value || 'weight';
+                    const baseUnit = (unitInput?.value || 'pcs').trim();
+                    const bulkUnit = (bulkUnitInput?.value || '').trim();
+
+                    if (isRetail) {
+                        $retailFields.show();
+                        $('.bulk-label-text').text('Grosir');
+                        $('.non-retail-hint').hide();
+
+                        if (bulkUnit) {
+                            $bulkConversionDiv.show();
+                            $bulkPriceDiv.show();
+                            
+                            $('.bulk-unit-text').text(bulkUnit);
+                            $('.bulk-unit-text2').text(bulkUnit);
+                            $('.bulk-unit-text3').text(bulkUnit);
+                            $('#bulkConvLabel').text(bulkUnit);
+                            
+                            $('.base-unit-text').text(baseUnit);
+                            $('.base-unit-text2').text(baseUnit);
+                            
+                            if (type === 'weight') {
+                                $('#bulkConvLabel2').text('Berat Isi');
+                                $kratWeightDiv.show();
+                            } else {
+                                $('#bulkConvLabel2').text('Isi');
+                                $kratWeightDiv.hide();
+                            }
+                        } else {
+                            $bulkConversionDiv.hide();
+                            $bulkPriceDiv.hide();
+                            $kratWeightDiv.hide();
+                            $('.base-unit-text2').text(baseUnit);
+                        }
                     } else {
-                        syncHidden();
-                    }
-
-                    priceDisplay.addEventListener('input', onInput);
-
-                    const form = priceDisplay.closest('form');
-                    if (form) {
-                        form.addEventListener('submit', function() {
-                            syncHidden();
-                        });
+                        // Not retail
+                        $retailFields.hide();
+                        $('.bulk-label-text').text('Utama');
+                        $('.non-retail-hint').show();
+                        
+                        $bulkConversionDiv.hide();
+                        $kratWeightDiv.hide();
+                        $bulkPriceDiv.show(); // Show bulk price as the main price
+                        
+                        const showUnit = bulkUnit || 'krat';
+                        $('.bulk-unit-text2').text(showUnit);
+                        $('.bulk-unit-text3').text(showUnit);
                     }
                 }
+
+                $hasRetailToggle.on('change', updateVisibility);
+                if (productType) productType.addEventListener('change', updateVisibility);
+                if (unitInput) {
+                    unitInput.addEventListener('input', function() {
+                        this.dataset.userEdited = '1';
+                        updateVisibility();
+                    });
+                }
+                if (bulkUnitInput) bulkUnitInput.addEventListener('input', updateVisibility);
+
+                // Init on load
+                updateVisibility();
 
                 // ── Promo toggle ─────────────────────────────────
                 const promoToggle      = document.getElementById('promo_toggle');
@@ -204,31 +413,7 @@
                     });
                 }
 
-                if (promoPriceDisplay && promoPriceHidden) {
-                    function syncPromo() {
-                        promoPriceHidden.value = normalizeToNumber(promoPriceDisplay.value);
-                    }
-
-                    // Init: format nilai awal dari DB
-                    if (promoPriceHidden.value && !promoPriceDisplay.value) {
-                        const normalized = String(promoPriceHidden.value).replace(/\./g, ',');
-                        promoPriceDisplay.value = formatRupiahDisplay(normalized);
-                    }
-
-                    promoPriceDisplay.addEventListener('input', function () {
-                        const pos    = this.selectionStart;
-                        const before = this.value.length;
-                        this.value   = formatRupiahDisplay(this.value);
-                        const delta  = this.value.length - before;
-                        this.setSelectionRange(pos + delta, pos + delta);
-                        syncPromo();
-                    });
-
-                    const form2 = promoPriceDisplay.closest('form');
-                    if (form2) {
-                        form2.addEventListener('submit', syncPromo);
-                    }
-                }
+                setupRupiahInput(promoPriceDisplay, promoPriceHidden);
             })();
         </script>
     @endpush

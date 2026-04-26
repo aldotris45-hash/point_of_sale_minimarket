@@ -119,13 +119,14 @@
                                 <thead>
                                     <tr>
                                         <th>Produk</th>
+                                        <th class="text-center" style="width:100px;">Satuan</th>
                                         <th class="text-end" style="width:120px;">Harga</th>
                                         <th class="text-center" style="width:140px;">Qty</th>
                                         <th class="text-end" style="width:140px;">Total</th>
                                         <th class="text-end" style="width:80px;"></th>
                                     </tr>
                                 </thead>
-                                <tbody id="cartBody"></tbody>
+                                <tbody id="cartBody"><tr><td colspan="6" class="text-center text-muted">Keranjang kosong.</td></tr></tbody>
                             </table>
                         </div>
                     </div>
@@ -261,24 +262,50 @@
             let dropdownReq = null;
             let dropDebounce = null;
 
+            // Cache produk dari search results
+            let productCache = {};
+
             function renderInlineResults(list) {
                 if (!Array.isArray(list) || !list.length) {
                     $inlineDropResults.html('<div class="text-muted small">Produk tidak ditemukan.</div>');
                     return;
                 }
+                // Cache products
+                list.forEach(p => { productCache[p.id] = p; });
+
                 const rows = list.map(p => {
                     const disabled = p.stock <= 0 ? 'disabled' : '';
                     const stockInfo = p.stock <= 0 ? '<span class="badge bg-secondary">Habis</span>' :
-                        `<span class="badge bg-success">Stok: ${p.stock}</span>`;
+                        `<span class="badge bg-success">Stok: ${p.stock} ${p.unit}</span>`;
+                    const typeIcon = p.is_weight ? '⚖️' : '📦';
+
+                    // Tombol eceran & grosir
+                    let unitBtns = '';
+                    if (p.has_retail) {
+                        unitBtns += `<button class="btn btn-sm btn-primary" data-add="${p.id}" data-bulk="0" ${disabled} title="Tambah eceran"><i class="bi bi-cart-plus"></i> ${p.unit}</button>`;
+                        if (p.has_bulk && p.bulk_unit) {
+                            unitBtns += ` <button class="btn btn-sm btn-outline-warning" data-add="${p.id}" data-bulk="1" ${disabled} title="Tambah grosir"><i class="bi bi-box-seam"></i> ${p.bulk_unit}</button>`;
+                        }
+                    } else {
+                        // Hanya grosir (count)
+                        unitBtns += `<button class="btn btn-sm btn-warning text-dark fw-semibold" data-add="${p.id}" data-bulk="0" ${disabled} title="Tambah"><i class="bi bi-box-seam"></i> ${p.unit}</button>`;
+                    }
+
+                    // Step: kg → 0.01, pcs/krat → 1
+                    const isDecimal = p.has_retail && p.is_weight;
+                    const step = isDecimal ? '0.01' : '1';
+                    const minVal = isDecimal ? '0.01' : '1';
+                    const defVal = isDecimal ? '0.5' : '1';
+
                     return `
                         <div class="d-flex justify-content-between align-items-center border rounded p-2 mb-2">
                             <div class="me-2" style="min-width:0;">
-                                <div class="fw-semibold text-truncate" title="${p.name}">${p.name}</div>
-                                <div class="small text-muted">SKU: ${p.sku} • Rp ${fmt(p.price)} ${stockInfo}</div>
+                                <div class="fw-semibold text-truncate" title="${p.name}">${typeIcon} ${p.name}</div>
+                                <div class="small text-muted">SKU: ${p.sku} • Rp ${fmt(p.price)}/${p.unit} ${p.price_per_bulk ? '• Rp ' + fmt(p.price_per_bulk) + '/' + p.bulk_unit : ''} ${stockInfo}</div>
                             </div>
                             <div class="d-flex gap-2 align-items-center">
-                                <input type="number" class="form-control form-control-sm" style="width: 70px" min="1" value="1" id="qty_${p.id}" ${disabled}>
-                                <button class="btn btn-sm btn-primary" data-add="${p.id}" ${disabled} title="Tambah ke keranjang"><i class="bi bi-cart-plus"></i></button>
+                                <input type="number" class="form-control form-control-sm" style="width: 80px" min="${minVal}" step="${step}" value="${defVal}" id="qty_${p.id}" ${disabled}>
+                                ${unitBtns}
                             </div>
                         </div>
                     `;
@@ -286,17 +313,28 @@
                 $inlineDropResults.html(rows);
             }
 
-            function upsertCart(product, qty) {
-                const idx = cart.findIndex(x => x.product_id === product.id);
+            function upsertCart(product, qty, isBulk) {
+                const saleUnit = isBulk ? (product.bulk_unit || product.unit) : product.unit;
+                const unitPrice = isBulk ? (product.price_per_bulk || product.price) : product.price;
+
+                // Cari apakah item dengan produk + unit yang sama sudah ada di cart
+                const idx = cart.findIndex(x => x.product_id === product.id && x.sale_unit === saleUnit);
                 if (idx >= 0) {
-                    cart[idx].qty = Math.min((cart[idx].qty + qty), product.stock);
+                    cart[idx].qty += qty;
                 } else {
                     cart.push({
                         product_id: product.id,
                         name: product.name,
-                        price: Number(product.price),
-                        qty: Math.min(qty, product.stock),
-                        stock: product.stock
+                        price: Number(unitPrice),
+                        qty: qty,
+                        stock: product.stock,
+                        sale_unit: saleUnit,
+                        is_bulk: isBulk,
+                        is_weight: product.is_weight,
+                        has_retail: product.has_retail,
+                        unit: product.unit,
+                        bulk_unit: product.bulk_unit,
+                        bulk_conversion: product.bulk_conversion || 1,
                     });
                 }
                 renderCart();
@@ -304,7 +342,7 @@
 
             function renderCart() {
                 if (!cart.length) {
-                    $cartBody.html('<tr><td colspan="5" class="text-center text-muted">Keranjang kosong.</td></tr>');
+                    $cartBody.html('<tr><td colspan="6" class="text-center text-muted">Keranjang kosong.</td></tr>');
                     calcSummary();
                     $btnClearCart.prop('disabled', true);
                     $btnHold.prop('disabled', true);
@@ -312,20 +350,40 @@
                 }
                 const rows = cart.map((it, i) => {
                     const line = Number(it.price) * Number(it.qty);
+
+                    // Krat/grosir → integer step, Eceran kg → desimal, Eceran pcs → integer
+                    const isDecimalQty = it.has_retail && it.is_weight && !it.is_bulk;
+                    const step    = isDecimalQty ? '0.01' : '1';
+                    const minVal  = isDecimalQty ? '0.01' : '1';
+                    const decStep = isDecimalQty ? 0.1 : 1;
+
+                    const unitBadge = it.is_bulk
+                        ? `<span class="badge bg-warning text-dark">${it.sale_unit}</span>`
+                        : `<span class="badge bg-info">${it.sale_unit}</span>`;
+                    const qtyDisplay = isDecimalQty ? Number(it.qty).toFixed(2) : Math.round(it.qty);
+
+                    // Stok info: tampilkan stok base + konversi ke krat jika grosir
+                    let stockHint = `Stok: ${Number(it.stock).toFixed(1)} ${it.unit}`;
+                    if (it.is_bulk && it.bulk_conversion > 0) {
+                        const maxBulk = Math.floor(Number(it.stock) / Number(it.bulk_conversion));
+                        stockHint += ` (~${maxBulk} ${it.sale_unit})`;
+                    }
+
                     return `
                         <tr>
                             <td>
                                 <div class="fw-semibold">${it.name}</div>
                                 <div class="small text-muted">ID: ${it.product_id}</div>
                             </td>
-                            <td class="text-end">Rp ${fmt(it.price)}</td>
+                            <td class="text-center">${unitBadge}</td>
+                            <td class="text-end">Rp ${fmt(it.price)}/${it.sale_unit}</td>
                             <td class="text-center">
-                                <div class="input-group input-group-sm justify-content-center" style="max-width: 140px;">
-                                    <button class="btn btn-outline-secondary" data-dec="${i}" ${it.qty <= 1 ? 'disabled' : ''}>-</button>
-                                    <input type="number" class="form-control text-center" min="1" max="${it.stock}" value="${it.qty}" data-qty="${i}">
-                                    <button class="btn btn-outline-secondary" data-inc="${i}" ${it.qty >= it.stock ? 'disabled' : ''}>+</button>
+                                <div class="input-group input-group-sm justify-content-center" style="max-width: 150px;">
+                                    <button class="btn btn-outline-secondary" data-dec="${i}" data-step="${decStep}" ${it.qty <= Number(minVal) ? 'disabled' : ''}>-</button>
+                                    <input type="number" class="form-control text-center" min="${minVal}" step="${step}" value="${qtyDisplay}" data-qty="${i}">
+                                    <button class="btn btn-outline-secondary" data-inc="${i}" data-step="${decStep}">+</button>
                                 </div>
-                                <div class="small text-muted mt-1">Stok: ${it.stock}</div>
+                                <div class="small text-muted mt-1">${stockHint}</div>
                             </td>
                             <td class="text-end">Rp ${fmt(line)}</td>
                             <td class="text-end">
@@ -353,12 +411,11 @@
                 $sumTotal.text(fmt(total));
 
                 $btnCheckout.prop('disabled', cart.length === 0);
-                $itemsJson.val(JSON.stringify(cart.map(({
-                    product_id,
-                    qty
-                }) => ({
-                    product_id,
-                    qty
+                $itemsJson.val(JSON.stringify(cart.map(it => ({
+                    product_id: it.product_id,
+                    qty: it.qty,
+                    sale_unit: it.sale_unit || null,
+                    is_bulk: it.is_bulk || false,
                 }))));
 
                 lastSubtotal = subtotal;
@@ -459,7 +516,7 @@
                                 .find(p => Number(p.id) === Number(code)) : null) || list[0];
                         }
                         if (prod && prod.stock > 0) {
-                            upsertCart(prod, 1);
+                            upsertCart(prod, 1, false);
                             $q.val('');
                         } else {
                             showInlineMenu();
@@ -474,14 +531,21 @@
 
             $inlineDropResults.on('click', '[data-add]', function () {
                 const id = Number($(this).data('add'));
+                const isBulk = $(this).data('bulk') == 1;
                 const qty = Number($('#qty_' + id).val() || 1);
-                $.get(@json(route('kasir.products')), {
-                    q: id,
-                    limit: 1
-                }).done((list) => {
-                    const p = Array.isArray(list) ? list.find(x => Number(x.id) === id) : null;
-                    if (p) upsertCart(p, qty);
-                });
+                // Cari dari cache dulu
+                const cached = productCache[id];
+                if (cached) {
+                    upsertCart(cached, qty, isBulk);
+                } else {
+                    $.get(@json(route('kasir.products')), {
+                        q: id,
+                        limit: 1
+                    }).done((list) => {
+                        const p = Array.isArray(list) ? list.find(x => Number(x.id) === id) : null;
+                        if (p) upsertCart(p, qty, isBulk);
+                    });
+                }
             });
 
             $q.on('focus', function () {
@@ -538,21 +602,31 @@
 
             $('#cartTable').on('click', '[data-inc]', function () {
                 const i = Number($(this).data('inc'));
-                cart[i].qty = Math.min(cart[i].qty + 1, cart[i].stock);
+                const step = Number($(this).data('step') || 1);
+                cart[i].qty = Math.round((cart[i].qty + step) * 100) / 100;
+                // Jika grosir, bulatkan ke integer
+                if (cart[i].is_bulk) cart[i].qty = Math.round(cart[i].qty);
                 renderCart();
             });
 
             $('#cartTable').on('click', '[data-dec]', function () {
                 const i = Number($(this).data('dec'));
-                cart[i].qty = Math.max(cart[i].qty - 1, 1);
+                const step = Number($(this).data('step') || 1);
+                const isDecimalQty = cart[i].has_retail && cart[i].is_weight && !cart[i].is_bulk;
+                const minVal = isDecimalQty ? 0.01 : 1;
+                cart[i].qty = Math.max(Math.round((cart[i].qty - step) * 100) / 100, minVal);
+                if (cart[i].is_bulk || !cart[i].has_retail) cart[i].qty = Math.round(cart[i].qty);
                 renderCart();
             });
 
             $('#cartTable').on('input', '[data-qty]', function () {
                 const i = Number($(this).data('qty'));
-                let v = Number($(this).val() || 1);
-                v = Math.min(Math.max(v, 1), cart[i].stock);
-                cart[i].qty = v;
+                let v = Number($(this).val() || 0.01);
+                const isDecimalQty = cart[i].has_retail && cart[i].is_weight && !cart[i].is_bulk;
+                const minVal = isDecimalQty ? 0.01 : 1;
+                v = Math.max(v, minVal);
+                if (cart[i].is_bulk || !cart[i].has_retail) v = Math.round(v); // harus integer
+                cart[i].qty = Math.round(v * 100) / 100;
                 renderCart();
             });
 

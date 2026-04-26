@@ -15,15 +15,25 @@ class StoreProductRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'category_id' => ['required', 'exists:categories,id'],
-            'name' => ['required', 'string', 'max:255'],
-            'sku' => ['required', 'string', 'max:100', 'unique:products,sku'],
-            'price' => ['required', 'numeric', 'min:0'],
-            'promo_price' => ['nullable', 'numeric', 'min:0'],
-            'promo_label' => ['nullable', 'string', 'max:50'],
-            'stock' => ['nullable', 'numeric', 'min:0'],
-            'min_stock' => ['nullable', 'numeric', 'min:0'],
-            'expiry_date' => ['nullable', 'date'],
+            'category_id'      => ['required', 'exists:categories,id'],
+            'name'             => ['required', 'string', 'max:255'],
+            'sku'              => ['required', 'string', 'max:100', 'unique:products,sku'],
+            'price'            => ['required', 'numeric', 'min:0'],
+            // Multi-unit
+            'has_retail'       => ['boolean'],
+            'product_type'     => ['nullable', 'in:weight,count'],
+            'unit'             => ['nullable', 'string', 'max:30'],
+            'bulk_unit'        => ['nullable', 'string', 'max:30'],
+            'bulk_conversion'  => ['nullable', 'numeric', 'min:0'],
+            'price_per_unit'   => ['nullable', 'numeric', 'min:0'],
+            'price_per_bulk'   => ['nullable', 'numeric', 'min:0'],
+            'krat_weight_kg'   => ['nullable', 'numeric', 'min:0'],
+            // Promo
+            'promo_price'      => ['nullable', 'numeric', 'min:0'],
+            'promo_label'      => ['nullable', 'string', 'max:50'],
+            'stock'            => ['nullable', 'numeric', 'min:0'],
+            'min_stock'        => ['nullable', 'numeric', 'min:0'],
+            'expiry_date'      => ['nullable', 'date'],
         ];
     }
 

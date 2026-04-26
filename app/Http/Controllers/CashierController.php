@@ -41,7 +41,11 @@ class CashierController extends Controller
         $q = trim((string) request('q', ''));
         $limit = max(1, min(20, (int) request('limit', 10)));
 
-        $query = Product::query()->select(['id', 'sku', 'name', 'price', 'stock']);
+        $query = Product::query()->select([
+            'id', 'sku', 'name', 'price', 'stock',
+            'product_type', 'unit', 'bulk_unit', 'bulk_conversion',
+            'price_per_unit', 'price_per_bulk', 'promo_price', 'has_retail',
+        ]);
         if ($q !== '') {
             if (ctype_digit($q) && (int) $q > 0) {
                 $query->where('id', (int) $q);
@@ -53,7 +57,23 @@ class CashierController extends Controller
                 });
             }
         }
-        $products = $query->orderBy('name')->limit($limit)->get();
+        $products = $query->orderBy('name')->limit($limit)->get()->map(function ($p) {
+            return [
+                'id'              => $p->id,
+                'sku'             => $p->sku,
+                'name'            => $p->name,
+                'stock'           => (float) $p->stock,
+                'product_type'    => $p->product_type ?? 'count',
+                'unit'            => $p->unit ?? 'pcs',
+                'bulk_unit'       => $p->bulk_unit,
+                'bulk_conversion' => (float) ($p->bulk_conversion ?? 0),
+                'price'           => $p->effectiveUnitPrice(),       // harga eceran
+                'price_per_bulk'  => $p->hasBulkUnit() ? $p->effectiveBulkPrice() : null,
+                'has_bulk'        => $p->hasBulkUnit(),
+                'has_retail'      => $p->hasRetail(),
+                'is_weight'       => $p->isWeightBased(),
+            ];
+        });
 
         return response()->json($products);
     }

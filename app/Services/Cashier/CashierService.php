@@ -35,30 +35,55 @@ class CashierService implements CashierServiceInterface
             $built = [];
 
             foreach ($items as $row) {
-                $pid = (int) ($row['product_id'] ?? 0);
-                $qty = (int) ($row['qty'] ?? 0);
-                if ($pid <= 0 || $qty <= 0) {
+                $pid      = (int) ($row['product_id'] ?? 0);
+                $saleUnit = $row['sale_unit'] ?? null;           // 'kg','botol' atau 'krat','karton'
+                $saleQty  = (float) ($row['qty'] ?? 0);          // bisa desimal untuk kg
+                $isBulk   = (bool) ($row['is_bulk'] ?? false);  // penjualan grosir?
+
+                if ($pid <= 0 || $saleQty <= 0) {
                     throw new InvalidArgumentException('Item keranjang tidak valid.');
                 }
 
                 $product = Product::lockForUpdate()->findOrFail($pid);
-                if ($product->stock < $qty) {
-                    throw new InvalidArgumentException("Stok tidak mencukupi untuk {$product->name}.");
+
+                // Tentukan satuan jual default jika tidak dikirim
+                if (! $saleUnit) {
+                    $saleUnit = $isBulk ? ($product->bulk_unit ?? $product->unit) : $product->unit;
                 }
 
-                // Gunakan harga promo jika ada, fallback ke harga normal
-                $isPromo   = $product->isOnPromo();
-                $unitPrice = $product->effectivePrice();
-                $line      = $unitPrice * $qty;
-                $subtotal += $line;
+                // Konversi ke base unit untuk validasi & deduct stok
+                $qtyInBaseUnit = $product->toBaseUnit($saleQty, $saleUnit);
+
+                if ((float) $product->stock < $qtyInBaseUnit) {
+                    throw new InvalidArgumentException(
+                        "Stok tidak mencukupi untuk {$product->name}. " .
+                        "Stok: {$product->stockDisplay()}"
+                    );
+                }
+
+                // Tentukan harga
+                $isPromo         = $product->isOnPromo() && ! $isBulk;
+                $unitPrice       = $product->priceFor($saleUnit);
+                $line            = $unitPrice * $saleQty;
+                $subtotal       += $line;
+
+                // Promo grosir (bulk promo label)
+                $promoBulkLabel  = $row['promo_bulk_label'] ?? null;
+
                 $built[] = [
-                    'product_id'     => $product->id,
-                    'price'          => $unitPrice,
-                    'is_promo'       => $isPromo,
-                    'original_price' => $isPromo ? (float) $product->price : null,
-                    'quantity'       => $qty,
-                    'total'          => $line,
-                    '_product'       => $product,
+                    'product_id'       => $product->id,
+                    'price'            => $unitPrice,
+                    'is_promo'         => $isPromo || ($isBulk && $promoBulkLabel),
+                    'original_price'   => $isPromo ? (float) $product->price : null,
+                    'quantity'         => $saleQty,  // qty dalam satuan jual (bisa decimal)
+                    'sale_unit'        => $saleUnit,
+                    'sale_qty'         => $saleQty,
+                    'qty_in_base_unit' => $qtyInBaseUnit,
+                    'is_bulk_sale'     => $isBulk,
+                    'promo_bulk_label' => $promoBulkLabel,
+                    'total'            => $line,
+                    '_product'         => $product,
+                    '_qty_deduct'      => $qtyInBaseUnit, // untuk deduct stok
                 ];
             }
 
@@ -115,15 +140,20 @@ class CashierService implements CashierServiceInterface
 
             foreach ($built as $b) {
                 $product = $b['_product'];
-                unset($b['_product']); // jangan simpan ke DB
+
+                $qtyDeduct = $b['_qty_deduct'] ?? $b['qty_in_base_unit'] ?? $b['quantity'];
+                unset($b['_product'], $b['_qty_deduct']); // jangan simpan ke DB
 
                 TransactionDetail::create([
                     'transaction_id' => $trx->id,
                     ...$b,
                 ]);
-                Product::whereKey($b['product_id'])->decrement('stock', (int) $b['quantity']);
 
-                // Gunakan instance yang sudah ada, refresh untuk stok terbaru
+                // Deduct stok dalam base unit (presisi untuk kg & pcs)
+                $newStock = max(0, (float) $product->stock - (float) $qtyDeduct);
+                $product->update(['stock' => $newStock]);
+
+                // Refresh & cek alert stok minimum
                 $product->refresh();
                 app(ProductAlertService::class)->checkAndNotifyForProduct($product, $this->settings->expiryAlertDays());
             }
@@ -172,24 +202,41 @@ class CashierService implements CashierServiceInterface
             $built = [];
 
             foreach ($items as $row) {
-                $pid = (int) ($row['product_id'] ?? 0);
-                $qty = (int) ($row['qty'] ?? 0);
-                if ($pid <= 0 || $qty <= 0) {
+                $pid      = (int) ($row['product_id'] ?? 0);
+                $saleQty  = (float) ($row['qty'] ?? 0);  // float untuk support kg desimal
+                $saleUnit = $row['sale_unit'] ?? null;
+                $isBulk   = (bool) ($row['is_bulk'] ?? false);
+
+                if ($pid <= 0 || $saleQty <= 0) {
                     throw new InvalidArgumentException('Item keranjang tidak valid.');
                 }
 
                 $product = Product::findOrFail($pid);
-                $isPromo   = $product->isOnPromo();
-                $unitPrice = $product->effectivePrice();
-                $line      = $unitPrice * $qty;
+
+                // Tentukan satuan jual
+                if (! $saleUnit) {
+                    $saleUnit = $isBulk ? ($product->bulk_unit ?? $product->unit) : $product->unit;
+                }
+
+                $isPromo   = $product->isOnPromo() && ! $isBulk;
+                $unitPrice = $product->priceFor($saleUnit);
+                $line      = $unitPrice * $saleQty;
                 $subtotal += $line;
+
+                // Konversi ke base unit
+                $qtyInBaseUnit = $product->toBaseUnit($saleQty, $saleUnit);
+
                 $built[] = [
-                    'product_id'     => $product->id,
-                    'price'          => $unitPrice,
-                    'is_promo'       => $isPromo,
-                    'original_price' => $isPromo ? (float) $product->price : null,
-                    'quantity'       => $qty,
-                    'total'          => $line,
+                    'product_id'       => $product->id,
+                    'price'            => $unitPrice,
+                    'is_promo'         => $isPromo,
+                    'original_price'   => $isPromo ? (float) $product->price : null,
+                    'quantity'         => $saleQty,
+                    'sale_unit'        => $saleUnit,
+                    'sale_qty'         => $saleQty,
+                    'qty_in_base_unit' => $qtyInBaseUnit,
+                    'is_bulk_sale'     => $isBulk,
+                    'total'            => $line,
                 ];
             }
 
