@@ -32,6 +32,7 @@ class CheckoutRequest extends FormRequest
             'items.*.qty'          => ['required', 'numeric', 'min:0.01'],
             'items.*.sale_unit'    => ['nullable', 'string', 'max:30'],
             'items.*.is_bulk'      => ['nullable', 'boolean'],
+            'items.*.item_discount' => ['nullable', 'numeric', 'min:0'],
             'payment_method'       => ['required', 'in:cash,cash_tempo'],
             'paid_amount'          => ['nullable', 'numeric', 'min:0'],
             'note'                 => ['nullable', 'string', 'max:255'],

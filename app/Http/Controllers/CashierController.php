@@ -173,6 +173,9 @@ class CashierController extends Controller
                 'product_id' => $d->product_id,
                 'qty' => $d->quantity,
                 'price' => (float) $d->price,
+                'item_discount' => (float) ($d->item_discount ?? 0),
+                'sale_unit' => $d->sale_unit,
+                'is_bulk' => (bool) $d->is_bulk_sale,
             ])->values(),
         ]);
     }

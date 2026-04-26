@@ -326,6 +326,7 @@
                         product_id: product.id,
                         name: product.name,
                         price: Number(unitPrice),
+                        item_discount: 0,
                         qty: qty,
                         stock: product.stock,
                         sale_unit: saleUnit,
@@ -349,7 +350,8 @@
                     return;
                 }
                 const rows = cart.map((it, i) => {
-                    const line = Number(it.price) * Number(it.qty);
+                    const effectivePrice = Math.max(0, Number(it.price) - Number(it.item_discount || 0));
+                    const line = effectivePrice * Number(it.qty);
 
                     // Krat/grosir → integer step, Eceran kg → desimal, Eceran pcs → integer
                     const isDecimalQty = it.has_retail && it.is_weight && !it.is_bulk;
@@ -362,21 +364,41 @@
                         : `<span class="badge bg-info">${it.sale_unit}</span>`;
                     const qtyDisplay = isDecimalQty ? Number(it.qty).toFixed(2) : Math.round(it.qty);
 
-                    // Stok info: tampilkan stok base + konversi ke krat jika grosir
+                    // Stok info
                     let stockHint = `Stok: ${Number(it.stock).toFixed(1)} ${it.unit}`;
                     if (it.is_bulk && it.bulk_conversion > 0) {
                         const maxBulk = Math.floor(Number(it.stock) / Number(it.bulk_conversion));
                         stockHint += ` (~${maxBulk} ${it.sale_unit})`;
                     }
 
+                    // Harga display: coret jika ada diskon
+                    const hasDisc = Number(it.item_discount || 0) > 0;
+                    const priceHtml = hasDisc
+                        ? `<s class="text-muted small">Rp ${fmt(it.price)}</s><br><span class="text-success fw-semibold">Rp ${fmt(effectivePrice)}</span>/${it.sale_unit}`
+                        : `Rp ${fmt(it.price)}/${it.sale_unit}`;
+
+                    // Diskon row (toggle)
+                    const discVal = Number(it.item_discount || 0);
+                    const discRow = `
+                        <div class="mt-1">
+                            <button class="btn btn-sm ${hasDisc ? 'btn-success' : 'btn-outline-secondary'}" data-toggle-disc="${i}" title="Diskon per item">
+                                <i class="bi bi-tag"></i>${hasDisc ? ' -' + fmt(discVal) : ''}
+                            </button>
+                            <div class="input-group input-group-sm mt-1" id="discRow_${i}" style="display:none; max-width:160px;">
+                                <span class="input-group-text">Rp</span>
+                                <input type="number" class="form-control" min="0" max="${it.price}" step="500" value="${discVal}" data-disc="${i}" placeholder="0">
+                            </div>
+                        </div>`;
+
                     return `
                         <tr>
                             <td>
                                 <div class="fw-semibold">${it.name}</div>
                                 <div class="small text-muted">ID: ${it.product_id}</div>
+                                ${discRow}
                             </td>
                             <td class="text-center">${unitBadge}</td>
-                            <td class="text-end">Rp ${fmt(it.price)}/${it.sale_unit}</td>
+                            <td class="text-end">${priceHtml}</td>
                             <td class="text-center">
                                 <div class="input-group input-group-sm justify-content-center" style="max-width: 150px;">
                                     <button class="btn btn-outline-secondary" data-dec="${i}" data-step="${decStep}" ${it.qty <= Number(minVal) ? 'disabled' : ''}>-</button>
@@ -399,7 +421,10 @@
             }
 
             function calcSummary() {
-                const subtotal = cart.reduce((s, it) => s + (Number(it.price) * Number(it.qty)), 0);
+                const subtotal = cart.reduce((s, it) => {
+                    const effectivePrice = Math.max(0, Number(it.price) - Number(it.item_discount || 0));
+                    return s + (effectivePrice * Number(it.qty));
+                }, 0);
                 const discountAmount = subtotal * (discount / 100);
                 const afterDiscount = subtotal - discountAmount;
                 const taxAmount = afterDiscount * (tax / 100);
@@ -416,6 +441,7 @@
                     qty: it.qty,
                     sale_unit: it.sale_unit || null,
                     is_bulk: it.is_bulk || false,
+                    item_discount: Number(it.item_discount || 0),
                 }))));
 
                 lastSubtotal = subtotal;
@@ -630,6 +656,36 @@
                 renderCart();
             });
 
+            // Toggle diskon input per item
+            $('#cartTable').on('click', '[data-toggle-disc]', function () {
+                const i = Number($(this).data('toggle-disc'));
+                const $row = $(`#discRow_${i}`);
+                $row.toggle();
+                $row.find('input').focus();
+            });
+
+            // Update diskon per item
+            $('#cartTable').on('input', '[data-disc]', function () {
+                const i = Number($(this).data('disc'));
+                let v = Number($(this).val() || 0);
+                v = Math.max(0, Math.min(v, cart[i].price)); // tidak boleh melebihi harga
+                cart[i].item_discount = v;
+                calcSummary();
+                // Update tampilan harga & total tanpa full re-render (agar input tidak blur)
+                const effectivePrice = Math.max(0, cart[i].price - v);
+                const line = effectivePrice * cart[i].qty;
+                const $tr = $(this).closest('tr');
+                const hasDisc = v > 0;
+                $tr.find('td:eq(2)').html(hasDisc
+                    ? `<s class="text-muted small">Rp ${fmt(cart[i].price)}</s><br><span class="text-success fw-semibold">Rp ${fmt(effectivePrice)}</span>/${cart[i].sale_unit}`
+                    : `Rp ${fmt(cart[i].price)}/${cart[i].sale_unit}`);
+                $tr.find('td:eq(4)').html(`Rp ${fmt(line)}`);
+                // Update toggle button
+                const $btn = $tr.find('[data-toggle-disc]');
+                $btn.toggleClass('btn-outline-secondary', !hasDisc).toggleClass('btn-success', hasDisc);
+                $btn.html(`<i class="bi bi-tag"></i>${hasDisc ? ' -' + fmt(v) : ''}`);
+            });
+
             $btnClearCart.on('click', function () {
                 cart = [];
                 renderCart();
@@ -733,8 +789,16 @@
                                         name: p ? p.name : ('Produk #' + it
                                             .product_id),
                                         price: Number(it.price || 0),
+                                        item_discount: Number(it.item_discount || 0),
                                         qty: Math.min(Number(it.qty), stock),
-                                        stock: stock
+                                        stock: stock,
+                                        sale_unit: it.sale_unit || (p ? p.unit : 'pcs'),
+                                        is_bulk: it.is_bulk || false,
+                                        is_weight: p ? p.is_weight : false,
+                                        has_retail: p ? p.has_retail : true,
+                                        unit: p ? p.unit : 'pcs',
+                                        bulk_unit: p ? p.bulk_unit : null,
+                                        bulk_conversion: p ? (p.bulk_conversion || 1) : 1,
                                     };
                                 });
                                 renderCart();

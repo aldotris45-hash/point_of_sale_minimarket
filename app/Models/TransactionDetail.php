@@ -15,6 +15,7 @@ class TransactionDetail extends Model
         'product_id',
         'quantity',         // qty dalam satuan jual (bisa decimal untuk kg)
         'price',            // harga per satuan jual
+        'item_discount',    // diskon per unit (Rp) — nego harga di kasir
         'is_promo',
         'original_price',
         'total',
@@ -28,6 +29,7 @@ class TransactionDetail extends Model
 
     protected $casts = [
         'price'            => 'decimal:2',
+        'item_discount'    => 'decimal:2',
         'original_price'   => 'decimal:2',
         'total'            => 'decimal:2',
         'quantity'         => 'decimal:4',

@@ -64,7 +64,9 @@ class CashierService implements CashierServiceInterface
                 // Tentukan harga
                 $isPromo         = $product->isOnPromo() && ! $isBulk;
                 $unitPrice       = $product->priceFor($saleUnit);
-                $line            = $unitPrice * $saleQty;
+                $itemDiscount    = (float) ($row['item_discount'] ?? 0);
+                $effectivePrice  = max(0, $unitPrice - $itemDiscount);
+                $line            = $effectivePrice * $saleQty;
                 $subtotal       += $line;
 
                 // Promo grosir (bulk promo label)
@@ -73,6 +75,7 @@ class CashierService implements CashierServiceInterface
                 $built[] = [
                     'product_id'       => $product->id,
                     'price'            => $unitPrice,
+                    'item_discount'    => $itemDiscount,
                     'is_promo'         => $isPromo || ($isBulk && $promoBulkLabel),
                     'original_price'   => $isPromo ? (float) $product->price : null,
                     'quantity'         => $saleQty,  // qty dalam satuan jual (bisa decimal)
@@ -220,7 +223,9 @@ class CashierService implements CashierServiceInterface
 
                 $isPromo   = $product->isOnPromo() && ! $isBulk;
                 $unitPrice = $product->priceFor($saleUnit);
-                $line      = $unitPrice * $saleQty;
+                $itemDiscount = (float) ($row['item_discount'] ?? 0);
+                $effectivePrice = max(0, $unitPrice - $itemDiscount);
+                $line      = $effectivePrice * $saleQty;
                 $subtotal += $line;
 
                 // Konversi ke base unit
@@ -229,6 +234,7 @@ class CashierService implements CashierServiceInterface
                 $built[] = [
                     'product_id'       => $product->id,
                     'price'            => $unitPrice,
+                    'item_discount'    => $itemDiscount,
                     'is_promo'         => $isPromo,
                     'original_price'   => $isPromo ? (float) $product->price : null,
                     'quantity'         => $saleQty,

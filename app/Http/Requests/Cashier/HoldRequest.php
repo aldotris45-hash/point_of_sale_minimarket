@@ -33,6 +33,7 @@ class HoldRequest extends FormRequest
             'items.*.qty'          => ['required', 'numeric', 'min:0.01'],
             'items.*.sale_unit'    => ['nullable', 'string', 'max:30'],
             'items.*.is_bulk'      => ['nullable', 'boolean'],
+            'items.*.item_discount' => ['nullable', 'numeric', 'min:0'],
             'note'                 => ['nullable', 'string', 'max:255'],
             'customer_id'          => ['nullable', 'integer', 'exists:customers,id'],
             'suspended_from_id'    => ['nullable', 'integer', 'min:1'],

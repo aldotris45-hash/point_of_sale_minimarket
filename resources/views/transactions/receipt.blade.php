@@ -136,13 +136,21 @@
                             @if ($d->is_promo)
                                 <span class="badge-promo">PROMO</span>
                             @endif
+                            @if ($d->item_discount > 0)
+                                <span class="badge-promo" style="background:#198754;">DISKON</span>
+                            @endif
                         </td>
                         <td class="text-end">{{ $qtyFmt }} {{ $saleUnit }}</td>
                         <td class="text-end">
-                            @if ($d->is_promo && $d->original_price)
+                            @if ($d->item_discount > 0)
+                                <span class="price-original">{{ $fmt($d->price) }}</span>
+                                {{ $fmt($d->price - $d->item_discount) }}/{{ $saleUnit }}
+                            @elseif ($d->is_promo && $d->original_price)
                                 <span class="price-original">{{ $fmt($d->original_price) }}</span>
+                                {{ $fmt($d->price) }}/{{ $saleUnit }}
+                            @else
+                                {{ $fmt($d->price) }}/{{ $saleUnit }}
                             @endif
-                            {{ $fmt($d->price) }}/{{ $saleUnit }}
                         </td>
                         <td class="text-end">{{ $fmt($d->total) }}</td>
                     </tr>
