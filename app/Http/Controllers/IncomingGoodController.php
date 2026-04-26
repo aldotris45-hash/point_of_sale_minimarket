@@ -124,7 +124,7 @@ class IncomingGoodController extends Controller
         // Tambah field spesifik per tipe produk
         if ($product->isWeightBased()) {
             $rules['gross_weight_kg'] = ['required', 'numeric', 'min:0.001'];
-            $rules['krat_weight_kg']  = ['required', 'numeric', 'min:0.001'];
+            $rules['krat_weight_kg']  = ['nullable', 'numeric', 'min:0'];
         } else {
             $rules['conversion_factor'] = ['nullable', 'numeric', 'min:0.001'];
         }
