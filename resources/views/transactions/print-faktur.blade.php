@@ -142,7 +142,8 @@
                 @foreach($transaction->details as $detail)
                     @php
                         $saleUnit = $detail->sale_unit ?? $detail->product->unit ?? 'Pcs';
-                        $qtyFmt = $detail->product?->isWeightBased() ? number_format((float)$detail->quantity, 2, ',', '.') : number_format($detail->quantity, 0);
+                        $isDecimalUnit = in_array(strtolower(trim($saleUnit)), ['kg', 'gram', 'g', 'ons']);
+                        $qtyFmt = $isDecimalUnit ? number_format((float)$detail->quantity, 2, ',', '.') : number_format($detail->quantity, 0);
                     @endphp
                     <tr>
                         <td>{{ strtoupper($detail->product->name) }}</td>

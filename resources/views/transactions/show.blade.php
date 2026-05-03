@@ -127,7 +127,8 @@
                                     @foreach ($trx->details as $d)
                                         @php
                                             $saleUnit = $d->sale_unit ?? $d->product->unit ?? 'pcs';
-                                            $qtyFmt = $d->product?->isWeightBased() ? number_format((float)$d->quantity, 2, ',', '.') : (int) $d->quantity;
+                                            $isDecimalUnit = in_array(strtolower(trim($saleUnit)), ['kg', 'gram', 'g', 'ons']);
+                                            $qtyFmt = $isDecimalUnit ? number_format((float)$d->quantity, 2, ',', '.') : (int) $d->quantity;
                                         @endphp
                                         <tr>
                                             <td>{{ $d->product->name ?? '#' . $d->product_id }}</td>
