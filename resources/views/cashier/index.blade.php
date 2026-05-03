@@ -273,11 +273,18 @@
                 // Cache products
                 list.forEach(p => { productCache[p.id] = p; });
 
+                // Helper: cek apakah satuan mengandung kg/gram → butuh desimal
+                function isWeightUnit(unit) {
+                    if (!unit) return false;
+                    const u = unit.toLowerCase().trim();
+                    return u === 'kg' || u === 'gram' || u === 'g' || u === 'ons';
+                }
+
                 const rows = list.map(p => {
                     const disabled = p.stock <= 0 ? 'disabled' : '';
                     const stockInfo = p.stock <= 0 ? '<span class="badge bg-secondary">Habis</span>' :
                         `<span class="badge bg-success">Stok: ${p.stock} ${p.unit}</span>`;
-                    const typeIcon = p.is_weight ? '⚖️' : '📦';
+                    const typeIcon = (p.is_weight || isWeightUnit(p.unit)) ? '⚖️' : '📦';
 
                     // Tombol eceran & grosir
                     let unitBtns = '';
@@ -292,8 +299,8 @@
                         unitBtns += `<button class="btn btn-sm btn-warning text-dark fw-semibold" data-add="${p.id}" data-bulk="0" ${disabled} title="Tambah"><i class="bi bi-box-seam"></i> ${p.unit}</button>`;
                     }
 
-                    // Step: kg → 0.01, pcs/krat → 1
-                    const isDecimal = p.has_retail && p.is_weight;
+                    // Step: kg/gram → 0.01, pcs/krat → 1
+                    const isDecimal = p.is_weight || isWeightUnit(p.unit);
                     const step = isDecimal ? '0.01' : '1';
                     const minVal = isDecimal ? '0.01' : '1';
                     const defVal = isDecimal ? '0.5' : '1';
@@ -350,12 +357,19 @@
                     $btnHold.prop('disabled', true);
                     return;
                 }
+                // Helper: cek satuan berat di cart
+                function isWeightUnitCart(unit) {
+                    if (!unit) return false;
+                    const u = unit.toLowerCase().trim();
+                    return u === 'kg' || u === 'gram' || u === 'g' || u === 'ons';
+                }
+
                 const rows = cart.map((it, i) => {
                     const effectivePrice = Math.max(0, Number(it.price) - Number(it.item_discount || 0));
                     const line = effectivePrice * Number(it.qty);
 
                     // Krat/grosir → integer step, Eceran kg → desimal, Eceran pcs → integer
-                    const isDecimalQty = it.has_retail && it.is_weight && !it.is_bulk;
+                    const isDecimalQty = !it.is_bulk && (it.is_weight || isWeightUnitCart(it.sale_unit) || isWeightUnitCart(it.unit));
                     const step    = isDecimalQty ? '0.01' : '1';
                     const minVal  = isDecimalQty ? '0.01' : '1';
                     const decStep = isDecimalQty ? 0.1 : 1;
