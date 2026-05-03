@@ -282,7 +282,8 @@
                     // Tombol eceran & grosir
                     let unitBtns = '';
                     if (p.has_retail) {
-                        unitBtns += `<button class="btn btn-sm btn-primary" data-add="${p.id}" data-bulk="0" ${disabled} title="Tambah eceran"><i class="bi bi-cart-plus"></i> ${p.unit}</button>`;
+                        const btnTitle = p.has_bulk ? 'Tambah eceran' : 'Tambah';
+                        unitBtns += `<button class="btn btn-sm btn-primary" data-add="${p.id}" data-bulk="0" ${disabled} title="${btnTitle}"><i class="bi bi-cart-plus"></i> ${p.unit}</button>`;
                         if (p.has_bulk && p.bulk_unit) {
                             unitBtns += ` <button class="btn btn-sm btn-outline-warning" data-add="${p.id}" data-bulk="1" ${disabled} title="Tambah grosir"><i class="bi bi-box-seam"></i> ${p.bulk_unit}</button>`;
                         }

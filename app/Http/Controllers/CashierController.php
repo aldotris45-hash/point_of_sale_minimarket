@@ -33,6 +33,7 @@ class CashierController extends Controller
             'tax_percent' => $this->settings->taxPercent(),
             'receipt_format' => $this->settings->receiptNumberFormat(),
             'customers' => Customer::orderBy('name')->get(['id', 'name']),
+            'enable_bulk_unit' => $this->settings->enableBulkUnit(),
         ]);
     }
 
@@ -68,9 +69,9 @@ class CashierController extends Controller
                 'bulk_unit'       => $p->bulk_unit,
                 'bulk_conversion' => (float) ($p->bulk_conversion ?? 0),
                 'price'           => $p->effectiveUnitPrice(),       // harga eceran
-                'price_per_bulk'  => $p->hasBulkUnit() ? $p->effectiveBulkPrice() : null,
-                'has_bulk'        => $p->hasBulkUnit(),
-                'has_retail'      => $p->hasRetail(),
+                'price_per_bulk'  => ($this->settings->enableBulkUnit() && $p->hasBulkUnit()) ? $p->effectiveBulkPrice() : null,
+                'has_bulk'        => $this->settings->enableBulkUnit() && $p->hasBulkUnit(),
+                'has_retail'      => $this->settings->enableBulkUnit() ? $p->hasRetail() : true,
                 'is_weight'       => $p->isWeightBased(),
             ];
         });

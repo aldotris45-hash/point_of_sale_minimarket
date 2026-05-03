@@ -85,6 +85,9 @@
         <hr class="my-2">
         <h6 class="fw-semibold mb-3"><i class="bi bi-boxes"></i> Pengaturan Satuan & Harga</h6>
 
+        @php $enableBulk = app(\App\Services\Settings\SettingsServiceInterface::class)->enableBulkUnit(); @endphp
+        
+        @if($enableBulk)
         <div class="d-flex align-items-center gap-3 mb-3">
             <div class="form-check form-switch mb-0">
                 <input type="hidden" name="has_retail" value="0">
@@ -109,16 +112,22 @@
                 @enderror
                 <div class="form-text">Timbangan = dijual per kg. Hitungan = dijual per pcs/botol.</div>
             </div>
+        @else
+            <input type="hidden" name="has_retail" value="1">
+            <input type="hidden" name="product_type" value="count">
+            <div class="row g-3">
+        @endif
 
             <div class="col-12 col-md-3 retail-field">
-                <label for="unit" class="form-label">Satuan Eceran <span class="text-danger">*</span></label>
+                <label for="unit" class="form-label">Satuan <span class="text-danger">*</span></label>
                 <input id="unit" name="unit" type="text" class="form-control @error('unit') is-invalid @enderror"
-                    value="{{ old('unit', $product->unit ?? 'kg') }}" placeholder="kg, pcs, botol, bungkus">
+                    value="{{ old('unit', $product->unit ?? 'pcs') }}" placeholder="kg, pcs, botol, bungkus">
                 @error('unit')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
             </div>
 
+            @if($enableBulk)
             <div class="col-12 col-md-3">
                 <label for="bulk_unit" class="form-label">Satuan <span class="bulk-label-text">Grosir</span> <small class="text-muted">(opsional)</small></label>
                 <input id="bulk_unit" name="bulk_unit" type="text" class="form-control @error('bulk_unit') is-invalid @enderror"
@@ -142,11 +151,12 @@
                 @enderror
                 <div class="form-text">1 <span class="bulk-unit-text">krat</span> = berapa <span class="base-unit-text">kg</span>?</div>
             </div>
+            @endif
         </div>
 
         <div class="row g-3 mt-1">
             <div class="col-12 col-md-4 retail-field">
-                <label for="price_per_unit_display" class="form-label">Harga Jual Eceran (per <span class="base-unit-text2">kg</span>) <span class="text-danger">*</span></label>
+                <label for="price_per_unit_display" class="form-label">Harga Jual (per <span class="base-unit-text2">satuan</span>) <span class="text-danger">*</span></label>
                 <div class="input-group">
                     <span class="input-group-text">Rp</span>
                     <input id="price_per_unit_display" type="text" inputmode="decimal"
@@ -161,6 +171,7 @@
                 </div>
             </div>
 
+            @if($enableBulk)
             <div class="col-12 col-md-4" id="bulkPriceDiv">
                 <label for="price_per_bulk_display" class="form-label">Harga Jual Grosir (per <span class="bulk-unit-text2">krat</span>)</label>
                 <div class="input-group">
@@ -177,6 +188,7 @@
                 </div>
                 <div class="form-text">Kosongkan = harga eceran × isi per <span class="bulk-unit-text3">krat</span>.</div>
             </div>
+            @endif
 
             <div class="col-12 col-md-4" id="kratWeightDiv">
                 <label for="krat_weight_kg" class="form-label">Berat Krat Kosong (kg)</label>

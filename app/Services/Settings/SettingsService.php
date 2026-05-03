@@ -136,6 +136,13 @@ class SettingsService implements SettingsServiceInterface
         return is_numeric($val) ? (int) $val : 7;
     }
 
+    public function enableBulkUnit(): bool
+    {
+        $val = $this->get('pos.enable_bulk_unit', true);
+        if (is_array($val)) return (bool) ($val['value'] ?? true);
+        return is_bool($val) || is_numeric($val) || is_string($val) ? filter_var($val, FILTER_VALIDATE_BOOLEAN) : true;
+    }
+
     /**
      * Determine if the default database connection is available.
      * This prevents crashes during composer install / package discovery.

@@ -27,6 +27,7 @@ class UpdateSettingsRequest extends FormRequest
             'store_stamp' => ['nullable', 'image', 'max:2048'],
             'low_stock_threshold' => ['required', 'integer', 'min:1', 'max:1000'],
             'expiry_alert_days' => ['required', 'integer', 'min:1', 'max:365'],
+            'enable_bulk_unit' => ['nullable', 'boolean'],
         ];
     }
 
@@ -46,6 +47,7 @@ class UpdateSettingsRequest extends FormRequest
             'store_stamp' => 'Stempel',
             'low_stock_threshold' => 'Batas Stok Rendah',
             'expiry_alert_days' => 'Peringatan Kadaluarsa',
+            'enable_bulk_unit' => 'Fitur Multi Satuan (Grosir)',
         ];
     }
 

@@ -37,6 +37,7 @@ class SettingsController extends Controller
             'receipt_format' => $this->settings->receiptNumberFormat(),
             'low_stock_threshold' => $this->settings->lowStockThreshold(),
             'expiry_alert_days' => $this->settings->expiryAlertDays(),
+            'enable_bulk_unit' => $this->settings->enableBulkUnit(),
         ];
 
         return view('settings.index', $data);
@@ -55,6 +56,7 @@ class SettingsController extends Controller
             'receipt_format' => $this->settings->receiptNumberFormat(),
             'low_stock_threshold' => $this->settings->lowStockThreshold(),
             'expiry_alert_days' => $this->settings->expiryAlertDays(),
+            'enable_bulk_unit' => $this->settings->enableBulkUnit(),
         ];
 
         $this->settings->set('store.name', $validated['store_name'], 'store', 'Nama Toko');
@@ -77,6 +79,7 @@ class SettingsController extends Controller
         $this->settings->set('pos.receipt_format', $validated['receipt_format'] ?? 'INV-{YYYY}{MM}{DD}-{SEQ:6}', 'pos', 'Format Penomoran Struk');
         $this->settings->set('pos.low_stock_threshold', (int) ($validated['low_stock_threshold'] ?? 5), 'pos', 'Batas stok rendah (notifikasi)');
         $this->settings->set('pos.expiry_alert_days', (int) ($validated['expiry_alert_days'] ?? 7), 'pos', 'Jumlah hari sebelum kadaluarsa untuk notifikasi');
+        $this->settings->set('pos.enable_bulk_unit', $request->has('enable_bulk_unit'), 'pos', 'Fitur Multi Satuan (Grosir)');
 
         if ($request->hasFile('store_logo')) {
             $file = $request->file('store_logo');
@@ -106,6 +109,7 @@ class SettingsController extends Controller
             'receipt_format' => $this->settings->receiptNumberFormat(),
             'low_stock_threshold' => $this->settings->lowStockThreshold(),
             'expiry_alert_days' => $this->settings->expiryAlertDays(),
+            'enable_bulk_unit' => $this->settings->enableBulkUnit(),
         ];
         $this->logger->log('Ubah Pengaturan', 'Mengubah pengaturan aplikasi', ['before' => $before, 'after' => $after]);
 

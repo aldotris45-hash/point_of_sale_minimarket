@@ -237,6 +237,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             // === Data produk ===
             const products = @json($productsJson);
+            const enableBulk = @json($enableBulk);
 
             const searchInput     = document.getElementById('productSearch');
             const hiddenInput     = document.getElementById('product_id');
@@ -315,36 +316,47 @@
                 searchInput.classList.remove('is-invalid');
                 document.getElementById('productSearchError').classList.add('d-none');
 
-                // Show multi-unit section
-                multiUnitSection.classList.remove('d-none');
+                if (enableBulk) {
+                    // Show multi-unit section
+                    multiUnitSection.classList.remove('d-none');
 
-                if (p.product_type === 'weight' && p.has_retail) {
-                    // Weight-based (retail): show gross weight & krat weight
-                    weightSection.classList.remove('d-none');
-                    countSection.classList.add('d-none');
-                    qtyUnitLabel.textContent = '(krat)';
-                    // Jumlah krat = bilangan bulat
-                    qtyInput.step = '1';
-                    qtyInput.min = '1';
-                    qtyInput.placeholder = 'Contoh: 5';
-                    qtyInput.value = old_qty || 1;
-                } else {
-                    // Count-based: show conversion factor
-                    countSection.classList.remove('d-none');
-                    weightSection.classList.add('d-none');
-                    const bulkUnit = p.bulk_unit || 'krat';
-                    qtyUnitLabel.textContent = '(' + bulkUnit + ')';
-                    baseUnitLabel.textContent = p.unit;
-                    convBulkLabel.textContent = bulkUnit;
-                    // Jumlah krat/karton = bilangan bulat
-                    qtyInput.step = '1';
-                    qtyInput.min = '1';
-                    qtyInput.placeholder = 'Contoh: 10';
-                    qtyInput.value = old_qty || 1;
-                    if (p.bulk_conversion > 0) {
-                        convFactorInput.value = p.bulk_conversion;
+                    if (p.product_type === 'weight' && p.has_retail) {
+                        // Weight-based (retail): show gross weight & krat weight
+                        weightSection.classList.remove('d-none');
+                        countSection.classList.add('d-none');
+                        qtyUnitLabel.textContent = '(krat)';
+                        // Jumlah krat = bilangan bulat
+                        qtyInput.step = '1';
+                        qtyInput.min = '1';
+                        qtyInput.placeholder = 'Contoh: 5';
+                    } else {
+                        // Count-based: show conversion factor
+                        countSection.classList.remove('d-none');
+                        weightSection.classList.add('d-none');
+                        const bulkUnit = p.bulk_unit || 'krat';
+                        qtyUnitLabel.textContent = '(' + bulkUnit + ')';
+                        baseUnitLabel.textContent = p.unit;
+                        convBulkLabel.textContent = bulkUnit;
+                        // Jumlah krat/karton = bilangan bulat
+                        qtyInput.step = '1';
+                        qtyInput.min = '1';
+                        qtyInput.placeholder = 'Contoh: 10';
+                        if (p.bulk_conversion > 0) {
+                            convFactorInput.value = p.bulk_conversion;
+                        }
                     }
+                } else {
+                    // Bulk feature disabled
+                    multiUnitSection.classList.add('d-none');
+                    qtyUnitLabel.textContent = '(' + (p.unit || 'pcs') + ')';
+                    // Allow decimal if weight based
+                    const isWeight = p.product_type === 'weight';
+                    qtyInput.step = isWeight ? '0.01' : '1';
+                    qtyInput.min = isWeight ? '0.01' : '1';
+                    qtyInput.placeholder = isWeight ? 'Contoh: 1.5' : 'Contoh: 10';
                 }
+                
+                qtyInput.value = old_qty || 1;
 
                 updateTotal();
                 updateMargin();

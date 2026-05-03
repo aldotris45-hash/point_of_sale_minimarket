@@ -23,4 +23,5 @@ interface SettingsServiceInterface
     public function receiptNumberFormat(): string;
     public function lowStockThreshold(): int;
     public function expiryAlertDays(): int;
+    public function enableBulkUnit(): bool;
 }

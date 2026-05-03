@@ -99,8 +99,9 @@ class IncomingGoodController extends Controller
     {
         $suppliers = Supplier::query()->orderBy('name')->pluck('name', 'id');
         $products  = Product::query()->with('category')->orderBy('name')->get();
+        $enableBulk = app(\App\Services\Settings\SettingsServiceInterface::class)->enableBulkUnit();
 
-        return view('incoming_goods.create', compact('suppliers', 'products'));
+        return view('incoming_goods.create', compact('suppliers', 'products', 'enableBulk'));
     }
 
     public function store(Request $request): RedirectResponse
@@ -121,12 +122,16 @@ class IncomingGoodController extends Controller
             'notes'             => ['nullable', 'string', 'max:500'],
         ];
 
-        // Tambah field spesifik per tipe produk
-        if ($product->isWeightBased()) {
-            $rules['gross_weight_kg'] = ['required', 'numeric', 'min:0.001'];
-            $rules['krat_weight_kg']  = ['nullable', 'numeric', 'min:0'];
-        } else {
-            $rules['conversion_factor'] = ['nullable', 'numeric', 'min:0.001'];
+        // Tambah field spesifik per tipe produk (jika fitur bulk aktif)
+        $enableBulk = app(\App\Services\Settings\SettingsServiceInterface::class)->enableBulkUnit();
+        
+        if ($enableBulk) {
+            if ($product->isWeightBased()) {
+                $rules['gross_weight_kg'] = ['required', 'numeric', 'min:0.001'];
+                $rules['krat_weight_kg']  = ['nullable', 'numeric', 'min:0'];
+            } else {
+                $rules['conversion_factor'] = ['nullable', 'numeric', 'min:0.001'];
+            }
         }
 
         $validated = $request->validate($rules);
@@ -147,15 +152,25 @@ class IncomingGoodController extends Controller
         ];
 
         // Tentukan incoming_unit dari tipe produk
-        if ($product->isWeightBased()) {
-            $serviceData['incoming_unit']   = $product->bulk_unit ?: 'krat';
-            $serviceData['gross_weight_kg'] = $validated['gross_weight_kg'];
-            $serviceData['krat_weight_kg']  = $validated['krat_weight_kg'];
+        if ($enableBulk) {
+            if ($product->isWeightBased()) {
+                $serviceData['incoming_unit']   = $product->bulk_unit ?: 'krat';
+                $serviceData['gross_weight_kg'] = $validated['gross_weight_kg'];
+                $serviceData['krat_weight_kg']  = $validated['krat_weight_kg'];
+            } else {
+                $serviceData['incoming_unit']     = $product->bulk_unit ?: 'krat';
+                $serviceData['conversion_factor'] = $validated['conversion_factor'] ?? $product->bulk_conversion;
+            }
         } else {
-            $bulkUnit = $product->bulk_unit ?: 'krat';
-            $serviceData['incoming_unit']     = $bulkUnit;
-            $serviceData['conversion_factor'] = $validated['conversion_factor']
-                ?? $product->bulk_conversion;
+            // Jika bulk mati, quantity adalah total stok langsung.
+            $serviceData['incoming_unit'] = $product->unit;
+            if ($product->isWeightBased()) {
+                $serviceData['incoming_qty'] = 1; // Paksa 1 krat
+                $serviceData['gross_weight_kg'] = $validated['quantity'];
+                $serviceData['krat_weight_kg']  = 0;
+            } else {
+                $serviceData['conversion_factor'] = 1;
+            }
         }
 
         $incomingGood = $this->service->create($serviceData);

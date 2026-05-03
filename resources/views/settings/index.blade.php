@@ -151,8 +151,19 @@
                                 @enderror
                             </div>
 
-                            <div class="col-12">
-                                <label class="form-label d-block fw-bold border-bottom pb-2 mt-2">Gambar Nota & Dokumen</label>
+                            <div class="col-12 mt-4">
+                                <label class="form-label d-block fw-bold border-bottom pb-2 mb-3">Fitur Opsional</label>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="enable_bulk_unit" name="enable_bulk_unit" value="1" {{ old('enable_bulk_unit', $enable_bulk_unit ?? true) ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="enable_bulk_unit">
+                                        Aktifkan Fitur Harga Grosir / Krat (Multi-Satuan)
+                                    </label>
+                                </div>
+                                <div class="form-text">Jika dimatikan, kasir akan kembali simpel. Tombol pilihan eceran/grosir akan disembunyikan.</div>
+                            </div>
+
+                            <div class="col-12 mt-4">
+                                <label class="form-label d-block fw-bold border-bottom pb-2">Gambar Nota & Dokumen</label>
                             </div>
 
                             <div class="col-12 col-md-4">
