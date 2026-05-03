@@ -13,10 +13,21 @@ class HoldRequest extends FormRequest
             try {
                 $decoded = json_decode($items, true, 512, JSON_THROW_ON_ERROR);
                 if (is_array($decoded)) {
-                    $this->merge(['items' => $decoded]);
+                    $items = $decoded;
                 }
             } catch (\Throwable $e) {
             }
+        }
+
+        // Cast is_bulk string values ("false"/"true") to proper booleans
+        if (is_array($items)) {
+            foreach ($items as &$item) {
+                if (isset($item['is_bulk'])) {
+                    $item['is_bulk'] = filter_var($item['is_bulk'], FILTER_VALIDATE_BOOLEAN);
+                }
+            }
+            unset($item);
+            $this->merge(['items' => $items]);
         }
     }
 
