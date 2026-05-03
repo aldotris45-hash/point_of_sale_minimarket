@@ -122,10 +122,13 @@ class IncomingGoodController extends Controller
             'notes'             => ['nullable', 'string', 'max:500'],
         ];
 
+        $rules['incoming_mode'] = ['nullable', 'string', 'in:bulk,retail'];
+
         // Tambah field spesifik per tipe produk (jika fitur bulk aktif)
         $enableBulk = app(\App\Services\Settings\SettingsServiceInterface::class)->enableBulkUnit();
+        $isBulkMode = $enableBulk && ($request->input('incoming_mode') !== 'retail');
         
-        if ($enableBulk) {
+        if ($isBulkMode) {
             if ($product->isWeightBased()) {
                 $rules['gross_weight_kg'] = ['required', 'numeric', 'min:0.001'];
                 $rules['krat_weight_kg']  = ['nullable', 'numeric', 'min:0'];
@@ -152,7 +155,7 @@ class IncomingGoodController extends Controller
         ];
 
         // Tentukan incoming_unit dari tipe produk
-        if ($enableBulk) {
+        if ($isBulkMode) {
             if ($product->isWeightBased()) {
                 $serviceData['incoming_unit']   = $product->bulk_unit ?: 'krat';
                 $serviceData['gross_weight_kg'] = $validated['gross_weight_kg'];
@@ -162,7 +165,7 @@ class IncomingGoodController extends Controller
                 $serviceData['conversion_factor'] = $validated['conversion_factor'] ?? $product->bulk_conversion;
             }
         } else {
-            // Jika bulk mati, quantity adalah total stok langsung.
+            // Jika bulk mati atau mode retail dipilih, quantity adalah total stok langsung.
             $serviceData['incoming_unit'] = $product->unit;
             if ($product->isWeightBased()) {
                 $serviceData['incoming_qty'] = 1; // Paksa 1 krat

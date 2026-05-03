@@ -116,6 +116,23 @@
                     <div id="multiUnitSection" class="d-none">
                         <hr>
                         <h6 class="text-muted mb-3"><i class="bi bi-boxes"></i> Detail Multi-Unit</h6>
+                        
+                        <div class="mb-3">
+                            <label class="form-label d-block">Mode Penerimaan <small class="text-muted">(Pilih satuan barang yang masuk)</small></label>
+                            <div class="btn-group" role="group">
+                                <input type="radio" class="btn-check" name="incoming_mode" id="modeBulk" value="bulk" checked autocomplete="off">
+                                <label class="btn btn-outline-primary" for="modeBulk">
+                                    <i class="bi bi-box-seam"></i> Grosir / Krat
+                                </label>
+
+                                <input type="radio" class="btn-check" name="incoming_mode" id="modeRetail" value="retail" autocomplete="off">
+                                <label class="btn btn-outline-primary" for="modeRetail">
+                                    <i class="bi bi-tag"></i> Eceran / <span id="retailModeUnit">Satuan</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div id="bulkDetailsWrapper">
 
                         {{-- Weight-based: Berat Kotor & Berat Krat --}}
                         <div id="weightSection" class="row g-3 mb-3 d-none">
@@ -165,6 +182,7 @@
                                     style="background-color: #f8f9fa; font-weight: 600;" value="— pcs">
                             </div>
                         </div>
+                        </div> <!-- End of bulkDetailsWrapper -->
 
                         {{-- Spoilage --}}
                         <div class="row g-3 mb-3">
@@ -260,6 +278,42 @@
             const netWeightDisplay = document.getElementById('netWeightDisplay');
             const convFactorInput  = document.getElementById('conversion_factor');
             const totalStockDisplay = document.getElementById('totalStockDisplay');
+            const modeRadios       = document.querySelectorAll('input[name="incoming_mode"]');
+            const bulkDetailsWrapper = document.getElementById('bulkDetailsWrapper');
+            const retailModeUnit   = document.getElementById('retailModeUnit');
+
+            function applyMode() {
+                if (!selectedProduct) return;
+                const mode = document.querySelector('input[name="incoming_mode"]:checked')?.value || 'bulk';
+                
+                if (mode === 'bulk') {
+                    bulkDetailsWrapper.classList.remove('d-none');
+                    if (selectedProduct.product_type === 'weight' && selectedProduct.has_retail) {
+                        qtyUnitLabel.textContent = '(krat)';
+                        qtyInput.step = '1';
+                        qtyInput.min = '1';
+                        qtyInput.placeholder = 'Contoh: 5';
+                    } else {
+                        const bulkUnit = selectedProduct.bulk_unit || 'krat';
+                        qtyUnitLabel.textContent = '(' + bulkUnit + ')';
+                        qtyInput.step = '1';
+                        qtyInput.min = '1';
+                        qtyInput.placeholder = 'Contoh: 10';
+                    }
+                } else {
+                    bulkDetailsWrapper.classList.add('d-none');
+                    qtyUnitLabel.textContent = '(' + (selectedProduct.unit || 'pcs') + ')';
+                    const isWeight = selectedProduct.product_type === 'weight';
+                    qtyInput.step = isWeight ? '0.01' : '1';
+                    qtyInput.min = isWeight ? '0.01' : '1';
+                    qtyInput.placeholder = isWeight ? 'Contoh: 1.5' : 'Contoh: 10';
+                }
+                updateTotal();
+            }
+
+            if (modeRadios) {
+                modeRadios.forEach(radio => radio.addEventListener('change', applyMode));
+            }
             const baseUnitLabel    = document.getElementById('baseUnitLabel');
             const convBulkLabel    = document.getElementById('conversionBulkLabel');
             const spoilageInput    = document.getElementById('spoilage_qty');
@@ -319,32 +373,24 @@
                 if (enableBulk) {
                     // Show multi-unit section
                     multiUnitSection.classList.remove('d-none');
+                    if (retailModeUnit) retailModeUnit.textContent = p.unit || 'Satuan';
 
                     if (p.product_type === 'weight' && p.has_retail) {
                         // Weight-based (retail): show gross weight & krat weight
                         weightSection.classList.remove('d-none');
                         countSection.classList.add('d-none');
-                        qtyUnitLabel.textContent = '(krat)';
-                        // Jumlah krat = bilangan bulat
-                        qtyInput.step = '1';
-                        qtyInput.min = '1';
-                        qtyInput.placeholder = 'Contoh: 5';
                     } else {
                         // Count-based: show conversion factor
                         countSection.classList.remove('d-none');
                         weightSection.classList.add('d-none');
                         const bulkUnit = p.bulk_unit || 'krat';
-                        qtyUnitLabel.textContent = '(' + bulkUnit + ')';
                         baseUnitLabel.textContent = p.unit;
                         convBulkLabel.textContent = bulkUnit;
-                        // Jumlah krat/karton = bilangan bulat
-                        qtyInput.step = '1';
-                        qtyInput.min = '1';
-                        qtyInput.placeholder = 'Contoh: 10';
                         if (p.bulk_conversion > 0) {
                             convFactorInput.value = p.bulk_conversion;
                         }
                     }
+                    applyMode();
                 } else {
                     // Bulk feature disabled
                     multiUnitSection.classList.add('d-none');
